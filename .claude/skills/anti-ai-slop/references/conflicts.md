@@ -13,10 +13,10 @@ Resolution: sort every missing fact by **who must supply it**.
 - **Demo data inside the product artifact** (tasks, invoice lines, terminal output) may be invented. Use roles or objects rather than fake people, with at most one short caption.
 
 **C3. Placeholders and honesty notes make the page look unfinished.** (v2: 38 placeholders on 8 pages; v3: 7 pages said "not connected")
-Resolution: no visible `[… NEEDED]`, "prototype", "pre-launch", "nothing is sent" or "not connected" text. The hand-off message and the LAUNCH TODO comment carry that information. Photo gaps become art-directed photo slots (`<figure class="photo-slot" data-todo="…">` at the right aspect ratio), not grey boxes with "[PHOTO]".
+Resolution: no visible `[… NEEDED]`, "prototype", "pre-launch", "nothing is sent" or "not connected" text. The hand-off message and the LAUNCH TODO comment carry that information. Photo gaps become art-directed photo slots (`<figure class="photo-slot" data-todo="…">`): a flat tint from the palette at the photo's aspect ratio, with the real caption beneath. Do not put an outline drawing, clip-art or an icon of the object inside the slot; a drawn stand-in reads as the product image and looks worse than an empty frame. On a shop, a product's name, price and action take more space than its slot. [v4: all 3 photo pages drew outlines]
 
 **C4. Text link vs ghost button; what a "specific secondary link" is.** (02,05,10)
-Resolution: a ghost button is any secondary action with a border, a background, or padding over 0.25em, or one placed in the same flex row as the primary. A text link is inline in running text or on its own line below, uses the body font at body size, and carries only an underline. Default to no secondary action. Add one only if the visitor's first question is answered lower on the page *and* the hero does not answer it. Its label names that answer as a noun phrase ("The 21-day schedule", "shipyard.toml reference"), not a "See…" verb phrase.
+Resolution: a ghost button is any secondary action with a border, a background, or padding over 0.25em, or one placed in the same flex row as the primary. A text link is inline in running text or on its own line below, uses the body font at body size, and carries only an underline. Default to no secondary action in the hero. Add one only when the visitor's first question is answered lower on the page *and* the hero cannot answer it. Do not add one by reflex: in v4 the same underlined noun-phrase link under the CTA appeared on 8/10 pages.
 
 **C5. What counts as a "list of three".** (01,03)
 Resolution: banned means three or more parallel items used *rhetorically* in one sentence, headline or button row: series of verbs, adjectives or nouns ("Plan, assign, ship"), staccato fragments ("Push. Build. Float."), or repeated negations ("no X, no Y, no Z"). Data is allowed (tasting notes, table rows, three real plans). Test: if the sentence stays equally true with two or four items, the count is decoration, so rewrite it. The rule applies to h1, h2, lead and CTA rows, not only the lead. A section with three rows is fine if there really are three things.
@@ -40,7 +40,7 @@ Resolution: `og:image` must be an absolute https URL that exists. With no host, 
 Resolution: write the current year as static text and let JS update it: `<span id="y">2026</span>`. The v1 ban was on a footer made of *only* "© 2026 Brand. All rights reserved.", not on a static year.
 
 **C11. Legal links with no destination.** (05,01,02,04)
-Resolution: if there are no legal pages, show no legal links and list them in LAUNCH TODO. `mailto:?subject=Privacy` is not a privacy policy.
+Resolution: legal links point to launch constants (`PRIVACY_URL`, `TERMS_URL`) listed in LAUNCH TODO, because a business needs those pages before launch. `mailto:?subject=Privacy` is not a privacy policy. For a visible contact fact you do not have (address, phone), use a link labelled by its purpose ("Studio address and directions" → `MAP_URL`), and never invent the fact itself.
 
 **C12. Contrast and 360px "checked by eye", no tool available.** (01,02,05,06,08,09)
 Resolution: ship a runnable check. Extend `slop_check.py` to resolve dark-theme tokens (dark tokens are resolved) and add `--contrast-table`, which prints every resolved text/bg pair for both themes. The skill should require running it and pasting the FAIL lines, which must be empty.
@@ -55,7 +55,7 @@ Resolution: no single content form (ruled rows, table, dl, cards) may be used fo
 Resolution: remove the outlier's concrete traits from SKILL.md (done in SKILL.md). Describe *why* it worked: every choice came from drawing-sheet conventions. Do not describe *what* it did.
 
 **C16. Does a mid-tone section background count as a card?** (01)
-Resolution: no. A card is a bounded box repeated three or more times as siblings. A full-bleed band is a section. Only one inverted band per page (see dont-list.md).
+Resolution: no. A card is a bounded box repeated three or more times as siblings. A full-bleed band is a section. Only one inverted band per page, unless the seed assigned "alternating light/dark bands" or "horizontal strata".
 
 **C17. Product-behaviour copy vs "invented claims".** (v3: 03,05,07,09)
 Resolution: describing what the product **does** ("rolls back when the health check fails", "encrypts on your device before upload") is product copy, not a claim, so write it plainly. Describing how **well** it does it compared with others, or what **others say** about it ("10× faster", "trusted by 2,000 teams", "audited by…"), is a third-party claim. Do not write those unless they were supplied.
@@ -65,4 +65,13 @@ Resolution: use one of your two overrides, with one sentence naming the visitor 
 
 **C19. "Don't nudge values to clear the checker".** (v3: lede 34→37/38/41rem, `#ebebe8`→`#eeece9`, h1 weight 400→700)
 Resolution: a WARN describes a shape. Change the shape (a different composition, ground or type class), or keep the WARN and write the reason in a comment. Moving a number a few units past a threshold is a fail of the self-check, even if the checker is quiet.
+
+**C20. A seed axis vs rule 3 (first mobile screen) or rule 16 (boundaries).** (v4: 03, 04, 05, 08, 09)
+Resolution: these are not overrides.
+- "No borders" edge languages (soft uniform, elevation only) apply to containers. Inputs, selects and secondary buttons keep a 3:1 boundary, either a line or a fill that is 3:1 against its ground.
+- Scale and hero specs are desktop specs. At 360px the h1 takes at most 4 lines and the CTA stays in view.
+- "Type poster" and "one big number" still need the artifact's top edge in the first 1280×800 viewport, and the h1 must still name the category.
+
+**C21. Keeping a WARN with a reason.** (v4: 9/10 pages kept WARNs with reasons, but only in their hand-off message)
+Resolution: write the reason in the page as `<!-- slop-ok: <rule-key> <reason> -->`, using the rule key the checker prints. The checker then lists that WARN as kept-with-reason. A FAIL can never be kept. The reason must name the visitor need or the seed axis; "intentional" is not a reason.
 

@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Shipyard - deploy web apps from your terminal</title>
+<meta name="description" content="Shipyard builds your repo, health-checks the new version and moves traffic only when it passes. Deploy and roll back web apps from the command line.">
+<meta property="og:title" content="Shipyard - deploy web apps from your terminal">
+<meta property="og:description" content="Shipyard builds your repo, health-checks the new version and moves traffic only when it passes.">
+<meta property="og:type" content="website">
+<!--
+LAUNCH TODO
+Constants: SIGNUP_URL, LOGIN_URL, DOCS_URL, CHANGELOG_URL, STATUS_URL, CONTACT_URL, TERMS_URL, PRIVACY_URL
+Drafted owner facts (all wrapped in <data class="todo">): install command, free-plan line, plan names, prices, app limits, region counts, preview retention
+Also: og:image (absolute https URL) once a host exists
+-->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Cpath fill=%27%23a6e7b3%27 d=%27M2 14h20l-3.5 6h-13zM11 3v9H5zM13 5l6 7h-6z%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400&family=Fira+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night-water:#121110;
+  --console-glass:#1d1c1a;
+  --deck-light:#ece9e4;
+  --fog:#b0aea8;
+  --buoy:#a6e7b3;
+  --on-buoy:#121110;
+  --lift:0 1px 2px rgba(0,0,0,.5),0 10px 28px rgba(0,0,0,.45);
+  --gutter-hero:clamp(18px,6vw,96px);
+  --gutter-mid:clamp(18px,4vw,56px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--night-water);color:var(--deck-light);font:400 15.5px/1.55 "Fira Sans",sans-serif}
+img,svg{max-width:100%;display:block}
+button,input{font:inherit;color:inherit}
+h1,h2,h3,p,ol,dl,dd,figure,table{margin:0}
+a{color:inherit;text-underline-offset:.2em;transition:color .15s,text-decoration-color .15s}
+a:hover{color:var(--buoy)}
+:focus-visible{outline:2px solid var(--buoy);outline-offset:3px}
+code,pre,.cmd{font-family:"Fira Mono",monospace}
+data.todo{font-style:normal}
+.skip{position:absolute;left:12px;top:-60px;background:var(--buoy);color:var(--on-buoy);padding:8px 14px;z-index:10;transition:top .15s}
+.skip:focus{top:8px}
+
+/* masthead */
+.masthead{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px var(--gutter-hero)}
+.mark{display:flex;align-items:center;gap:9px;text-decoration:none;font-weight:500;font-size:1.15rem}
+.mark svg{width:24px;height:24px;fill:var(--buoy)}
+.masthead ul{display:flex;gap:clamp(14px,3vw,28px);list-style:none;margin:0;padding:0}
+.masthead ul a{text-decoration:none}
+.masthead ul a:hover{text-decoration:underline}
+
+/* hero: one reading column, figure breaks wider */
+.landing{padding-bottom:40px}
+.opening{margin-top:0;padding:clamp(28px,6vw,72px) var(--gutter-hero) 0}
+.opening>*{max-width:66ch}
+.kicker{color:var(--fog);font-size:.95rem;margin-bottom:12px}
+h1{font-weight:500;font-size:clamp(1.85rem,4.6vw,2.7rem);line-height:1.16}
+.lede{margin-top:16px;font-size:1.08rem;line-height:1.55}
+.act{margin-top:24px;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.signup{display:inline-block;background:var(--buoy);color:var(--on-buoy);padding:12px 20px;border-radius:4px;font-weight:500;text-decoration:none;box-shadow:var(--lift);transition:background-color .15s,box-shadow .15s}
+.signup:hover{background:#c6f3cf;color:var(--on-buoy)}
+.terms-line{color:var(--fog);font-size:.92rem}
+.evidence{display:block;margin-top:2px}
+.install{margin-top:20px;font-size:.9rem;color:var(--fog)}
+.install .cmd{color:var(--deck-light);background:var(--console-glass);padding:5px 10px;border-radius:3px;margin-left:6px;white-space:nowrap}
+
+.pane{background:var(--console-glass);box-shadow:var(--lift);border-radius:6px;overflow-x:auto}
+.pane pre{margin:0;padding:18px 20px;font-size:.84rem;line-height:1.65;color:var(--deck-light);tab-size:2}
+.pane .p{color:var(--buoy)}
+.pane .q{color:var(--fog)}
+.pane .hold{font-weight:700}
+.stage-term{margin:36px var(--gutter-hero) 0;max-width:46rem}
+.stage-term figcaption{color:var(--fog);font-size:.88rem;margin-top:10px}
+
+/* sections */
+section{margin-top:64px}
+h2{font-weight:500;font-size:1.5rem;line-height:1.25;margin-bottom:14px}
+h3{font-weight:500;font-size:1rem;line-height:1.4}
+
+.sequence{padding:0 var(--gutter-mid) 0 clamp(18px,12vw,180px);max-width:52rem}
+.sequence ol{list-style:none;padding:0;counter-reset:s}
+.sequence li{display:grid;grid-template-columns:7.5rem 1fr;gap:4px 20px;padding:12px 0;counter-increment:s}
+.sequence h3::before{content:counter(s) ".";color:var(--fog);margin-right:10px;font-variant-numeric:tabular-nums}
+.sequence p{color:var(--deck-light)}
+
+.config{padding:0 var(--gutter-mid)}
+.config .words{max-width:60ch}
+.config .pane{margin-top:20px;max-width:56rem}
+
+.previews{padding:0 var(--gutter-hero);max-width:60rem}
+.previews dl{display:grid;grid-template-columns:minmax(9rem,14rem) 1fr;gap:14px 24px;margin-top:18px}
+.previews dt{font-weight:500}
+.previews dt code{color:var(--buoy)}
+.previews dd{color:var(--deck-light)}
+
+.plans{padding:0 var(--gutter-mid);max-width:70rem}
+.plans table{width:100%;border-collapse:collapse;margin-top:12px}
+.plans caption{text-align:left;color:var(--fog);padding-bottom:8px}
+.plans th,.plans td{text-align:left;padding:14px 20px 14px 0;vertical-align:top}
+.plans thead th{color:var(--fog);font-weight:400;font-size:.92rem}
+.plans tbody th{font-weight:500}
+.plans tbody tr:nth-child(odd){background:var(--console-glass);box-shadow:inset 0 0 0 0 transparent}
+.plans tbody th,.plans tbody td{padding-left:16px}
+.plans .figure{font-variant-numeric:tabular-nums;white-space:nowrap}
+.plans .free-note{margin-top:16px;color:var(--fog);max-width:60ch}
+
+.boarding{padding:0 var(--gutter-hero);max-width:44rem}
+.boarding .install{margin-top:14px}
+.boarding .signup{margin-top:20px}
+
+footer{margin-top:80px;padding:28px var(--gutter-mid) 36px;background:var(--console-glass);box-shadow:var(--lift)}
+.foot{display:flex;flex-wrap:wrap;gap:14px 40px;justify-content:space-between;max-width:70rem}
+.foot nav ul{display:flex;flex-wrap:wrap;gap:8px 22px;list-style:none;margin:0;padding:0}
+.foot p{color:var(--fog);font-size:.9rem}
+
+@media (max-width:640px){
+  body{font-size:15px}
+  .sequence li{grid-template-columns:1fr;gap:2px}
+  .previews dl{grid-template-columns:1fr;gap:2px}
+  .previews dd{margin-bottom:12px}
+  .plans table,.plans tbody,.plans tr,.plans th,.plans td{display:block}
+  .plans thead{position:absolute;left:-9999px}
+  .plans tbody tr{padding:12px 0}
+  .plans th,.plans td{padding:2px 16px}
+  .plans td::before{content:attr(data-label) ": ";color:var(--fog)}
+  .install .cmd{display:inline-block;margin:6px 0 0}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <a class="mark" href="/" aria-label="Shipyard home">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 14h20l-3.5 6h-13zM11 3v9H5zM13 5l6 7h-6z"/></svg>
+    <span>Shipyard</span>
+  </a>
+  <nav aria-label="Primary">
+    <ul>
+      <li><a href="DOCS_URL" data-href="DOCS_URL">Docs</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="LOGIN_URL" data-href="LOGIN_URL">Log in</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main" class="landing">
+  <section class="opening" aria-labelledby="top">
+    <p class="kicker">Deployment tool for web apps</p>
+    <h1 id="top">Deploy a web app from your terminal and roll it back from the same place</h1>
+    <p class="lede">Shipyard builds your repo, starts the new version beside the old one and runs its health check. Traffic moves only when the check passes. When it fails, the old version keeps serving.</p>
+    <div class="act">
+      <a class="signup" href="SIGNUP_URL" data-href="SIGNUP_URL">Create a Shipyard account</a>
+      <p class="terms-line"><data class="todo">The free plan covers one app with preview URLs.</data></p>
+      <a class="evidence" href="#config">The shipyard.toml reference</a>
+    </div>
+    <p class="install">Install the CLI <span class="cmd"><data class="todo">npm install -g shipyard-cli</data></span></p>
+  </section>
+
+  <figure class="stage-term">
+    <div class="pane" role="img" aria-label="Terminal session: shipyard deploy builds a new version, the health check returns 503 on one of two instances, and traffic stays on the previous version.">
+<pre aria-hidden="true"><span class="p">$</span> shipyard deploy --env production
+<span class="q">Upload</span>  214 files from ./
+<span class="q">Build</span>   node 22 &middot; npm run build
+<span class="q">Image</span>   web@7f3a9c2
+<span class="q">Start</span>   2 instances in fra1
+<span class="q">Health</span>  GET /healthz -> 503 on 1 of 2
+<span class="hold">Hold</span>    traffic stays on web@c41d08e
+<span class="hold">Failed</span>  web@7f3a9c2 was not promoted
+
+<span class="p">$</span> shipyard logs web@7f3a9c2 --instance 2
+<span class="q">fra1-2</span>   error: DATABASE_URL is not set</pre>
+    </div>
+    <figcaption>A deploy that fails its health check and leaves production untouched.</figcaption>
+  </figure>
+
+  <section class="sequence" aria-labelledby="stages-h">
+    <h2 id="stages-h">What a deploy does</h2>
+    <ol>
+      <li><h3>Build</h3><p>Runs your build command in a clean container with the runtime pinned in the repo.</p></li>
+      <li><h3>Image</h3><p>Packs the output into an image named after the commit, so each version stays addressable.</p></li>
+      <li><h3>Start</h3><p>Brings up the new instances next to the running ones. Nothing is stopped yet.</p></li>
+      <li><h3>Health check</h3><p>Requests the path set in shipyard.toml on every new instance and waits for a 200.</p></li>
+      <li><h3>Promote</h3><p>Shifts traffic to the new version and keeps the previous image warm for a rollback.</p></li>
+    </ol>
+  </section>
+
+  <section class="config" id="config" aria-labelledby="config-h">
+    <h2 id="config-h">shipyard.toml</h2>
+    <p class="words">Build command and health path live in shipyard.toml at the repo root. The file is committed with your code, so a rollback restores the config that shipped with that version.</p>
+    <div class="pane">
+<pre><span class="q"># shipyard.toml</span>
+[app]
+name    = "web"
+runtime = "node22"
+
+[build]
+command = "npm run build"
+
+[health]
+path    = "/healthz"
+timeout = "30s"
+
+[deploy.production]
+regions   = ["fra1"]
+instances = 2</pre>
+    </div>
+  </section>
+
+  <section class="previews" aria-labelledby="previews-h">
+    <h2 id="previews-h">Branches and previews</h2>
+    <p>Each branch maps to a destination, and the CLI prints the URL when the deploy finishes.</p>
+    <dl>
+      <dt><code>main</code></dt>
+      <dd>Deploys to production when the health check passes.</dd>
+      <dt><code>feature/*</code></dt>
+      <dd>Gets its own preview URL on every push.</dd>
+      <dt>Closed pull request</dt>
+      <dd>Removes the preview and frees its instances.</dd>
+      <dt><code>shipyard rollback</code></dt>
+      <dd>Points production at the previous image without a rebuild.</dd>
+    </dl>
+  </section>
+
+  <section class="plans" id="pricing" aria-labelledby="plans-h">
+    <h2 id="plans-h">Plans</h2>
+    <table>
+      <caption>Prices in US dollars.</caption>
+      <thead>
+        <tr><th scope="col">Plan</th><th scope="col">Price</th><th scope="col">Apps</th><th scope="col">Regions</th><th scope="col">Preview URLs</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row"><data class="todo">Hobby</data></th><td class="figure" data-label="Price"><data class="todo">$0</data></td><td data-label="Apps"><data class="todo">1</data></td><td data-label="Regions"><data class="todo">1</data></td><td data-label="Preview URLs"><data class="todo">Kept 7 days</data></td></tr>
+        <tr><th scope="row"><data class="todo">Team</data></th><td class="figure" data-label="Price"><data class="todo">$24 per member per month</data></td><td data-label="Apps"><data class="todo">Unlimited</data></td><td data-label="Regions"><data class="todo">3</data></td><td data-label="Preview URLs"><data class="todo">Kept 30 days</data></td></tr>
+        <tr><th scope="row"><data class="todo">Scale</data></th><td class="figure" data-label="Price"><data class="todo">$180 per month plus usage</data></td><td data-label="Apps"><data class="todo">Unlimited</data></td><td data-label="Regions"><data class="todo">All</data></td><td data-label="Preview URLs"><data class="todo">Kept 90 days</data></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="boarding" aria-labelledby="board-h">
+    <h2 id="board-h">Install and deploy</h2>
+    <p>Install the CLI, run <code>shipyard deploy</code> in a repo that has a shipyard.toml, and the first version goes through the checks above.</p>
+    <p class="install"><span class="cmd"><data class="todo">npm install -g shipyard-cli</data></span></p>
+    <a class="signup" href="SIGNUP_URL" data-href="SIGNUP_URL">Create a Shipyard account</a>
+  </section>
+</main>
+
+<footer>
+  <div class="foot">
+    <p>&copy; <span id="y">2026</span> Shipyard</p>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="DOCS_URL" data-href="DOCS_URL">Docs</a></li>
+        <li><a href="CHANGELOG_URL" data-href="CHANGELOG_URL">Changelog</a></li>
+        <li><a href="STATUS_URL" data-href="STATUS_URL">Status</a></li>
+        <li><a href="CONTACT_URL" data-href="CONTACT_URL">Contact</a></li>
+        <li><a href="TERMS_URL" data-href="TERMS_URL">Terms</a></li>
+        <li><a href="PRIVACY_URL" data-href="PRIVACY_URL">Privacy</a></li>
+      </ul>
+    </nav>
+  </div>
+</footer>
+<script>
+try{document.getElementById('y').textContent=new Date().getFullYear()}catch(e){}
+</script>
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Lingo Loop - Learn a language five minutes at a time</title>
+<meta name="description" content="Lingo Loop is a language learning app. Short speaking lessons bring every phrase back on a spaced schedule, so Monday's words are still there on Friday.">
+<meta property="og:title" content="Lingo Loop - Learn a language five minutes at a time">
+<meta property="og:description" content="Short speaking lessons in Spanish, French, Japanese and more. Every phrase returns on a spaced schedule just before you forget it.">
+<meta property="og:type" content="website">
+<!--
+LAUNCH TODO
+Launch constants (replace everywhere they appear):
+  SIGNUP_URL     form action for both sign-up forms (receives ?lang=)
+  LOGIN_URL      nav "Log in"
+  SUPPORT_URL    footer contact route
+  PRIVACY_URL    footer legal
+  TERMS_URL      footer legal
+  APP_STORE_URL  footer iOS app link
+  PLAY_STORE_URL footer Android app link
+  og:image       absolute https URL to a 1200x630 image (omitted until one exists)
+Owner facts drafted in <data class="todo">: lesson length, review schedule (day 1/3/7/21),
+  course levels, plan names, prices ($0, $9.99/month, $59.99/year), free-plan limits, trial length (7 days).
+-->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 28 28%27%3E%3Crect width=%2728%27 height=%2728%27 fill=%27%23a8138e%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#fff;
+  --lesson-text:#000;
+  --hint-text:#555;
+  --loop-plum:#a8138e;
+  --on-loop:#fff;
+  --hairline:#000;
+  --gutter:clamp(16px,5vw,64px);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--canvas);color:var(--lesson-text);font-family:"Baloo 2","Nunito","Varela Round",sans-serif;font-weight:500;font-size:1.125rem;line-height:1.5}
+a{color:inherit}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:3px solid var(--lesson-text);outline-offset:3px}
+.band :focus-visible,.screen-main :focus-visible{outline-color:var(--on-loop)}
+.skip{position:absolute;left:var(--gutter);top:-4rem;background:var(--lesson-text);color:var(--canvas);padding:.5rem 1rem;z-index:5}
+.skip:focus{top:.5rem}
+h1,h2,h3,p{margin:0}
+h1{font-size:1.8rem;line-height:1.2;font-weight:700}
+h2{font-size:1.5rem;line-height:1.25;font-weight:700}
+h3{font-size:1.125rem;font-weight:700}
+
+/* top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.75rem var(--gutter);border-bottom:1px solid var(--hairline)}
+.mark{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;font-weight:700;font-size:1.2rem}
+.mark svg{display:block}
+.topbar nav ul{display:flex;gap:1.25rem;list-style:none;margin:0;padding:0}
+.topbar nav a{white-space:nowrap;text-decoration:none;padding:.25rem 0;border-bottom:2px solid transparent;transition:border-color .15s}
+.topbar nav a:hover{border-bottom-color:var(--loop-plum)}
+
+/* hero: centred stack */
+.opener{padding:clamp(28px,6vw,72px) var(--gutter) 0;text-align:center}
+.opener-copy{max-width:34rem;margin:0 auto}
+.opener-copy p.lede{margin-top:.75rem}
+.start-form{display:flex;gap:0;justify-content:center;margin:1.5rem auto 0;max-width:30rem}
+.start-form select{flex:1 1 9rem;min-width:0;font:inherit;font-weight:600;padding:.7rem .75rem;border:1px solid var(--hairline);border-right:0;border-radius:0;background:var(--canvas);color:var(--lesson-text)}
+.go{font:inherit;font-weight:700;padding:.7rem 1.1rem;border:1px solid var(--loop-plum);border-radius:0;background:var(--loop-plum);color:var(--on-loop);cursor:pointer;transition:background-color .15s,color .15s;white-space:nowrap}
+.go:hover{background:var(--canvas);color:var(--loop-plum)}
+.start-note{margin-top:.6rem;color:var(--hint-text);font-size:1rem}
+
+/* phone trio */
+.devices{display:flex;justify-content:center;align-items:stretch;gap:0;margin:clamp(28px,5vw,56px) auto 0;max-width:62rem;border:1px solid var(--hairline);border-bottom:0;text-align:left}
+.screen{flex:1 1 0;min-width:0;padding:1.1rem 1.1rem 1.4rem;border-right:1px solid var(--hairline);background:var(--canvas)}
+.screen:last-child{border-right:0}
+.screen-main{flex:1.25 1 0;background:var(--loop-plum);color:var(--on-loop);padding:1.1rem 1.25rem 1.4rem}
+.screen h2{font-size:1.125rem}
+.s-top{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem}
+.progress{flex:1;height:.6rem;border:1px solid currentColor;position:relative}
+.progress span{position:absolute;inset:0 auto 0 0;width:60%;background:currentColor}
+.s-kind{font-size:1rem;margin-bottom:.25rem}
+.phrase{font-size:1.5rem;font-weight:700;line-height:1.2}
+.phrase-row{display:flex;gap:.75rem;align-items:flex-start;margin-bottom:1rem}
+.say{flex:none;width:2.5rem;height:2.5rem;border:1px solid currentColor;background:transparent;color:inherit;display:grid;place-items:center;cursor:pointer;transition:background-color .15s,color .15s}
+.say:hover{background:var(--on-loop);color:var(--loop-plum)}
+.answer{min-height:5.2rem;border-top:1px solid var(--on-loop);border-bottom:1px solid var(--on-loop);padding:.5rem 0;display:flex;flex-wrap:wrap;gap:.4rem;align-content:flex-start}
+.bank{display:flex;flex-wrap:wrap;gap:.4rem;margin:1rem 0}
+.tile{font:inherit;font-weight:600;font-size:1rem;padding:.3rem .7rem;border:1px solid var(--on-loop);border-radius:0;background:var(--loop-plum);color:var(--on-loop);cursor:pointer;transition:background-color .15s,color .15s}
+.tile:hover{background:var(--on-loop);color:var(--loop-plum)}
+.tile[disabled]{opacity:1;background:transparent;color:transparent;border-style:dashed;cursor:default}
+.answer .tile{background:var(--on-loop);color:var(--loop-plum)}
+.check{display:block;width:100%;font:inherit;font-weight:700;padding:.65rem;border:1px solid var(--on-loop);border-radius:0;background:var(--on-loop);color:var(--loop-plum);cursor:pointer;transition:background-color .15s,color .15s}
+.check:hover{background:var(--loop-plum);color:var(--on-loop)}
+.verdict{min-height:1.5rem;margin-top:.6rem;font-weight:600;font-size:1rem}
+.queue{list-style:none;margin:.75rem 0 0;padding:0}
+.queue li{display:flex;justify-content:space-between;gap:.75rem;padding:.55rem 0;border-top:1px solid var(--hairline);font-size:1rem}
+.queue b{font-weight:700}
+.queue span{color:var(--hint-text);white-space:nowrap}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;margin:.9rem 0 .6rem}
+.week i{display:block;font-style:normal;text-align:center;font-size:.9rem;border:1px solid var(--hairline);padding:.5rem 0}
+.week i.done{background:var(--loop-plum);color:var(--on-loop);border-color:var(--loop-plum)}
+.screen .figure{font-size:1.5rem;font-weight:700;line-height:1.2}
+.screen .second{margin-top:1rem}
+.screen small{display:block;font-size:1rem;color:var(--hint-text)}
+
+/* loop timeline */
+.loop{padding:clamp(48px,8vw,96px) var(--gutter) 0;max-width:80rem}
+.loop h2{max-width:26rem}
+.loop .intro{max-width:36rem;margin-top:.75rem}
+.stops{list-style:none;margin:2.25rem 0 0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--hairline)}
+.stops li{position:relative;padding:1.4rem 1rem 0 0}
+.stops li::before{content:"";position:absolute;top:-.55rem;left:0;width:.9rem;height:.9rem;background:var(--loop-plum)}
+.stops h3{font-size:1.5rem}
+.stops .what{margin-top:.15rem;font-weight:600}
+.stops .cue{margin-top:.5rem;font-size:1rem;color:var(--hint-text)}
+
+/* languages */
+.langs{padding:clamp(48px,8vw,96px) var(--gutter) 0;margin-left:auto;max-width:56rem;margin-right:clamp(0px,8vw,120px)}
+.langs h2{margin-bottom:1rem}
+table{width:100%;border-collapse:collapse}
+caption{text-align:left;color:var(--hint-text);font-size:1rem;padding-bottom:.5rem}
+th,td{text-align:left;padding:.7rem .75rem .7rem 0;border-top:1px solid var(--hairline);vertical-align:top}
+thead th{font-weight:700;border-top:2px solid var(--hairline)}
+tbody th{font-weight:700}
+tr:last-child th,tr:last-child td{border-bottom:1px solid var(--hairline)}
+.reads{color:var(--hint-text);font-size:1rem}
+
+/* pricing band */
+.band{margin-top:clamp(48px,8vw,96px);background:var(--loop-plum);color:var(--on-loop);padding:clamp(40px,7vw,88px) var(--gutter)}
+.band-in{max-width:68rem;margin:0 auto}
+.band h2{max-width:30rem}
+.plans{display:grid;grid-template-columns:1fr 1.4fr;gap:0;margin-top:2rem;border:1px solid var(--on-loop)}
+.plan{padding:1.5rem}
+.plan+.plan{border-left:1px solid var(--on-loop)}
+.plan .name{font-weight:700}
+.plan .big{font-size:3.25rem;line-height:1.05;font-weight:700;margin:.4rem 0 .6rem}
+.plan .big small{font-size:1.125rem;font-weight:600}
+.plan p+p{margin-top:.6rem}
+.terms{margin-top:1.25rem;max-width:42rem}
+
+/* final sign-up */
+.begin{padding:clamp(48px,8vw,96px) var(--gutter);text-align:center}
+.begin h2{font-size:1.8rem}
+.begin .start-form{margin-top:1.25rem}
+
+/* footer */
+footer{border-top:1px solid var(--hairline);padding:1.5rem var(--gutter) 2rem;display:flex;flex-wrap:wrap;gap:1.5rem 3rem;justify-content:space-between;font-size:1rem}
+footer h2{font-size:1rem}
+footer ul{list-style:none;margin:.4rem 0 0;padding:0}
+footer li{padding:.15rem 0}
+
+@media (max-width:860px){
+  .stops{grid-template-columns:1fr;border-top:0;border-left:1px solid var(--hairline);margin-left:.45rem}
+  .stops li{padding:0 0 1.5rem 1.5rem}
+  .stops li::before{top:.35rem;left:-.5rem}
+  .plans{grid-template-columns:1fr}
+  .plan+.plan{border-left:0;border-top:1px solid var(--on-loop)}
+}
+@media (max-width:760px){
+  .screen:not(.screen-main){display:none}
+  .devices{border-right:0;border-left:0}
+  .langs{margin-right:auto}
+  .reads{display:none}
+}
+@media (max-width:480px){
+  .topbar nav ul{gap:.9rem}
+  .mark span{font-size:1.05rem}
+  .start-form{flex-wrap:wrap}
+  .start-form select{flex:1 1 100%;border-right:1px solid var(--hairline);border-bottom:0}
+  .go{flex:1 1 100%}
+  th,td{padding-right:.5rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="mark" href="/" aria-label="Lingo Loop home">
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" fill="#a8138e"/><path d="M8 14a6 6 0 0 1 10.2-4.3L20 11.5M20 14a6 6 0 0 1-10.2 4.3L8 16.5" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M20.5 7.5v4.5H16M7.5 20.5V16H12" fill="none" stroke="#fff" stroke-width="2.2"/></svg>
+    <span>Lingo Loop</span>
+  </a>
+  <nav aria-label="Primary">
+    <ul>
+      <li><a href="#languages">Languages</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="LOGIN_URL" data-href="LOGIN_URL">Log in</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="opener" aria-labelledby="hero-h">
+    <div class="opener-copy">
+      <h1 id="hero-h">Learn a language five minutes at a time</h1>
+      <p class="lede">Lessons make you say each phrase out loud, then bring it back on a spaced schedule so Monday's words are still there on Friday.</p>
+      <form class="start-form" action="SIGNUP_URL" method="get">
+        <select id="lang-1" name="lang" data-lang-select aria-label="Language to learn">
+          <option value="spanish">Spanish</option>
+          <option value="french">French</option>
+          <option value="japanese">Japanese</option>
+          <option value="german">German</option>
+          <option value="italian">Italian</option>
+          <option value="portuguese">Portuguese</option>
+        </select>
+        <button class="go" type="submit" data-go>Start learning Spanish</button>
+      </form>
+      <p class="start-note">Free plan, <data class="todo">one language</data>. Plus adds the rest.</p>
+    </div>
+
+    <div class="devices">
+      <section class="screen" aria-label="Review queue screen">
+        <h2>Due today</h2>
+        <ul class="queue">
+          <li><b>Buenos días</b><span>now</span></li>
+          <li><b>La cuenta, por favor</b><span>now</span></li>
+          <li><b>Me llamo Ana</b><span>in 2 h</span></li>
+          <li><b>¿Cuánto cuesta?</b><span>tomorrow</span></li>
+        </ul>
+      </section>
+
+      <section class="screen screen-main" aria-label="Spanish lesson screen">
+        <div class="s-top">
+          <div class="progress" aria-hidden="true"><span></span></div>
+          <span>6 of 10</span>
+        </div>
+        <p class="s-kind">Build the translation</p>
+        <div class="phrase-row">
+          <button class="say" type="button" aria-label="Play the sentence" data-say>
+            <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 7h3l4-3.5v11L5 11H2z" fill="currentColor"/><path d="M12 6a4 4 0 0 1 0 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          </button>
+          <p class="phrase" lang="es">¿Dónde está la estación?</p>
+        </div>
+        <div class="answer" id="answer" aria-label="Your answer" aria-live="polite"></div>
+        <div class="bank" id="bank">
+          <button class="tile" type="button">the</button>
+          <button class="tile" type="button">bus</button>
+          <button class="tile" type="button">Where</button>
+          <button class="tile" type="button">station</button>
+          <button class="tile" type="button">is</button>
+          <button class="tile" type="button">a</button>
+        </div>
+        <button class="check" type="button" id="check">Check</button>
+        <p class="verdict" id="verdict" role="status"></p>
+      </section>
+
+      <section class="screen" aria-label="Weekly progress screen">
+        <h2>This week</h2>
+        <div class="week" aria-hidden="true"><i class="done">M</i><i class="done">T</i><i class="done">W</i><i class="done">T</i><i>F</i><i>S</i><i>S</i></div>
+        <p class="figure">4 days in a row</p>
+        <small>Today: 3 of <data class="todo">5</data> minutes</small>
+        <p class="figure second">58 phrases</p>
+        <small>Kept in memory</small>
+      </section>
+    </div>
+  </section>
+
+  <section class="loop" aria-labelledby="loop-h">
+    <h2 id="loop-h">Each phrase returns just before you forget it</h2>
+    <p class="intro">Say a new phrase today and it reappears on a widening schedule. The cue gets thinner each time until you produce the whole sentence yourself.</p>
+    <ol class="stops">
+      <li><h3><data class="todo">Day 0</data></h3><p class="what">Hear it, then say it</p><p class="cue">Spanish and English both on screen</p></li>
+      <li><h3><data class="todo">Day 1</data></h3><p class="what">Pick the right words</p><p class="cue">English cue, word tiles</p></li>
+      <li><h3><data class="todo">Day 3</data></h3><p class="what">Type it</p><p class="cue">English cue, empty line</p></li>
+      <li><h3><data class="todo">Day 7</data></h3><p class="what">Say it from a picture</p><p class="cue">No words shown</p></li>
+      <li><h3><data class="todo">Day 21</data></h3><p class="what">Use it in a dialogue</p><p class="cue">A short exchange with a reply to give</p></li>
+    </ol>
+  </section>
+
+  <section class="langs" id="languages" aria-labelledby="langs-h">
+    <h2 id="langs-h">Languages, from the first words up</h2>
+    <table>
+      <caption>The same greeting in each course</caption>
+      <thead><tr><th scope="col">Course</th><th scope="col">Good morning</th><th scope="col">Levels</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Spanish</th><td lang="es">Buenos días</td><td><data class="todo">Beginner to B1</data></td></tr>
+        <tr><th scope="row">French</th><td lang="fr">Bonjour</td><td><data class="todo">Beginner to B1</data></td></tr>
+        <tr><th scope="row">Japanese</th><td><span lang="ja">おはようございます</span> <span class="reads">ohayō gozaimasu</span></td><td><data class="todo">Beginner to N4</data></td></tr>
+        <tr><th scope="row">German</th><td lang="de">Guten Morgen</td><td><data class="todo">Beginner to B1</data></td></tr>
+        <tr><th scope="row">Italian</th><td lang="it">Buongiorno</td><td><data class="todo">Beginner to B1</data></td></tr>
+        <tr><th scope="row">Portuguese</th><td lang="pt">Bom dia</td><td><data class="todo">Beginner to B1</data></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="band" id="pricing" aria-labelledby="price-h">
+    <div class="band-in">
+      <h2 id="price-h">Free covers a single language and Plus covers every course</h2>
+      <div class="plans">
+        <div class="plan">
+          <p class="name"><data class="todo">Free</data></p>
+          <p class="big"><data class="todo">$0</data></p>
+          <p>One course at a time, with <data class="todo">five new phrases a day</data>. Reviews are never capped.</p>
+        </div>
+        <div class="plan">
+          <p class="name"><data class="todo">Plus</data></p>
+          <p class="big"><data class="todo">$9.99</data> <small>a month</small></p>
+          <p>Or <data class="todo">$59.99</data> billed once a year. Plus unlocks every course and removes the daily limit on new phrases.</p>
+        </div>
+      </div>
+      <p class="terms">Plus starts with a <data class="todo">7-day</data> trial. After that it bills monthly or yearly, and you cancel from your app store subscriptions.</p>
+    </div>
+  </section>
+
+  <section class="begin" aria-labelledby="begin-h">
+    <h2 id="begin-h">Choose a language and say your first phrase</h2>
+    <form class="start-form" action="SIGNUP_URL" method="get">
+      <select id="lang-2" name="lang" data-lang-select aria-label="Language to learn">
+        <option value="spanish">Spanish</option>
+        <option value="french">French</option>
+        <option value="japanese">Japanese</option>
+        <option value="german">German</option>
+        <option value="italian">Italian</option>
+        <option value="portuguese">Portuguese</option>
+      </select>
+      <button class="go" type="submit" data-go>Start learning Spanish</button>
+    </form>
+  </section>
+</main>
+
+<footer>
+  <div>
+    <h2>Lingo Loop</h2>
+    <ul>
+      <li><a href="SUPPORT_URL" data-href="SUPPORT_URL">Contact support</a></li>
+      <li><a href="PRIVACY_URL" data-href="PRIVACY_URL">Privacy</a></li>
+      <li><a href="TERMS_URL" data-href="TERMS_URL">Terms</a></li>
+    </ul>
+  </div>
+  <div>
+    <h2>Get the app</h2>
+    <ul>
+      <li><a href="APP_STORE_URL" data-href="APP_STORE_URL">iPhone and iPad</a></li>
+      <li><a href="PLAY_STORE_URL" data-href="PLAY_STORE_URL">Android</a></li>
+    </ul>
+  </div>
+  </footer>
+
+<script>
+(function(){
+  var names={spanish:"Spanish",french:"French",japanese:"Japanese",german:"German",italian:"Italian",portuguese:"Portuguese"};
+  document.querySelectorAll("form.start-form").forEach(function(f){
+    var s=f.querySelector("select"),b=f.querySelector("[data-go]");
+    s.addEventListener("change",function(){b.textContent="Start learning "+names[s.value];});
+  });
+
+  var bank=document.getElementById("bank"),ans=document.getElementById("answer"),
+      verdict=document.getElementById("verdict"),check=document.getElementById("check");
+  var target="Where is the station";
+  function words(){return Array.prototype.map.call(ans.children,function(t){return t.textContent;});}
+  bank.addEventListener("click",function(e){
+    var t=e.target.closest(".tile");if(!t||t.disabled)return;
+    var c=document.createElement("button");c.type="button";c.className="tile";c.textContent=t.textContent;c.dataset.from=t.textContent;
+    ans.appendChild(c);t.disabled=true;verdict.textContent="";
+  });
+  ans.addEventListener("click",function(e){
+    var t=e.target.closest(".tile");if(!t)return;
+    Array.prototype.forEach.call(bank.children,function(b){if(b.disabled&&b.textContent===t.dataset.from){b.disabled=false;}});
+    t.remove();verdict.textContent="";
+  });
+  check.addEventListener("click",function(){
+    var w=words().join(" ");
+    if(!w){verdict.textContent="Tap the words in order.";return;}
+    verdict.textContent=(w===target)?"Correct. This comes back tomorrow.":"Not quite. Tap a word to take it out.";
+  });
+  var say=document.querySelector("[data-say]");
+  say.addEventListener("click",function(){
+    if("speechSynthesis" in window){
+      var u=new SpeechSynthesisUtterance("¿Dónde está la estación?");u.lang="es-ES";
+      window.speechSynthesis.cancel();window.speechSynthesis.speak(u);
+    }
+  });
+})();
+</script>
+</body>
+</html>

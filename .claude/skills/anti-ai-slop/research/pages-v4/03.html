@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Nimbus AI - the AI copy editor</title>
+<meta name="description" content="Nimbus AI reads your draft, marks each fix as a tracked change you accept or reject, and leaves your argument, your quotes and your voice alone.">
+<meta property="og:title" content="Nimbus AI - your AI copy editor">
+<meta property="og:description" content="Tracked-change edits on your own draft. It fixes the sentence and leaves the argument to you.">
+<meta property="og:type" content="website">
+<!--
+LAUNCH TODO
+Launch constants (contact facts, fill before shipping):
+  SIGNUP_URL   - sign-up endpoint / page (form action and data-href)
+  LOGIN_URL    - log-in page
+  SUPPORT_URL  - contact route (mailto: or help page)
+  PRIVACY_URL  - privacy policy
+  TERMS_URL    - terms of service
+  og:image     - absolute https URL of a share image (omitted for now)
+Owner facts drafted in <data class="todo"> (confirm or replace):
+  Free plan price, Free plan document limit, Pro monthly price, Pro annual price,
+  Pro trial length, Pro document limit, Free file size limit
+-->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 34 22%27%3E%3Cpath d=%27M9 20.5a7.5 7.5 0 0 1-.9-14.9A9 9 0 0 1 25.4 4.8 8 8 0 0 1 26 20.5Z%27 fill=%27%2300bdf2%27 stroke=%27%23050b10%27 stroke-width=%272.6%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky-field:#00bdf2;
+  --sheet:#ffffff;
+  --proof-black:#050b10;
+  --proof-quiet:#33424d;
+  --redline-cut:#a8102f;
+  --redline-add:#00587a;
+  --margin-wash:#e3f6fd;
+  --stamp-line:#050b10;
+  --font:"Alegreya Sans",system-ui,sans-serif;
+  --step-0:1.0938rem;
+  --step-1:1.4583rem;
+  --step-2:1.944rem;
+  --step-3:2.592rem;
+  --outline:3px solid var(--stamp-line);
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:4rem}
+body{margin:0;font-family:var(--font);font-size:var(--step-0);line-height:1.5;color:var(--proof-black);background:var(--sky-field);-webkit-text-size-adjust:100%}
+h1,h2,h3,p,figure,dl,dd,ul,ol,blockquote{margin:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--proof-black);outline-offset:3px}
+.skip{position:absolute;left:8px;top:-60px;background:var(--sheet);border:var(--outline);padding:.4rem .8rem;z-index:10}
+.skip:focus{top:8px}
+
+/* top bar */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.75rem 4vw}
+.mark{display:flex;align-items:center;gap:.4rem;text-decoration:none;font-weight:900;font-size:1.3rem;letter-spacing:-.01em}
+.mark svg{width:34px;height:22px;flex:none}
+.bar nav{display:flex;gap:1.1rem;align-items:center;font-weight:500;font-size:1rem}
+.bar nav a{text-underline-offset:.2em;transition:text-decoration-color .15s,background-color .15s}
+.bar nav a:hover{text-decoration-thickness:3px}
+.bar nav a.login{border:var(--outline);padding:.15rem .6rem;background:var(--sheet);text-decoration:none}
+.bar nav a.login:hover{background:var(--proof-black);color:var(--sheet)}
+
+/* hero: type poster */
+.poster{padding:1rem 4vw 0;min-height:calc(100svh - 3.5rem)}
+.poster h1{font-weight:900;font-size:clamp(3.4rem,17.5vw,15rem);line-height:.86;letter-spacing:-.02em;max-width:9ch}
+.poster .lede{font-size:var(--step-1);line-height:1.35;max-width:34ch;margin-top:1.1rem;font-weight:500}
+.signup{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.1rem;max-width:36rem}
+.signup label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.signup input{flex:1 1 13rem;font:inherit;font-size:1.05rem;padding:.7rem .8rem;border:var(--outline);background:var(--sheet);color:var(--proof-black);border-radius:0;min-width:0}
+.signup button{font:inherit;font-weight:800;font-size:1.05rem;padding:.7rem 1.1rem;border:var(--outline);background:var(--proof-black);color:var(--sheet);border-radius:0;cursor:pointer;transition:background-color .15s,color .15s}
+.signup button:hover{background:var(--sheet);color:var(--proof-black)}
+.signup button:focus-visible,.signup input:focus-visible{outline-color:var(--proof-black);outline-offset:3px}
+.poster .terms{margin-top:.8rem;font-size:1rem}
+.terms a{text-underline-offset:.2em}
+
+/* proof: the edit */
+.pass{background:var(--sheet);border-top:var(--outline);padding:3.5rem 0 4rem}
+.pass-head{padding:0 4vw;max-width:46rem}
+h2{font-weight:900;font-size:var(--step-3);line-height:1.02;letter-spacing:-.01em}
+.pass-head p{margin-top:.8rem;max-width:60ch}
+.desk{display:flex;flex-wrap:wrap;gap:1.5rem 2.5rem;padding:2rem 4vw 0;align-items:flex-start}
+.page{flex:1 1 30rem;max-width:44rem;border:var(--outline);box-shadow:10px 10px 0 var(--proof-black);padding:1.4rem 1.3rem 1.6rem;background:var(--sheet)}
+.page h3{font-size:1rem;font-weight:500;color:var(--proof-quiet);margin-bottom:.8rem}
+.page p{font-size:var(--step-1);line-height:1.6;max-width:62ch}
+del{color:var(--redline-cut);text-decoration:line-through;text-decoration-thickness:2px}
+ins{color:var(--redline-add);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.18em;font-weight:800}
+.notes{flex:1 1 15rem;max-width:22rem;list-style:none;padding:0;display:flex;flex-direction:column;gap:.9rem;counter-reset:n}
+.notes li{border:var(--outline);background:var(--margin-wash);padding:.7rem .9rem;font-size:1.02rem;line-height:1.4}
+.notes b{display:block;font-weight:800}
+.tally{padding:1.6rem 4vw 0;max-width:46rem;color:var(--proof-quiet)}
+
+/* limits: transcript */
+.limits{padding:4rem 4vw;max-width:50rem}
+.limits>p{margin-top:.8rem;max-width:56ch}
+.talk{margin-top:2rem;display:flex;flex-direction:column;gap:1rem;list-style:none;padding:0}
+.talk li{border:var(--outline);padding:.8rem 1rem;max-width:36rem;background:var(--sheet)}
+.talk .ask{align-self:flex-end;background:var(--proof-black);color:var(--sheet)}
+.talk .says{font-weight:800;display:block;font-size:1rem}
+
+/* plans */
+.plans{background:var(--sheet);border-top:var(--outline);border-bottom:var(--outline);padding:4rem 4vw}
+.plans h2{max-width:20ch}
+.tablewrap{margin-top:1.8rem;overflow-x:auto;max-width:60rem}
+table{border-collapse:collapse;width:100%;min-width:30rem;border:var(--outline)}
+caption{text-align:left;padding-bottom:.6rem;color:var(--proof-quiet)}
+th,td{text-align:left;padding:.8rem 1rem;border:2px solid var(--proof-black);vertical-align:top}
+thead th{background:var(--proof-black);color:var(--sheet);font-weight:800;font-size:1.2rem}
+tbody th{font-weight:500;width:28%}
+.price{font-size:var(--step-2);font-weight:900;line-height:1}
+data.todo{font-weight:inherit}
+
+/* close */
+.join{padding:4rem 4vw 3.5rem;display:flex;flex-wrap:wrap;gap:2rem 4rem;align-items:flex-end;justify-content:space-between}
+.join h2{font-size:clamp(2.6rem,9vw,6rem);max-width:12ch;line-height:.92}
+.join .signup{flex:1 1 22rem;margin-top:0}
+
+footer{border-top:var(--outline);background:var(--proof-black);color:var(--sheet);padding:1.6rem 4vw;display:flex;flex-wrap:wrap;gap:.8rem 2rem;justify-content:space-between;font-size:1rem}
+footer a{text-underline-offset:.2em}
+footer p+p{max-width:36ch}
+
+@media (min-width:900px){
+  .poster{display:flex;flex-direction:column;justify-content:flex-start;padding-top:2rem}
+  .poster h1{max-width:none;font-size:clamp(5rem,15vw,15rem)}
+  .poster .lede{max-width:40ch}
+  .bar{padding:1rem 4vw}
+}
+@media (max-width:400px){
+  .bar nav{gap:.8rem;font-size:.95rem}
+  .mark{font-size:1.15rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar">
+  <a class="mark" href="/" aria-label="Nimbus AI home">
+    <svg viewBox="0 0 34 22" aria-hidden="true"><path d="M9 20.5a7.5 7.5 0 0 1-.9-14.9A9 9 0 0 1 25.4 4.8 8 8 0 0 1 26 20.5Z" fill="#fff" stroke="#050b10" stroke-width="2.6" stroke-linejoin="round"/></svg>
+    Nimbus AI
+  </a>
+  <nav aria-label="Primary">
+    <a href="#limits">Limits</a>
+    <a href="#plans">Pricing</a>
+    <a class="login" data-href="LOGIN_URL" href="LOGIN_URL">Log in</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="poster" aria-labelledby="top">
+    <h1 id="top">Your AI copy editor</h1>
+    <p class="lede">Paste a draft and every fix comes back as a tracked change. Accept it, reject it, keep writing.</p>
+    <form class="signup" action="SIGNUP_URL" method="post" data-href="SIGNUP_URL">
+      <label for="e1">Email address</label>
+      <input id="e1" name="email" type="email" autocomplete="email" placeholder="you@work.com" required>
+      <button type="submit">Sign up for Nimbus</button>
+    </form>
+    <p class="terms"><a href="#pass">One paragraph, marked up</a></p>
+  </section>
+
+  <section class="pass" id="pass" aria-labelledby="pass-h">
+    <div class="pass-head">
+      <h2 id="pass-h">A paragraph after one pass</h2>
+      <p>Each change carries its reason in the margin. Nothing is applied until you say so.</p>
+    </div>
+    <div class="desk">
+      <figure class="page">
+        <h3>Launch update, paragraph 2</h3>
+        <p>The team <del>have</del><ins>has</ins> decided to move the launch date back <del>due to the fact that</del><ins>because</ins> testing is not yet complete, and <del>in order to ensure quality we will be reviewing</del><ins>to protect quality we will review</ins> everything again next week.</p>
+      </figure>
+      <ol class="notes" aria-label="Margin notes">
+        <li><b>have to has</b>"Team" takes a singular verb in your house style (US).</li>
+        <li><b>due to the fact that to because</b>Same meaning, four words shorter.</li>
+        <li><b>in order to ensure to to protect</b>Verb form changed from "will be reviewing" to "will review".</li>
+      </ol>
+    </div>
+    <p class="tally">The date, the reason and the plan are untouched. Only the wording around them moved.</p>
+  </section>
+
+  <section class="limits" id="limits" aria-labelledby="limits-h">
+    <h2 id="limits-h">What Nimbus declines</h2>
+    <p>It edits text you wrote. When a request asks it to author or alter the substance, it says so and stops.</p>
+    <ul class="talk">
+      <li class="ask">Write my cover letter from this job ad.</li>
+      <li><span class="says">Nimbus</span>That would be writing, not editing. Paste your own draft and I will mark it up.</li>
+      <li class="ask">Add a statistic to back up paragraph 3.</li>
+      <li><span class="says">Nimbus</span>I do not supply facts or sources. I flagged the claim so you can cite one yourself.</li>
+      <li class="ask">Tidy the quotation in the second paragraph.</li>
+      <li><span class="says">Nimbus</span>Quoted text stays exactly as written. I left it alone and fixed the sentence around it.</li>
+    </ul>
+  </section>
+
+  <section class="plans" id="plans" aria-labelledby="plans-h">
+    <h2 id="plans-h">Plans</h2>
+    <div class="tablewrap">
+      <table>
+        <caption>Both plans use the same editor.</caption>
+        <thead><tr><th scope="col">&nbsp;</th><th scope="col">Free</th><th scope="col">Pro</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Price</th><td><span class="price"><data class="todo">$0</data></span></td><td><span class="price"><data class="todo">$12</data></span> a month, or <data class="todo">$110</data> a year</td></tr>
+          <tr><th scope="row">Documents</th><td><data class="todo">5</data> a month</td><td><data class="todo">Unlimited</data></td></tr>
+          <tr><th scope="row">Length per document</th><td>Up to <data class="todo">2,000</data> words</td><td>Up to <data class="todo">30,000</data> words</td></tr>
+          <tr><th scope="row">Trial</th><td>None needed</td><td><data class="todo">14 days</data>, cancel from account settings</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="join" aria-labelledby="join-h">
+    <h2 id="join-h">Send us a draft</h2>
+    <form class="signup" action="SIGNUP_URL" method="post" data-href="SIGNUP_URL">
+      <label for="e2">Email address</label>
+      <input id="e2" name="email" type="email" autocomplete="email" placeholder="you@work.com" required>
+      <button type="submit">Sign up for Nimbus</button>
+    </form>
+  </section>
+</main>
+
+<footer>
+  <p>&copy; <span id="y">2026</span> Nimbus AI</p>
+  <p><a data-href="SUPPORT_URL" href="SUPPORT_URL">Contact support</a></p>
+  <p><a data-href="PRIVACY_URL" href="PRIVACY_URL">Privacy</a> &nbsp; <a data-href="TERMS_URL" href="TERMS_URL">Terms</a></p>
+</footer>
+<script>
+try{document.getElementById('y').textContent=new Date().getFullYear()}catch(e){}
+</script>
+</body>
+</html>

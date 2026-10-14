@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Taskflow</title>
+<meta name="description" content="Taskflow is task management for small teams. Type a task in a sentence and see whose week it lands in before anyone is overloaded.">
+<meta property="og:title" content="Taskflow - task management for small teams">
+<meta property="og:description" content="Type a task in a sentence and see whose week it lands in before anyone is overloaded.">
+<meta property="og:type" content="website">
+<!--
+LAUNCH TODO
+Launch constants (replace everywhere they appear):
+  SIGNUP_URL   - account creation endpoint (hero link, signup form action)
+  LOGIN_URL    - log-in page
+  CONTACT_URL  - support contact route (mailto: or form)
+  PRIVACY_URL  - privacy policy page
+  TERMS_URL    - terms of service page
+  og:image     - absolute https URL of a share image (omitted until a host exists)
+Owner facts drafted in <data class="todo"> (confirm or replace):
+  free seat limit, Team price per person, weekly capacity default, free history length,
+  free project limit, plan-change and cancellation terms
+Integrations: none listed because none were supplied; add a row to the section if they exist.
+-->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 28 28%27%3E%3Crect width=%2728%27 height=%2728%27 rx=%279%27 fill=%27%23a3182b%27/%3E%3Cpath d=%27M7 9h14M7 14h9M7 19h12%27 stroke=%27%23fdf0ee%27 stroke-width=%272.4%27 stroke-linecap=%27round%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --week-ground:hsl(8 60% 97%);
+  --lane-blush:hsl(2 70% 93%);
+  --lane-rose:hsl(345 60% 92%);
+  --lane-coral:hsl(12 72% 92%);
+  --board-band:hsl(355 62% 90%);
+  --task-text:hsl(350 55% 13%);
+  --task-text-quiet:hsl(350 35% 30%);
+  --action-red:hsl(354 72% 36%);
+  --action-red-hover:hsl(354 75% 28%);
+  --on-action:hsl(8 60% 98%);
+  --edge-rose:hsl(352 40% 45%);
+  --edge-soft:hsl(352 45% 82%);
+  --load-track:hsl(350 50% 86%);
+  --load-fill:hsl(345 45% 42%);
+  --load-over:hsl(354 78% 30%);
+  --footer-wine:hsl(350 55% 16%);
+  --on-wine:hsl(8 60% 94%);
+  --on-wine-quiet:hsl(8 45% 82%);
+  --gutter:clamp(16px,5vw,64px);
+  --radius-panel:28px;
+  --radius-control:12px;
+}
+html{font-size:17.5px;scroll-behavior:auto}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--week-ground);color:var(--task-text);font-family:"Atkinson Hyperlegible",sans-serif;line-height:1.55;-webkit-text-size-adjust:100%}
+img,svg{max-width:100%;display:block}
+input,button{font:inherit;color:inherit}
+h1,h2,h3,p,dl,dd,ul,ol,table,figure{margin:0}
+ul,ol{padding:0;list-style:none}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--action-red);outline-offset:3px;border-radius:6px}
+.skip{position:absolute;left:var(--gutter);top:-80px;background:var(--action-red);color:var(--on-action);padding:.6rem 1rem;border-radius:var(--radius-control);z-index:10}
+.skip:focus{top:8px}
+
+/* header */
+.site-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px var(--gutter)}
+.mark{display:flex;align-items:center;gap:9px;text-decoration:none;font-weight:700;font-size:1.15rem}
+.mark svg{width:28px;height:28px}
+.site-nav ul{display:flex;gap:4px}
+.site-nav a{display:block;padding:.4rem .7rem;border-radius:var(--radius-control);text-decoration:none;white-space:nowrap;transition:background-color .15s,color .15s}
+.site-nav a:hover{background:var(--lane-blush);color:var(--action-red-hover)}
+
+/* hero */
+.opening{display:grid;gap:36px;padding:20px var(--gutter) 64px;grid-template-areas:"copy" "demo"}
+.opening-copy{grid-area:copy;max-width:34rem}
+.opening-demo{grid-area:demo}
+.kicker{font-size:1rem;color:var(--task-text-quiet);margin-bottom:.5rem}
+h1{font-size:1.777rem;line-height:1.18;font-weight:700}
+.lede{margin-top:1rem;font-size:1rem}
+.start-link{display:inline-block;margin-top:1.4rem;background:var(--action-red);color:var(--on-action);text-decoration:none;font-weight:700;padding:.9rem 1.4rem;border-radius:var(--radius-control);transition:background-color .15s}
+.start-link:hover{background:var(--action-red-hover)}
+.seat-line{margin-top:.9rem;color:var(--task-text-quiet)}
+.seat-line data{color:var(--task-text);font-weight:700}
+.evidence-link{display:block;margin-top:.9rem;text-decoration:underline;text-underline-offset:3px}
+.evidence-link:hover{color:var(--action-red-hover)}
+
+.composer{background:var(--board-band);border-radius:var(--radius-panel);padding:clamp(18px,3vw,32px)}
+.composer label{display:block;font-weight:700;margin-bottom:.5rem}
+.composer input[type=text]{width:100%;padding:.85rem 1rem;border:2px solid var(--edge-rose);border-radius:var(--radius-control);background:var(--week-ground);transition:border-color .15s}
+.composer input[type=text]:hover{border-color:var(--action-red)}
+.parsed{display:flex;flex-wrap:wrap;gap:8px;margin:.9rem 0 1.4rem}
+.parsed li{background:var(--week-ground);border-radius:var(--radius-control);padding:.3rem .7rem;font-size:.9rem}
+.parsed b{font-weight:700;margin-right:.35em}
+.load-title{font-size:1.333rem;line-height:1.25;margin-bottom:.8rem}
+.load-row{display:grid;grid-template-columns:6.2rem 1fr;gap:4px 12px;align-items:center;padding:.45rem 0}
+.load-row .who{font-weight:700}
+.load-track{height:14px;border-radius:7px;background:var(--load-track);overflow:hidden;position:relative}
+.load-fill{display:block;height:100%;background:var(--load-fill);border-radius:7px;transition:width .3s}
+.load-row.is-over .load-fill{background:var(--load-over)}
+.load-note{grid-column:2;font-size:.9rem;color:var(--task-text-quiet)}
+.load-row.is-over .load-note{color:var(--load-over);font-weight:700}
+.demo-caption{margin-top:.8rem;font-size:.9rem;color:var(--task-text-quiet)}
+
+/* board */
+.board-band{background:var(--board-band);padding:56px var(--gutter)}
+.board-band h2,.thread-section h2,.pricing h2,.signup h2,.capacity h2{font-size:1.777rem;line-height:1.2;max-width:26rem}
+.board-intro{margin-top:.8rem;max-width:36rem}
+.lanes{display:grid;gap:18px;margin-top:2rem}
+.lane{border-radius:var(--radius-panel);padding:22px}
+.lane h3{font-size:1.333rem;line-height:1.2;margin-bottom:.9rem}
+.lane-today{background:var(--lane-blush)}
+.lane-week{background:var(--lane-rose)}
+.lane-wait{background:var(--lane-coral)}
+.task{background:var(--week-ground);border-radius:var(--radius-control);padding:.75rem .9rem;margin-top:10px}
+.task-name{display:block;font-weight:700}
+.task-meta{display:block;font-size:.9rem;color:var(--task-text-quiet)}
+.task.flag{border-left:6px solid var(--load-over)}
+.task.flag .task-meta{color:var(--load-over);font-weight:700}
+
+/* capacity: single figure */
+.capacity{padding:72px var(--gutter);display:grid;gap:24px;max-width:70rem}
+.big-figure{font-size:3.157rem;line-height:1;font-weight:700;color:var(--action-red)}
+.big-figure small{font-size:1.333rem;color:var(--task-text);margin-left:.2em}
+.capacity-text{max-width:34rem}
+.capacity-text p+p{margin-top:.8rem}
+
+/* thread: conversation */
+.thread-section{background:var(--lane-rose);padding:56px var(--gutter);border-radius:var(--radius-panel) var(--radius-panel) 0 0}
+.thread-section h2{margin-bottom:1.5rem}
+.thread{max-width:38rem;display:grid;gap:12px}
+.thread-head{font-weight:700}
+.msg{max-width:30rem;background:var(--week-ground);border-radius:var(--radius-panel);padding:.8rem 1.1rem}
+.msg:nth-child(even){justify-self:end;background:var(--lane-blush)}
+.msg-role{display:block;font-size:.9rem;color:var(--task-text-quiet)}
+
+/* pricing */
+.pricing{padding:72px var(--gutter) 40px;margin-left:clamp(0px,8vw,140px)}
+.plan-table{margin-top:1.8rem;width:100%;max-width:44rem;border-collapse:collapse}
+.plan-table caption{text-align:left;color:var(--task-text-quiet);padding-bottom:.6rem}
+.plan-table th,.plan-table td{text-align:left;padding:.8rem .6rem;vertical-align:top;border-bottom:2px solid var(--edge-soft)}
+.plan-table thead th{font-size:1.333rem;line-height:1.2;border-bottom:2px solid var(--edge-rose)}
+.plan-table tbody th{font-weight:400;color:var(--task-text-quiet);width:34%}
+.plan-table data{font-weight:700}
+.plan-terms{margin-top:1rem;max-width:36rem}
+
+/* signup */
+.signup{padding:48px var(--gutter) 80px}
+.signup-form{margin-top:1.6rem;max-width:36rem;display:grid;gap:12px;background:var(--lane-blush);padding:clamp(18px,3vw,30px);border-radius:var(--radius-panel)}
+.signup-form label{font-weight:700}
+.signup-form input[type=email]{width:100%;padding:.85rem 1rem;border:2px solid var(--edge-rose);border-radius:var(--radius-control);background:var(--week-ground);transition:border-color .15s}
+.signup-form input[type=email]:hover{border-color:var(--action-red)}
+.signup-form button{justify-self:start;border:0;cursor:pointer;background:var(--action-red);color:var(--on-action);font-weight:700;padding:.9rem 1.4rem;border-radius:var(--radius-control);transition:background-color .15s}
+.signup-form button:hover{background:var(--action-red-hover)}
+.signup-terms{font-size:.9rem;color:var(--task-text-quiet)}
+
+/* footer */
+.site-foot{background:var(--footer-wine);color:var(--on-wine);padding:36px var(--gutter);display:flex;flex-wrap:wrap;gap:20px 48px;justify-content:space-between;align-items:flex-start}
+.site-foot p{color:var(--on-wine-quiet);max-width:22rem}
+.site-foot ul{display:flex;flex-wrap:wrap;gap:6px 22px}
+.site-foot a{text-underline-offset:3px;transition:color .15s}
+.site-foot a:hover{color:#fff}
+
+@media (min-width:760px){
+  h1{font-size:2.369rem;line-height:1.15}
+  .lanes{grid-template-columns:repeat(3,1fr)}
+  .capacity{grid-template-columns:minmax(0,13rem) minmax(0,1fr);align-items:start;gap:56px}
+  .capacity h2{grid-column:1 / -1}
+}
+@media (min-width:980px){
+  .opening{grid-template-columns:minmax(0,3fr) minmax(0,2fr);grid-template-areas:"demo copy";gap:56px;align-items:start;padding-top:36px}
+  .opening-copy{padding-top:6px}
+  .thread-section{margin-right:clamp(0px,12vw,200px)}
+}
+@media (max-width:420px){
+  .site-nav a{padding:.4rem .45rem}
+  .load-row{grid-template-columns:5.2rem 1fr}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-top">
+  <a class="mark" href="/" aria-label="Taskflow home">
+    <svg viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="9" fill="#a3182b"/><path d="M7 9h14M7 14h9M7 19h12" stroke="#fdf0ee" stroke-width="2.4" stroke-linecap="round"/></svg>
+    Taskflow
+  </a>
+  <nav class="site-nav" aria-label="Main">
+    <ul>
+      <li><a href="#board">Board</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="LOGIN_URL">Log in</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="opening" aria-labelledby="hero-title">
+    <div class="opening-copy">
+      <p class="kicker">Task management for small teams</p>
+      <h1 id="hero-title">Task management that shows who is overloaded before the week starts</h1>
+      <p class="lede">Write a task as a sentence. Taskflow picks out the owner, the day, the project and the hours, then adds them to that person's week so you can move work before it piles up.</p>
+      <a class="start-link" data-href="SIGNUP_URL" href="SIGNUP_URL">Create a team workspace</a>
+      <p class="seat-line">Free for up to <data class="todo" value="5">5 people</data>, then <data class="todo" value="6">$6</data> per person each month.</p>
+      <a class="evidence-link" href="#pricing">What the Free and Team plans include</a>
+    </div>
+
+    <div class="opening-demo">
+      <div class="composer">
+        <label for="task-input">New task</label>
+        <input id="task-input" type="text" value="Prepare the invoice batch @ops thu 4h #billing" autocomplete="off" spellcheck="false">
+        <ul class="parsed" id="parsed" aria-live="polite"></ul>
+        <h2 class="load-title">Week of the 12th</h2>
+        <div id="loads"></div>
+        <p class="demo-caption">Sample team. Type @ with a role, a day, hours like 3h or a #project.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="board-band" id="board" aria-labelledby="board-title">
+    <h2 id="board-title">The board shows this week, not the backlog</h2>
+    <p class="board-intro">Anything without a day stays out of the columns. Tasks that push a person past their hours get a red edge, so the overload is visible on the card itself.</p>
+    <div class="lanes">
+      <section class="lane lane-today" aria-labelledby="lane-today">
+        <h3 id="lane-today">Today</h3>
+        <article class="task"><span class="task-name">Reconcile card payouts</span><span class="task-meta">Ops, 2h, #billing</span></article>
+        <article class="task"><span class="task-name">Review onboarding emails</span><span class="task-meta">Support, 1h, #activation</span></article>
+      </section>
+      <section class="lane lane-week" aria-labelledby="lane-week">
+        <h3 id="lane-week">This week</h3>
+        <article class="task flag"><span class="task-name">Prepare the invoice batch</span><span class="task-meta">Ops, Thu, 4h, over by 1h</span></article>
+        <article class="task"><span class="task-name">Draft pricing page copy</span><span class="task-meta">Founder, Fri, 3h, #site</span></article>
+        <article class="task"><span class="task-name">Fix export timeout</span><span class="task-meta">Design, Wed, 5h, #app</span></article>
+      </section>
+      <section class="lane lane-wait" aria-labelledby="lane-wait">
+        <h3 id="lane-wait">Waiting on someone</h3>
+        <article class="task"><span class="task-name">Signed supplier contract</span><span class="task-meta">Founder, waiting on legal</span></article>
+        <article class="task"><span class="task-name">Brand assets for the launch post</span><span class="task-meta">Design, waiting on Support</span></article>
+      </section>
+    </div>
+  </section>
+
+  <section class="capacity" aria-labelledby="capacity-title">
+    <h2 id="capacity-title">Each person sets their own hours</h2>
+    <p class="big-figure" aria-label="Default weekly capacity: 30 hours"><data class="todo" value="30">30</data><small>h a week</small></p>
+    <div class="capacity-text">
+      <p>This is the starting capacity for every seat. Someone on four days a week lowers theirs, and every bar on the board rescales.</p>
+      <p>Hours come from the estimate on each task. A task with no estimate counts as zero, and it shows up in the list of tasks to size.</p>
+    </div>
+  </section>
+
+  <section class="thread-section" aria-labelledby="thread-title">
+    <h2 id="thread-title">Questions stay on the task they are about</h2>
+    <div class="thread" role="group" aria-label="Comments on Prepare the invoice batch">
+      <p class="thread-head">Prepare the invoice batch</p>
+      <div class="msg"><span class="msg-role">Ops</span>This lands on me the same day as the payout check. Can anything come off?</div>
+      <div class="msg"><span class="msg-role">Founder</span>Moving the payout check to Friday. Thursday is only the batch.</div>
+      <div class="msg"><span class="msg-role">Ops</span>Done. My week reads 27 of 30 hours again.</div>
+    </div>
+  </section>
+
+  <section class="pricing" id="pricing" aria-labelledby="pricing-title">
+    <h2 id="pricing-title">Pricing</h2>
+    <table class="plan-table">
+      <caption>Two plans. Everything on the board is in both.</caption>
+      <thead>
+        <tr><td></td><th scope="col">Free</th><th scope="col">Team</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Price</th><td><data class="todo" value="0">$0</data></td><td><data class="todo" value="6">$6</data> per person each month</td></tr>
+        <tr><th scope="row">People</th><td>Up to <data class="todo" value="5">5</data></td><td>No limit</td></tr>
+        <tr><th scope="row">Projects</th><td>Up to <data class="todo" value="3">3</data></td><td>No limit</td></tr>
+        <tr><th scope="row">History</th><td><data class="todo" value="30">30</data> days</td><td>Full</td></tr>
+      </tbody>
+    </table>
+    <p class="plan-terms"><data class="todo" value="terms">The sixth person you invite moves the workspace to Team. You can go back to Free from billing settings once you are down to five people.</data></p>
+  </section>
+
+  <section class="signup" aria-labelledby="signup-title">
+    <h2 id="signup-title">Open a workspace for your team</h2>
+    <form class="signup-form" action="SIGNUP_URL" method="post">
+      <label for="signup-email">Work email</label>
+      <input id="signup-email" name="email" type="email" autocomplete="email" required>
+      <button type="submit">Create the workspace</button>
+      <p class="signup-terms">The workspace starts on Free, with room for <data class="todo" value="5">5 people</data>.</p>
+    </form>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div>
+    <p>Taskflow, task management for small teams.</p>
+    <p>&copy; <span id="y">2026</span> Taskflow</p>
+  </div>
+  <nav aria-label="Footer">
+    <ul>
+      <li><a href="CONTACT_URL">Contact</a></li>
+      <li><a href="LOGIN_URL">Log in</a></li>
+      <li><a href="PRIVACY_URL">Privacy</a></li>
+      <li><a href="TERMS_URL">Terms</a></li>
+    </ul>
+  </nav>
+</footer>
+
+<script>
+(function(){
+  var CAP = 30;
+  var team = [
+    {key:'design', name:'Design', base:15},
+    {key:'ops', name:'Ops', base:27},
+    {key:'support', name:'Support', base:18},
+    {key:'founder', name:'Founder', base:24}
+  ];
+  var days = {mon:'Mon',tue:'Tue',wed:'Wed',thu:'Thu',fri:'Fri'};
+  var input = document.getElementById('task-input');
+  var parsedEl = document.getElementById('parsed');
+  var loadsEl = document.getElementById('loads');
+
+  function parse(text){
+    var out = {owner:null, day:null, project:null, hours:0};
+    var m;
+    if((m = text.match(/@(\w+)/))){
+      team.forEach(function(t){ if(t.key === m[1].toLowerCase()) out.owner = t; });
+    }
+    if((m = text.match(/\b(mon|tue|wed|thu|fri)\w*\b/i))){ out.day = days[m[1].toLowerCase()]; }
+    if((m = text.match(/#(\w+)/))){ out.project = m[1]; }
+    if((m = text.match(/\b(\d+(?:\.\d+)?)\s?h\b/i))){ out.hours = parseFloat(m[1]); }
+    return out;
+  }
+  function chip(label, value){
+    var li = document.createElement('li');
+    var b = document.createElement('b');
+    b.textContent = label;
+    li.appendChild(b);
+    li.appendChild(document.createTextNode(value));
+    return li;
+  }
+  function render(){
+    var p = parse(input.value);
+    parsedEl.textContent = '';
+    parsedEl.appendChild(chip('Owner', p.owner ? p.owner.name : 'none yet'));
+    parsedEl.appendChild(chip('Day', p.day || 'none yet'));
+    parsedEl.appendChild(chip('Project', p.project || 'none'));
+    parsedEl.appendChild(chip('Estimate', p.hours ? p.hours + ' h' : 'none yet'));
+    loadsEl.textContent = '';
+    team.forEach(function(t){
+      var add = (p.owner === t) ? p.hours : 0;
+      var total = t.base + add;
+      var over = total > CAP;
+      var row = document.createElement('div');
+      row.className = 'load-row' + (over ? ' is-over' : '');
+      var who = document.createElement('span');
+      who.className = 'who'; who.textContent = t.name;
+      var track = document.createElement('span');
+      track.className = 'load-track';
+      var fill = document.createElement('span');
+      fill.className = 'load-fill';
+      fill.style.width = Math.min(100, total / CAP * 100) + '%';
+      track.appendChild(fill);
+      var note = document.createElement('span');
+      note.className = 'load-note';
+      note.textContent = over ? total + ' of ' + CAP + ' h, over by ' + (total - CAP) + ' h'
+                              : total + ' of ' + CAP + ' h';
+      row.appendChild(who); row.appendChild(track); row.appendChild(note);
+      loadsEl.appendChild(row);
+    });
+  }
+  input.addEventListener('input', render);
+  render();
+  var y = document.getElementById('y');
+  if(y){ y.textContent = new Date().getFullYear(); }
+})();
+</script>
+</body>
+</html>

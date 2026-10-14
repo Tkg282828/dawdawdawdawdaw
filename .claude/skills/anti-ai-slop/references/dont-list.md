@@ -174,6 +174,16 @@ Bans are written as **shapes**. Moving a value a few units does not clear a shap
 14. No prices, photos, proof or real conversion at all [10].
 15. Checker values nudged past thresholds (34→37/38/41rem lede, `#ebebe8`→`#eeece9`, h1 tracking forced to 0) [4 admitted].
 
+### v4 "honest conversion page" [v4 counts]
+16. The hero skeleton: h1 sentence → lede → one rounded CTA → an underlined noun-phrase link on its own line [8].
+17. A closing imperative h2 above the hero's button with the same label: "Ready to…?" reworded [7].
+18. 10–15-word "[category] that [clause]" h1s [4].
+19. Section left edges that move in and out from one section to the next [5].
+20. Drafted plans converge: a $0 free tier, a "Plus" plan, "cancel from settings" as the whole terms line [6/–/5].
+21. Outline drawings inside photo slots (empty bags, house outlines) [3/3 photo pages].
+22. Invented owner history: counts of past work, named past projects, named team members [1, but serious].
+23. A one-line © + Privacy/Terms footer on a shop or studio that needs address, hours and contact [9].
+
 Instead of all of the above: use the seed's assignment, the category conventions, and the shape rules in SKILL.md. Do not choose "the opposite" of a listed value; opposites (weight 400 → 700, paper → steel) were how v3 converged.
 
 ## Defaults that are right (do not ban these)

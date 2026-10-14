@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Ledgerly invoicing and accounting for freelancers</title>
+<meta name="description" content="Ledgerly is invoicing and bookkeeping for freelancers. Each invoice posts to your ledger, each payment sets aside your tax share, and the arithmetic is shown line by line.">
+<meta property="og:title" content="Ledgerly: invoicing and accounting for freelancers">
+<meta property="og:description" content="Send invoices, match payments, and see what you keep after expenses and tax.">
+<meta property="og:type" content="website">
+<!--
+LAUNCH TODO
+Constants: SIGNUP_URL, LOGIN_URL, SUPPORT_EMAIL (used as mailto:SUPPORT_EMAIL), PRIVACY_URL, TERMS_URL, OG_IMAGE_URL (add og:image as absolute https once hosted)
+Owner facts (data.todo): Solo price, Plus price, trial length, plan feature split, bank-feed and currency limits, encryption statement, card-data statement, data export statement
+-->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Crect x=%272%27 y=%272%27 width=%2720%27 height=%2720%27 rx=%273%27 fill=%27%2312130b%27 stroke=%27%23dbe6a6%27 stroke-width=%273%27/%3E%3Cpath d=%27M7 8h10M7 12h10M7 16h5%27 stroke=%27%23dbe6a6%27 stroke-width=%272.4%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Hanken+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night-ledger:#12130b;
+  --highlighter:#dbe6a6;
+  --on-highlighter:#1a1c0e;
+  --entry-text:#f1f0e4;
+  --quiet-entry:#b9bba2;
+  --ruling:#6b6e4c;
+  --font-display:"Unbounded","Arial Black",sans-serif;
+  --font-text:"Hanken Grotesk","Helvetica Neue",Arial,sans-serif;
+  --edge:3px solid var(--ruling);
+  --edge-bright:3px solid var(--highlighter);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--night-ledger);color:var(--entry-text);font:400 1rem/1.5 var(--font-text);font-variant-numeric:tabular-nums}
+img,svg{max-width:100%;display:block}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--highlighter);outline-offset:3px}
+.skip{position:absolute;left:1rem;top:-4rem;background:var(--highlighter);color:var(--on-highlighter);padding:.6rem 1rem;z-index:10;transition:top .15s}
+.skip:focus{top:1rem}
+h1,h2{font-family:var(--font-display);font-weight:500;margin:0}
+h2{font-size:clamp(1.4rem,3.4vw,2.2rem);line-height:1.15}
+p{margin:0}
+
+/* masthead */
+.masthead{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem clamp(1rem,3vw,2.5rem);flex-wrap:wrap}
+.mark{font-family:var(--font-display);font-weight:700;font-size:1.05rem;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem}
+.mark svg{width:1.4rem;height:1.4rem}
+.masthead nav ul{display:flex;gap:1.1rem;list-style:none;margin:0;padding:0;align-items:center}
+.masthead nav a{text-decoration:none;padding:.4rem 0;border-bottom:2px solid transparent;transition:border-color .15s,color .15s}
+.masthead nav a:hover{border-bottom-color:var(--highlighter)}
+.masthead nav .login{border:var(--edge);padding:.35rem .8rem;transition:background-color .15s,color .15s,border-color .15s}
+.masthead nav .login:hover{background:var(--highlighter);color:var(--on-highlighter);border-color:var(--highlighter)}
+
+/* hero */
+.opening{padding:clamp(1.5rem,4vw,3.5rem) clamp(1rem,3vw,2.5rem) 0;position:relative;z-index:2}
+.opening h1{font-size:clamp(2rem,10.4vw,7.2rem);line-height:1.02;max-width:14ch;text-wrap:balance}
+.opening .lede{font-size:1.15rem;max-width:44ch;margin-top:1.4rem;color:var(--entry-text)}
+.cta{display:inline-block;margin-top:1.6rem;background:var(--highlighter);color:var(--on-highlighter);border:var(--edge-bright);padding:.85rem 1.4rem;font-weight:700;text-decoration:none;border-radius:4px;transition:background-color .15s,color .15s,border-color .15s}
+.cta:hover{background:var(--night-ledger);color:var(--highlighter)}
+.evidence{display:block;margin-top:1.1rem;color:var(--entry-text)}
+.evidence:hover{color:var(--highlighter)}
+
+/* artifact */
+.desk{position:relative;z-index:3;width:calc(100% - 2rem);max-width:84rem;margin:2.5rem auto -7rem;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:1.25rem;align-items:start}
+.invoice-sheet{background:var(--highlighter);color:var(--on-highlighter);border:var(--edge-bright);border-radius:6px;padding:clamp(1rem,2.4vw,2rem);box-shadow:12px 12px 0 var(--ruling)}
+.sheet-head{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;border-bottom:3px solid var(--on-highlighter);padding-bottom:.9rem}
+.sheet-title{font-family:var(--font-display);font-weight:700;font-size:1rem;margin:0}
+.sheet-head p{font-size:.9rem}
+.lines{width:100%;border-collapse:collapse;margin-top:.5rem}
+.lines th{text-align:left;font-weight:700;font-size:.85rem;padding:.6rem 0 .3rem}
+.lines td{padding:.7rem 0;border-bottom:2px solid rgba(26,28,14,.35);vertical-align:top}
+.lines .num{text-align:right;white-space:nowrap}
+.lines small{display:block;font-size:.85rem}
+.lines tfoot td{border-bottom:0;padding:.35rem 0}
+.lines tfoot .grand td{border-top:3px solid var(--on-highlighter);padding-top:.7rem;font-weight:700;font-size:1.25rem}
+.posting{border:var(--edge);border-radius:6px;background:var(--night-ledger);padding:clamp(1rem,2vw,1.5rem)}
+.posting-title{font-family:var(--font-display);font-weight:500;font-size:.95rem;margin:0 0 .3rem;color:var(--entry-text)!important}
+.posting p{color:var(--quiet-entry);font-size:.9rem}
+.entries{width:100%;border-collapse:collapse;margin-top:.8rem}
+.entries th{text-align:left;font-size:.85rem;color:var(--quiet-entry);font-weight:500;padding:.3rem 0}
+.entries td{padding:.55rem 0;border-top:2px solid var(--ruling)}
+.entries .num{text-align:right;white-space:nowrap}
+.entries .credit td:first-child{padding-left:1.2rem}
+.entries tfoot td{border-top:3px solid var(--entry-text);font-weight:700}
+.caption{margin-top:.8rem;font-size:.85rem;color:var(--quiet-entry)}
+
+/* ledger */
+.statement{padding:11rem clamp(1rem,3vw,2.5rem) 5rem;border-top:var(--edge);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,26rem);gap:3rem clamp(2rem,6vw,6rem);align-items:end}
+#ledger-title{grid-column:1/-1}
+.kept-figure{font-family:var(--font-display);font-weight:700;font-size:clamp(2.6rem,9vw,7rem);line-height:1;color:var(--highlighter);word-break:break-word}
+.kept-note{margin-top:1rem;max-width:34ch}
+.workings{border:var(--edge);border-radius:6px;padding:1.2rem 1.4rem;margin:0}
+.workings div{display:flex;justify-content:space-between;gap:1rem;padding:.55rem 0;border-bottom:2px solid var(--ruling)}
+.workings div:last-child{border-bottom:0;font-weight:700;color:var(--highlighter)}
+.workings dt{margin:0}
+.workings dd{margin:0;text-align:right;white-space:nowrap}
+
+/* sequence */
+.course{padding:5rem clamp(1rem,3vw,2.5rem);border-top:var(--edge)}
+.course h2{max-width:20ch}
+.track{list-style:none;margin:2.5rem 0 0;padding:0 0 0 1.6rem;border-left:var(--edge-bright);max-width:46rem}
+.track li{position:relative;padding:0 0 2.2rem 1.4rem}
+.track li:last-child{padding-bottom:0}
+.track li::before{content:"";position:absolute;left:calc(-1.6rem - 9px);top:.35rem;width:15px;height:15px;background:var(--night-ledger);border:3px solid var(--highlighter);transform:rotate(45deg)}
+.track time{font-family:var(--font-display);font-size:.85rem;color:var(--highlighter)}
+.track h3{margin:.3rem 0 .3rem;font-size:1.15rem}
+.track p{max-width:52ch}
+
+/* pricing */
+.rates{padding:5rem clamp(1rem,3vw,2.5rem);border-top:var(--edge);display:grid;grid-template-columns:minmax(0,20rem) minmax(0,1fr);gap:2.5rem clamp(2rem,5vw,5rem)}
+.rates p.terms{margin-top:1rem;color:var(--quiet-entry)}
+.plan-table{width:100%;border-collapse:collapse;border:var(--edge);border-radius:6px}
+.plan-table th,.plan-table td{padding:.8rem 1rem;text-align:left;border-bottom:2px solid var(--ruling);vertical-align:top}
+.plan-table thead th{font-family:var(--font-display);font-weight:500;font-size:1rem}
+.plan-table .price{font-family:var(--font-display);font-weight:700;font-size:1.5rem;color:var(--highlighter)}
+.plan-table tbody tr:last-child th,.plan-table tbody tr:last-child td{border-bottom:0}
+.plan-table th[scope=row]{font-weight:500}
+
+/* security */
+.safeguards{padding:4rem clamp(1rem,3vw,2.5rem);border-top:var(--edge);max-width:60rem}
+.safeguards p{margin-top:1.2rem;max-width:62ch}
+
+/* signup */
+.opening-account{padding:5rem clamp(1rem,3vw,2.5rem);border-top:var(--edge-bright);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,28rem);gap:2rem clamp(2rem,6vw,6rem);align-items:end}
+.opening-account h2{font-size:clamp(1.6rem,5vw,3.4rem)}
+.signup{display:grid;gap:.9rem}
+.signup label{font-weight:700}
+.signup input{width:100%;background:var(--night-ledger);border:var(--edge);border-radius:4px;padding:.85rem 1rem;transition:border-color .15s}
+.signup input:hover,.signup input:focus{border-color:var(--highlighter)}
+.signup button{cursor:pointer;background:var(--highlighter);color:var(--on-highlighter);border:var(--edge-bright);border-radius:4px;padding:.85rem 1.4rem;font-weight:700;transition:background-color .15s,color .15s}
+.signup button:hover{background:var(--night-ledger);color:var(--highlighter)}
+.signup small{color:var(--quiet-entry)}
+
+/* footer */
+.colophon{border-top:var(--edge);padding:2rem clamp(1rem,3vw,2.5rem) 2.5rem;display:flex;flex-wrap:wrap;gap:1rem 3rem;justify-content:space-between;color:var(--quiet-entry)}
+.colophon ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem}
+.colophon a{color:var(--entry-text);text-underline-offset:.2em}
+.colophon a:hover{color:var(--highlighter)}
+
+@media (max-width:860px){
+  .desk{grid-template-columns:minmax(0,1fr);margin-bottom:-4rem}
+  .statement{padding-top:8rem;grid-template-columns:minmax(0,1fr)}
+  .rates,.opening-account{grid-template-columns:minmax(0,1fr)}
+  .masthead nav ul{gap:.8rem;font-size:.95rem}
+}
+@media (max-width:480px){
+  .masthead nav .hide-small{display:none}
+  .invoice-sheet{box-shadow:6px 6px 0 var(--ruling)}
+  .plan-table th,.plan-table td{padding:.65rem .6rem}
+  .plan-table .price{font-size:1.15rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <a class="mark" href="/" aria-label="Ledgerly home">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2" y="2" width="20" height="20" rx="3" fill="none" stroke="#dbe6a6" stroke-width="3"/><path d="M7 8h10M7 12h10M7 16h5" stroke="#dbe6a6" stroke-width="2.4"/></svg>
+    Ledgerly
+  </a>
+  <nav aria-label="Primary">
+    <ul>
+      <li class="hide-small"><a href="#ledger">Ledger</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li class="hide-small"><a href="#security">Security</a></li>
+      <li><a class="login" href="LOGIN_URL" data-href="LOGIN_URL">Log in</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="opening" aria-labelledby="top-title">
+    <h1 id="top-title">Invoice clients, keep your own books</h1>
+    <p class="lede">Invoicing and accounting for freelancers. Each invoice you send posts to your ledger, and each payment sets aside your tax share.</p>
+    <a class="cta" href="SIGNUP_URL" data-href="SIGNUP_URL">Open a Ledgerly account</a>
+    <a class="evidence" href="#ledger">October's ledger, line by line</a>
+  </section>
+
+  <div class="desk" role="group" aria-label="An invoice and the ledger entry it creates">
+    <article class="invoice-sheet" aria-label="Invoice INV-0042">
+      <div class="sheet-head">
+        <div>
+          <p class="sheet-title">Invoice INV-0042</p>
+          <p>Issued Oct 14 &middot; Due Oct 28</p>
+        </div>
+        <p>Billed to<br><strong>Retail client</strong></p>
+      </div>
+      <table class="lines">
+        <thead><tr><th scope="col">Item</th><th scope="col" class="num">Amount</th></tr></thead>
+        <tbody>
+          <tr><td>Brand identity work<small>24 h &times; $85.00</small></td><td class="num">$2,040.00</td></tr>
+          <tr><td>Revision round<small>6 h &times; $85.00</small></td><td class="num">$510.00</td></tr>
+          <tr><td>Typeface licence<small>1 &times; $120.00</small></td><td class="num">$120.00</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>Subtotal</td><td class="num">$2,670.00</td></tr>
+          <tr><td>Sales tax 10%</td><td class="num">$267.00</td></tr>
+          <tr class="grand"><td>Total due</td><td class="num">$2,937.00</td></tr>
+        </tfoot>
+      </table>
+    </article>
+    <aside class="posting" aria-label="Ledger entry posted by INV-0042">
+      <p class="posting-title">Posted to the ledger</p>
+      <p>Sent invoices book the receivable and the tax owed on the same day.</p>
+      <table class="entries">
+        <thead><tr><th scope="col">Account</th><th scope="col" class="num">Debit</th><th scope="col" class="num">Credit</th></tr></thead>
+        <tbody>
+          <tr><td>Accounts receivable</td><td class="num">$2,937.00</td><td class="num"></td></tr>
+          <tr class="credit"><td>Service income</td><td class="num"></td><td class="num">$2,670.00</td></tr>
+          <tr class="credit"><td>Sales tax payable</td><td class="num"></td><td class="num">$267.00</td></tr>
+        </tbody>
+        <tfoot><tr><td>Balance</td><td class="num">$2,937.00</td><td class="num">$2,937.00</td></tr></tfoot>
+      </table>
+      <p class="caption">Sample invoice and entry.</p>
+    </aside>
+  </div>
+
+  <section class="statement" id="ledger" aria-labelledby="ledger-title">
+    <h2 id="ledger-title">What October left you</h2>
+    <div>
+      <p class="kept-figure">$4,129.50</p>
+      <p class="kept-note">Kept from $5,750.00 received, after expenses and a 25% tax set-aside.</p>
+    </div>
+    <dl class="workings">
+      <div><dt>Received (INV-0040, INV-0041)</dt><dd>$5,750.00</dd></div>
+      <div><dt>Software</dt><dd class="minus">&minus;$64.00</dd></div>
+      <div><dt>Co-working desk</dt><dd class="minus">&minus;$180.00</dd></div>
+      <div><dt>Taxable profit</dt><dd>$5,506.00</dd></div>
+      <div><dt>Set aside at <data class="todo">25%</data></dt><dd class="minus">&minus;$1,376.50</dd></div>
+      <div><dt>You keep</dt><dd>$4,129.50</dd></div>
+    </dl>
+  </section>
+
+  <section class="course" aria-labelledby="course-title">
+    <h2 id="course-title">From invoice to tax return</h2>
+    <ol class="track">
+      <li>
+        <time datetime="2026-10-14">Oct 14</time>
+        <h3>Invoice sent</h3>
+        <p>The receivable and the sales tax are booked the moment the client gets the PDF.</p>
+      </li>
+      <li>
+        <time datetime="2026-10-22">Oct 22</time>
+        <h3>Payment matched</h3>
+        <p>A bank line of $2,937.00 clears INV-0042 and releases your tax share into the set-aside balance.</p>
+      </li>
+      <li>
+        <time datetime="2026-12-31">Dec 31</time>
+        <h3>Quarter closed</h3>
+        <p>Income, expenses and tax payable export as a report your accountant can read without asking you for receipts.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="rates" id="pricing" aria-labelledby="pricing-title">
+    <div>
+      <h2 id="pricing-title">Pricing</h2>
+      <p class="terms">Billed monthly. A <data class="todo">14-day</data> trial on either plan, cancel from settings.</p>
+    </div>
+    <table class="plan-table">
+      <caption class="sr-only" hidden>Ledgerly plans</caption>
+      <thead><tr><th scope="col">&nbsp;</th><th scope="col">Solo</th><th scope="col">Plus</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Per month</th><td class="price"><data class="todo">$12</data></td><td class="price"><data class="todo">$24</data></td></tr>
+        <tr><th scope="row">Invoices</th><td>Unlimited</td><td>Unlimited</td></tr>
+        <tr><th scope="row">Currencies</th><td><data class="todo">1</data></td><td><data class="todo">Up to 12</data></td></tr>
+        <tr><th scope="row">Bank feeds</th><td><data class="todo">1 account</data></td><td><data class="todo">5 accounts</data></td></tr>
+        <tr><th scope="row">Accountant access</th><td>Read-only link</td><td>Invited login</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="safeguards" id="security" aria-labelledby="security-title">
+    <h2 id="security-title">Security</h2>
+    <p><data class="todo">Data is encrypted in transit and at rest.</data> <data class="todo">Card numbers go to the payment processor and never reach Ledgerly servers.</data> <data class="todo">Export every invoice and ledger entry as CSV at any time.</data></p>
+  </section>
+
+  <section class="opening-account" aria-labelledby="signup-title">
+    <h2 id="signup-title">Send your next invoice from Ledgerly</h2>
+    <form class="signup" action="SIGNUP_URL" method="post">
+      <label for="signup-email">Work email</label>
+      <input id="signup-email" name="email" type="email" autocomplete="email" required>
+      <button type="submit">Open a Ledgerly account</button>
+      <small>The <data class="todo">14-day</data> trial starts when you confirm your email.</small>
+    </form>
+  </section>
+</main>
+
+<footer class="colophon">
+  <p>&copy; <span id="y">2026</span> Ledgerly</p>
+  <ul>
+    <li><a href="mailto:SUPPORT_EMAIL">Write to support</a></li>
+    <li><a href="PRIVACY_URL" data-href="PRIVACY_URL">Privacy</a></li>
+    <li><a href="TERMS_URL" data-href="TERMS_URL">Terms</a></li>
+  </ul>
+</footer>
+<script>
+(function(){var y=document.getElementById('y');if(y){y.textContent=new Date().getFullYear();}})();
+</script>
+</body>
+</html>

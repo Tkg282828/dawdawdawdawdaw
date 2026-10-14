@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>FitPulse - Fitness Tracking App</title>
+<meta name="description" content="FitPulse is a fitness tracking app for your phone. It logs each set, run and heart rate reading during a workout and totals your week.">
+<meta property="og:title" content="FitPulse - track every workout as it happens">
+<meta property="og:description" content="A fitness tracker for your phone that logs each set and run while you train, then totals the week.">
+<meta property="og:type" content="website">
+<!--
+LAUNCH TODO
+Launch constants (replace everywhere they appear):
+  DOWNLOAD_URL      smart link that sends visitors to the right store
+  APP_STORE_URL     iPhone store listing
+  PLAY_STORE_URL    Android store listing
+  CONTACT_URL       support / contact page or form
+  PRIVACY_URL       privacy policy
+  TERMS_URL         terms of use
+  og:image          absolute https URL of a share image (omitted until hosted)
+Owner facts drafted in <data class="todo"> (confirm or replace):
+  plan names, Plus price per month, Plus price per year, trial length, free history length,
+  which features sit in which plan, the five heart rate zone percentages
+-->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%23101012%27/%3E%3Cpath d=%27M3 17h7l3-8 5 15 3-7h8%27 fill=%27none%27 stroke=%27%2346f06b%27 stroke-width=%272.6%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gym-floor:#6b6b6b;
+  --floor-lift:rgba(0,0,0,.16);
+  --floor-text:#ffffff;
+  --pulse:#46f06b;
+  --on-pulse:#04210c;
+  --phone-glass:#101012;
+  --glass-text:#f4f4f2;
+  --glass-quiet:#b9b9b6;
+  --glass-lift:#222226;
+  --zone-rest:#bfe3ff;
+  --zone-fat:#7ff0a0;
+  --zone-aerobic:#f2ee63;
+  --zone-hard:#ffb25c;
+  --zone-max:#ff8585;
+  --r:12px;
+  --gutter:clamp(16px,5vw,64px);
+  --display:"Baloo 2","Nunito","Varela Round",system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--gym-floor);color:var(--floor-text);font-family:var(--display);font-weight:500;font-size:1.15rem;line-height:1.5;overflow-x:hidden}
+img,svg{max-width:100%;display:block}
+button,input{font:inherit}
+a{color:inherit}
+h1,h2,h3,p,dl,dd,figure,table{margin:0}
+:focus-visible{outline:3px solid var(--floor-text);outline-offset:3px}
+.phone :focus-visible,.zone-band :focus-visible{outline-color:var(--pulse)}
+.skip{position:absolute;left:var(--gutter);top:-4rem;background:var(--phone-glass);color:var(--glass-text);padding:.5rem 1rem;border-radius:var(--r);z-index:10;transition:top .15s}
+.skip:focus{top:.75rem}
+
+/* top bar */
+.top-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem var(--gutter)}
+.mark{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;font-weight:700;font-size:1.5rem;line-height:1}
+.mark svg{width:30px;height:30px}
+.top-bar nav{display:flex;gap:1.1rem;font-size:1rem}
+.top-bar nav a{text-underline-offset:.25em;transition:text-decoration-color .15s,background-color .15s;text-decoration:underline;text-decoration-color:transparent;text-decoration-thickness:2px}
+.top-bar nav a:hover{text-decoration-color:var(--floor-text)}
+
+/* hero */
+.hero{padding:clamp(1.5rem,5vw,4rem) var(--gutter) 0}
+.hero h1{font-weight:700;font-size:clamp(2.9rem,9.2vw,9rem);line-height:.95;max-width:11ch;text-wrap:balance}
+.hero-lede{margin-top:1.5rem;max-width:34rem;font-size:1.25rem}
+.pulse-btn{display:inline-block;background:var(--pulse);color:var(--on-pulse);text-decoration:none;font-weight:700;font-size:1.25rem;line-height:1.1;padding:.9rem 1.4rem;border-radius:var(--r);transition:background-color .15s,transform .15s}
+.pulse-btn:hover{background:#7dff95}
+.pulse-btn:active{transform:translateY(1px)}
+.hero .pulse-btn{margin-top:2rem}
+.hero-note{margin-top:.9rem;font-size:1rem}
+.hero-note a{text-underline-offset:.2em}
+
+/* phones */
+.stage{margin-top:clamp(2.5rem,6vw,5rem);display:flex;justify-content:center;align-items:flex-start;gap:clamp(.75rem,2.5vw,2rem);margin-bottom:calc(-1 * clamp(8rem,16vw,15rem));position:relative;z-index:2}
+.phone{width:clamp(250px,24vw,340px);aspect-ratio:9/18.5;background:var(--phone-glass);color:var(--glass-text);border-radius:var(--r);padding:1rem .9rem;display:flex;flex-direction:column;gap:.7rem;font-size:.95rem;line-height:1.25;font-variant-numeric:tabular-nums;box-shadow:0 18px 40px rgba(0,0,0,.28);overflow:hidden}
+.phone--main{width:clamp(270px,27vw,370px);margin-top:-1.5rem}
+.phone-head{display:flex;justify-content:space-between;align-items:baseline;color:var(--glass-quiet);font-size:.9rem}
+.phone-head b{color:var(--glass-text);font-weight:600}
+.lift-name{font-size:1.6rem;font-weight:700;line-height:1.05}
+.lift-sub{color:var(--glass-quiet)}
+.load{display:flex;align-items:baseline;gap:.4rem;background:var(--glass-lift);border-radius:var(--r);padding:.7rem .8rem}
+.load strong{font-size:2.6rem;font-weight:700;line-height:1}
+.load span{color:var(--glass-quiet)}
+.log-set{background:var(--pulse);color:var(--on-pulse);font-weight:700;font-size:1.15rem;text-align:center;padding:.75rem;border-radius:var(--r)}
+.set-row{display:flex;justify-content:space-between;padding:.35rem .1rem}
+.set-row + .set-row{background:linear-gradient(var(--glass-lift),var(--glass-lift)) bottom/100% 1px no-repeat}
+.set-row span:last-child{color:var(--glass-quiet)}
+.rest{background:var(--glass-lift);border-radius:var(--r);padding:.6rem .8rem}
+.rest-bar{height:8px;border-radius:var(--r);background:#3a3a40;margin-top:.45rem;overflow:hidden}
+.rest-bar i{display:block;height:100%;width:62%;background:var(--pulse)}
+.bpm{display:flex;align-items:center;justify-content:space-between;margin-top:auto;background:var(--glass-lift);border-radius:var(--r);padding:.6rem .8rem}
+.bpm strong{font-size:1.9rem;font-weight:700;line-height:1}
+.bpm small{color:var(--glass-quiet);font-size:.85rem}
+.beat{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--pulse);margin-right:.4rem}
+.big-figure{font-size:3.4rem;font-weight:700;line-height:1}
+.big-figure small{font-size:1.2rem;color:var(--glass-quiet);font-weight:500;margin-left:.3rem}
+.stat-pair{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.stat-pair div{background:var(--glass-lift);border-radius:var(--r);padding:.55rem .7rem}
+.stat-pair b{display:block;font-size:1.4rem;font-weight:700;line-height:1.1}
+.stat-pair span{color:var(--glass-quiet);font-size:.85rem}
+.route{background:var(--glass-lift);border-radius:var(--r);flex:1;min-height:110px;padding:.5rem}
+.route svg{width:100%;height:100%}
+.week-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:.4rem;align-items:end;flex:1;min-height:150px}
+.week-bars div{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:.3rem;height:100%;font-size:.8rem;color:var(--glass-quiet)}
+.week-bars i{display:block;width:100%;border-radius:var(--r);background:var(--pulse)}
+.week-bars .off i{background:var(--glass-lift)}
+.set-row--flush{padding:0}
+.sr-only{position:absolute;left:-9999px}
+.week-bars .h58{height:58%}
+.week-bars .h6{height:6%}
+.week-bars .h80{height:80%}
+.week-bars .h44{height:44%}
+.week-bars .h100{height:100%}
+.tab-row{display:flex;justify-content:space-between;color:var(--glass-quiet);font-size:.85rem;padding-top:.4rem}
+.tab-row .on{color:var(--pulse);font-weight:600}
+.phone--side{margin-top:3rem}
+
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.5)}}
+@media (prefers-reduced-motion:no-preference){.beat{animation:beat 1s ease-in-out infinite}}
+
+/* tracking index */
+.tracking{padding:calc(clamp(8rem,16vw,15rem) + 7.5rem) var(--gutter) 7.5rem;margin-left:clamp(0px,9vw,160px);max-width:64rem}
+.tracking h2,.plans h2,.download h2,.zone-band h2{font-weight:700;font-size:clamp(2.2rem,5vw,4rem);line-height:1}
+.tracked{margin-top:3rem;display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+.tracked-item{display:grid;grid-template-columns:minmax(0,11rem) minmax(0,1fr);gap:.5rem 2rem;padding:1.25rem 1rem;border-radius:var(--r)}
+.tracked-item:nth-child(odd){background:var(--floor-lift)}
+.tracked dt{font-weight:700;font-size:1.5rem;line-height:1.1}
+.tracked dd{max-width:36rem}
+.unit-note{margin-top:1.25rem;font-size:1rem}
+
+/* zone band */
+.zone-band{background:var(--phone-glass);color:var(--glass-text);padding:7.5rem var(--gutter)}
+.zone-band p{margin-top:1rem;max-width:36rem;color:var(--glass-text)}
+.zones{margin-top:3rem;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.zone{color:#060606;padding:1.1rem .9rem 1rem;border-radius:var(--r);display:flex;flex-direction:column;gap:.4rem;min-height:12rem;justify-content:flex-end;font-variant-numeric:tabular-nums}
+.zone b{font-size:1.5rem;font-weight:700;line-height:1}
+.zone span{font-size:1rem;line-height:1.2}
+.zone:nth-child(1){background:var(--zone-rest);min-height:7rem}
+.zone:nth-child(2){background:var(--zone-fat);min-height:9rem}
+.zone:nth-child(3){background:var(--zone-aerobic);min-height:11rem}
+.zone:nth-child(4){background:var(--zone-hard);min-height:13rem}
+.zone:nth-child(5){background:var(--zone-max);min-height:15rem}
+.zones-wrap{align-items:end}
+.zones{align-items:end}
+
+/* plans */
+.plans{padding:7.5rem var(--gutter);margin-left:auto;max-width:56rem;margin-right:clamp(0px,6vw,120px)}
+.plan-table{width:100%;margin-top:2.5rem;border-collapse:separate;border-spacing:0 6px;font-variant-numeric:tabular-nums}
+.plan-table th,.plan-table td{text-align:left;padding:.9rem 1rem;vertical-align:top;font-weight:500}
+.plan-table thead th{font-size:1.5rem;font-weight:700;line-height:1.1;vertical-align:bottom}
+.plan-table thead small{display:block;font-size:1rem;font-weight:500;margin-top:.2rem}
+.plan-table tbody th{font-weight:600}
+.plan-table tbody tr{background:var(--floor-lift)}
+.plan-table tbody tr>:first-child{border-radius:var(--r) 0 0 var(--r)}
+.plan-table tbody tr>:last-child{border-radius:0 var(--r) var(--r) 0}
+.plan-table .cell-plus{font-weight:700}
+.plans .pulse-btn{margin-top:2rem}
+data.todo{font-weight:inherit}
+
+/* download */
+.download{padding:7.5rem var(--gutter);max-width:46rem;margin:0 auto;text-align:center}
+.download p{margin-top:1rem}
+.stores{margin-top:2rem;display:flex;flex-wrap:wrap;justify-content:center;gap:.75rem}
+.store{display:block;background:var(--phone-glass);color:var(--glass-text);text-decoration:none;padding:.7rem 1.3rem;border-radius:var(--r);text-align:left;line-height:1.1;font-weight:700;font-size:1.3rem;transition:background-color .15s}
+.store small{display:block;font-size:.85rem;font-weight:500;color:var(--glass-quiet)}
+.store:hover{background:#2c2c32}
+
+/* footer */
+.site-foot{background:var(--phone-glass);color:var(--glass-text);padding:3rem var(--gutter);display:flex;flex-wrap:wrap;gap:1.5rem 4rem;justify-content:space-between;font-size:1rem}
+.site-foot a{color:var(--glass-text);text-underline-offset:.2em}
+.site-foot a:hover{color:var(--pulse)}
+.site-foot ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.4rem 1.5rem}
+.site-foot .foot-brand{font-weight:700;font-size:1.3rem;display:block}
+.site-foot p{color:var(--glass-text)}
+
+@media (max-width:900px){
+  .phone--side{display:none}
+  .phone--main{width:min(78vw,320px);margin-top:0}
+  .zones{grid-template-columns:1fr;}
+  .zone,.zone:nth-child(n){min-height:0;flex-direction:row;justify-content:space-between;align-items:baseline}
+  .tracked-item{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .tracking,.plans,.download,.zone-band{padding-top:7.5rem;padding-bottom:7.5rem}
+  .tracking{padding-top:calc(clamp(8rem,16vw,15rem) + 7.5rem);margin-left:0}
+  .plans{margin-right:0}
+  .plan-table th,.plan-table td{padding:.7rem .6rem;font-size:1rem}
+  .plan-table thead th{font-size:1.2rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header>
+  <div class="top-bar">
+    <a class="mark" href="/" aria-label="FitPulse home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#060606"/><path d="M3 17h7l3-8 5 15 3-7h8" fill="none" stroke="#46f06b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      FitPulse
+    </a>
+    <nav aria-label="Primary">
+      <a href="#tracking">Tracking</a>
+      <a href="#plans">Plans</a>
+      <a href="#download">Download</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="hero-title">
+    <h1 id="hero-title">Track every workout as it happens</h1>
+    <p class="hero-lede">A fitness tracking app for your phone that logs each set and run while you train, then totals the week.</p>
+    <a class="pulse-btn" href="DOWNLOAD_URL" data-href="DOWNLOAD_URL">Download FitPulse</a>
+    <p class="hero-note">Free plan available. <a href="#plans">Plan prices and what each includes</a></p>
+
+    <div class="stage">
+      <div class="phone phone--side" role="img" aria-label="FitPulse run screen: outdoor run at 5.24 kilometres in 27 minutes 36 seconds, pace 5:16 per kilometre, with the route drawn on a map">
+        <div class="phone-head" aria-hidden="true"><b>Outdoor run</b><span>GPS</span></div>
+        <div aria-hidden="true"><div class="big-figure">5.24<small>km</small></div></div>
+        <div class="stat-pair" aria-hidden="true">
+          <div><b>27:36</b><span>Time</span></div>
+          <div><b>5:16</b><span>Pace /km</span></div>
+        </div>
+        <div class="route" aria-hidden="true">
+          <svg viewBox="0 0 200 140" preserveAspectRatio="xMidYMid meet"><path d="M20 110 C40 70 60 100 85 70 S130 20 150 50 S180 100 160 120 S90 130 60 120" fill="none" stroke="#46f06b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="110" r="6" fill="#f4f4f2"/><circle cx="60" cy="120" r="6" fill="#46f06b"/></svg>
+        </div>
+        <div class="bpm" aria-hidden="true"><div><strong>158</strong> <small>bpm</small></div><small>Zone 4</small></div>
+        <div class="tab-row" aria-hidden="true"><span>Today</span><span class="on">Record</span><span>History</span></div>
+      </div>
+
+      <div class="phone phone--main" role="img" aria-label="FitPulse workout screen: bench press, set 3 of 4, 60 kilograms for 8 reps, rest timer at 1 minute 12 seconds, heart rate 142 beats per minute">
+        <div class="phone-head" aria-hidden="true"><b>Push day</b><span>41:08</span></div>
+        <div aria-hidden="true"><div class="lift-name">Bench press</div><div class="lift-sub">Set 3 of 4</div></div>
+        <div class="load" aria-hidden="true"><strong>60</strong><span>kg</span><strong>8</strong><span>reps</span></div>
+        <div class="log-set" aria-hidden="true">Log set 3</div>
+        <div aria-hidden="true">
+          <div class="set-row"><span>Set 1</span><span>60 kg x 8</span></div>
+          <div class="set-row"><span>Set 2</span><span>60 kg x 8</span></div>
+        </div>
+        <div class="rest" aria-hidden="true"><div class="set-row set-row--flush"><span>Rest</span><span>1:12</span></div><div class="rest-bar"><i></i></div></div>
+        <div class="bpm" aria-hidden="true"><div><span class="beat"></span><strong>142</strong> <small>bpm</small></div><small>Zone 3</small></div>
+        <div class="tab-row" aria-hidden="true"><span>Today</span><span class="on">Record</span><span>History</span></div>
+      </div>
+
+      <div class="phone phone--side" role="img" aria-label="FitPulse week screen: bars of workout minutes per day, four of five planned workouts done this week">
+        <div class="phone-head" aria-hidden="true"><b>This week</b><span>4 of 5 done</span></div>
+        <div aria-hidden="true"><div class="big-figure">3h 52<small>min</small></div></div>
+        <div class="week-bars" aria-hidden="true">
+          <div><i class="h58"></i>M</div>
+          <div class="off"><i class="h6"></i>T</div>
+          <div><i class="h80"></i>W</div>
+          <div><i class="h44"></i>T</div>
+          <div class="off"><i class="h6"></i>F</div>
+          <div><i class="h100"></i>S</div>
+          <div class="off"><i class="h6"></i>S</div>
+        </div>
+        <div class="stat-pair" aria-hidden="true">
+          <div><b>12</b><span>Weeks running</span></div>
+          <div><b>3</b><span>Runs</span></div>
+        </div>
+        <div class="tab-row" aria-hidden="true"><span>Today</span><span>Record</span><span class="on">History</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tracking" id="tracking" aria-labelledby="tracking-title">
+    <h2 id="tracking-title">What FitPulse logs</h2>
+    <dl class="tracked">
+      <div class="tracked-item"><dt>Strength</dt><dd>Exercise, weight, reps and rest time for every set, with last session's numbers beside the current one.</dd></div>
+      <div class="tracked-item"><dt>Runs and rides</dt><dd>Distance, pace and route from your phone's GPS.</dd></div>
+      <div class="tracked-item"><dt>Heart rate</dt><dd>Beats per minute and time spent in each zone, read from a connected sensor.</dd></div>
+      <div class="tracked-item"><dt>Body weight</dt><dd>Entered by you whenever you weigh in, and charted by week.</dd></div>
+      <div class="tracked-item"><dt>Consistency</dt><dd>Workouts completed against your weekly plan, and how many weeks in a row you hit it.</dd></div>
+    </dl>
+    <p class="unit-note">Weights in kilograms or pounds, distances in kilometres or miles.</p>
+  </section>
+
+  <section class="zone-band" aria-labelledby="zones-title">
+    <h2 id="zones-title">Heart rate zones</h2>
+    <p>Zone boundaries are percentages of your maximum heart rate, so the same session reads differently for a beginner and a marathoner.</p>
+    <div class="zones" role="list">
+      <div class="zone" role="listitem"><b>Zone 1</b><span>Recovery, <data class="todo" value="50-60">50-60%</data> of max</span></div>
+      <div class="zone" role="listitem"><b>Zone 2</b><span>Fat burn, <data class="todo" value="60-70">60-70%</data> of max</span></div>
+      <div class="zone" role="listitem"><b>Zone 3</b><span>Aerobic, <data class="todo" value="70-80">70-80%</data> of max</span></div>
+      <div class="zone" role="listitem"><b>Zone 4</b><span>Threshold, <data class="todo" value="80-90">80-90%</data> of max</span></div>
+      <div class="zone" role="listitem"><b>Zone 5</b><span>Maximum, <data class="todo" value="90-100">90-100%</data> of max</span></div>
+    </div>
+  </section>
+
+  <section class="plans" id="plans" aria-labelledby="plans-title">
+    <h2 id="plans-title">Plans</h2>
+    <table class="plan-table">
+      <thead>
+        <tr>
+          <th scope="col"><span class="sr-only">Feature</span></th>
+          <th scope="col">Free<small><data class="todo" value="0">$0</data></small></th>
+          <th scope="col">Plus<small><data class="todo" value="4.99">$4.99</data> a month or <data class="todo" value="39.99">$39.99</data> a year</small></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Strength and run logging</th><td>Unlimited</td><td class="cell-plus">Unlimited</td></tr>
+        <tr><th scope="row">History</th><td><data class="todo" value="30">Last 30 days</data></td><td class="cell-plus">Everything you have logged</td></tr>
+        <tr><th scope="row">Heart rate zones</th><td>Live reading</td><td class="cell-plus">Time in zone per session</td></tr>
+        <tr><th scope="row">Trial</th><td>Not needed</td><td class="cell-plus"><data class="todo" value="7">7 days</data> without charge</td></tr>
+      </tbody>
+    </table>
+    <a class="pulse-btn" href="DOWNLOAD_URL" data-href="DOWNLOAD_URL">Download FitPulse</a>
+  </section>
+
+  <section class="download" id="download" aria-labelledby="download-title">
+    <h2 id="download-title">FitPulse for iPhone and Android</h2>
+    <p>Pick your store and log tonight's session.</p>
+    <div class="stores">
+      <a class="store" href="APP_STORE_URL" data-href="APP_STORE_URL"><small>Download on the</small>App Store</a>
+      <a class="store" href="PLAY_STORE_URL" data-href="PLAY_STORE_URL"><small>Get it on</small>Google Play</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div>
+    <span class="foot-brand">FitPulse</span>
+    <p>&copy; <span id="y">2026</span> FitPulse</p>
+  </div>
+  <ul>
+    <li><a href="CONTACT_URL" data-href="CONTACT_URL">Contact support</a></li>
+    <li><a href="PRIVACY_URL" data-href="PRIVACY_URL">Privacy policy</a></li>
+    <li><a href="TERMS_URL" data-href="TERMS_URL">Terms of use</a></li>
+  </ul>
+</footer>
+<script>
+(function(){var y=document.getElementById('y');if(y){y.textContent=new Date().getFullYear();}})();
+</script>
+</body>
+</html>

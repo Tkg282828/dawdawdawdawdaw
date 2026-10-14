@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio Mara, independent architects</title>
+<meta name="description" content="Studio Mara is an independent architecture firm for houses, extensions and public buildings, working from first sketch to handover on site.">
+<meta property="og:title" content="Studio Mara, independent architects">
+<meta property="og:description" content="Houses and public buildings, drawn and supervised on site by one independent architecture studio.">
+<meta property="og:type" content="website">
+<meta name="color-scheme" content="light dark">
+<!--
+LAUNCH TODO
+Launch constants (replace everywhere they appear):
+  ENQUIRY_URL  = page or endpoint that receives the enquiry form and the hero button
+  STUDIO_EMAIL = studio email address (used as mailto:STUDIO_EMAIL)
+  MAP_URL      = map link for the studio address
+  PRIVACY_URL  = privacy policy page
+  TERMS_URL    = terms of engagement page
+  OG_IMAGE     = absolute https URL of a share image (og:image omitted until it exists)
+Owner facts drafted in <data class="todo">: building count, project names/types/places/years/areas,
+  stage durations, fee percentage and terms, people names and roles, studio hours.
+Photo slots (figure.photo-slot, data-todo) wait for real photographs of built work and portraits.
+-->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23d3df45%27/%3E%3Cpath d=%27M5 28V5h3l8 12 8-12h3v23%27 fill=%27none%27 stroke=%27%231c2105%27 stroke-width=%273%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+try { var t = localStorage.getItem("mara-theme"); if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+</script>
+<style>
+:root {
+  --hero-field: #d3df45;
+  --hero-type: #1c2105;
+  --hero-plate: #c0ce2e;
+  --sheet: #f6eebf;
+  --sheet-type: #1f2308;
+  --sheet-quiet: #4f5326;
+  --edge: #787d3c;
+  --hairline: #d9d08f;
+  --action: #3f4d08;
+  --on-action: #f6eebf;
+  --slot-sheet: #ebe4a8;
+  --face: "Jost", "Futura", "Century Gothic", sans-serif;
+}
+:root[data-theme="dark"] {
+  --sheet: #232610;
+  --sheet-type: #eef1cf;
+  --sheet-quiet: #bcc28f;
+  --edge: #7f8552;
+  --hairline: #3d4120;
+  --action: #d3df45;
+  --on-action: #1c2105;
+  --slot-sheet: #30341a;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  margin: 0;
+  background: var(--sheet);
+  color: var(--sheet-type);
+  font: 400 1.0625rem/1.55 var(--face);
+  letter-spacing: .005em;
+}
+img, svg { max-width: 100%; display: block; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: inherit; text-underline-offset: .2em; transition: color .15s, background-color .15s, text-decoration-color .15s; }
+:focus-visible { outline: 3px solid var(--action); outline-offset: 3px; }
+.hero-zone :focus-visible { outline-color: var(--hero-type); }
+data.todo { font: inherit; }
+h1, h2, h3, p, dl, dd, figure, ol, ul { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+
+.skip { position: absolute; left: 1rem; top: -4rem; background: var(--hero-type); color: var(--hero-field); padding: .6rem 1.2rem; border-radius: 999px; z-index: 10; transition: top .15s; }
+.skip:focus { top: 1rem; }
+
+/* ---------- hero zone (colour A) ---------- */
+.hero-zone { background: var(--hero-field); color: var(--hero-type); }
+.masthead { background: var(--hero-field); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1.5rem; padding: 1rem 1rem 0; }
+.wordmark { display: inline-flex; align-items: center; gap: .6rem; text-decoration: none; font-weight: 500; font-size: 1.375rem; letter-spacing: .01em; }
+.wordmark svg { width: 1.6rem; height: 1.6rem; }
+.site-nav { order: 3; flex-basis: 100%; }
+.site-nav ul { display: flex; gap: 1.25rem; }
+.site-nav a { text-decoration: none; font-size: .9375rem; padding: .35rem 0; text-decoration: none; }
+.site-nav a:hover { text-decoration: underline; }
+.theme-switch { border: 1px solid var(--hero-type); background: transparent; color: var(--hero-type); border-radius: 999px; padding: .4rem 1rem; font-size: .875rem; cursor: pointer; transition: background-color .15s, color .15s; }
+.theme-switch:hover { background: var(--hero-type); color: var(--hero-field); }
+
+.hero-split { display: block; }
+.claim { padding: 2rem 1rem 2.5rem; }
+.claim h1 { font-weight: 600; font-size: clamp(2rem, 8.4vw, 2.4rem); line-height: 1.08; max-width: 18ch; }
+.claim .lede { margin-top: 1.1rem; font-size: 1.1875rem; max-width: 34ch; }
+.cta-row { margin-top: 1.5rem; }
+.pill-btn { display: inline-block; text-decoration: none; background: var(--hero-type); color: var(--hero-field); border: 1px solid var(--hero-type); border-radius: 999px; padding: 1rem 1.75rem; font-weight: 500; font-size: 1.0625rem; cursor: pointer; transition: background-color .15s, color .15s; }
+.pill-btn:hover { background: transparent; color: var(--hero-type); }
+.claim .more { display: block; margin-top: 1.1rem; font-size: 1rem; }
+
+.proofs { padding: 0 1rem 3rem; display: flex; flex-direction: column; gap: 2.25rem; }
+.proof figcaption { margin-top: .6rem; font-size: .9375rem; display: flex; flex-wrap: wrap; gap: .1rem 1rem; justify-content: space-between; }
+.photo-slot { background: var(--hero-plate); color: var(--hero-type); border-radius: 0; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
+.photo-slot svg { width: 100%; height: 100%; }
+.photo-slot svg * { vector-effect: non-scaling-stroke; }
+.ratio-45 { aspect-ratio: 4 / 5; }
+.ratio-32 { aspect-ratio: 3 / 2; }
+.ratio-11 { aspect-ratio: 1 / 1; }
+.ratio-169 { aspect-ratio: 16 / 9; }
+
+@media (min-width: 62rem) {
+  .masthead { padding: 1.5rem 3rem 0; flex-wrap: nowrap; }
+  .site-nav { order: 0; flex-basis: auto; margin-left: auto; }
+  .site-nav ul { gap: 2rem; }
+  .hero-split { display: grid; grid-template-columns: 1fr 1fr; }
+  .claim { position: sticky; top: 0; align-self: start; height: 100vh; height: 100svh; display: flex; flex-direction: column; justify-content: center; padding: 2rem 3rem 3rem; }
+  .claim h1 { font-size: clamp(2.6rem, 3.9vw, 3.6rem); max-width: 16ch; }
+  .claim .lede { font-size: 1.3125rem; }
+  .proofs { padding: 2rem 3rem 5rem 0; gap: 3rem; }
+}
+
+/* ---------- sheet zone (colour B) ---------- */
+main > section { scroll-margin-top: 1rem; }
+.sheet-section { padding: 4.5rem 1rem; }
+.sheet-section h2 { font-weight: 500; font-size: 1.8rem; line-height: 1.15; max-width: 22ch; }
+.kicker { font-size: 1rem; color: var(--sheet-quiet); margin-top: .75rem; max-width: 62ch; }
+
+.work { padding-inline: 1rem; }
+.project-index { width: 100%; border-collapse: collapse; margin-top: 2.25rem; }
+.project-index caption { text-align: left; position: absolute; left: -9999px; }
+.project-index th { text-align: left; font-weight: 400; font-size: .9375rem; color: var(--sheet-quiet); padding: 0 1rem .6rem 0; border-bottom: 1px solid var(--edge); }
+.project-index td { padding: 1.15rem 1rem 1.15rem 0; border-bottom: 1px solid var(--hairline); vertical-align: baseline; }
+.project-index td:first-child { font-size: 1.1875rem; font-weight: 500; }
+.project-index .num { text-align: right; font-variant-numeric: tabular-nums; padding-right: 0; }
+.project-index th.num { padding-right: 0; }
+@media (max-width: 40rem) {
+  .project-index thead { position: absolute; left: -9999px; }
+  .project-index tr { display: block; padding: 1rem 0; border-bottom: 1px solid var(--hairline); }
+  .project-index td { display: inline; padding: 0 .9rem 0 0; border: 0; }
+  .project-index td:first-child { display: block; margin-bottom: .2rem; }
+  .project-index .num { text-align: left; padding-right: .9rem; }
+}
+@media (min-width: 62rem) {
+  .work { padding-inline: 3rem; }
+  .work .intro { display: flex; align-items: end; justify-content: space-between; gap: 3rem; }
+}
+
+.services { background: var(--slot-sheet); }
+.services-inner { max-width: 70rem; }
+.service-list { margin-top: 2.25rem; display: block; }
+.service-list div { padding: 1.1rem 0; }
+.service-list dt { font-size: 1.375rem; font-weight: 500; }
+.service-list dd { margin-top: .35rem; max-width: 56ch; color: var(--sheet-type); }
+@media (min-width: 48rem) {
+  .service-list div { display: grid; grid-template-columns: 18rem 1fr; gap: 2rem; }
+  .service-list dd { margin-top: 0; }
+}
+@media (min-width: 62rem) { .services { padding-inline: 3rem; } .services-inner { margin-left: 22%; } }
+
+.stages-wrap { padding-inline: 1rem; }
+.stages { margin-top: 2.5rem; counter-reset: none; }
+.stages li { padding: 1.1rem 0 1.1rem 1.25rem; border-left: 1px solid var(--edge); position: relative; }
+.stages li::before { content: ""; position: absolute; left: -4px; top: 1.65rem; width: 7px; height: 7px; background: var(--sheet-type); }
+.stages h3 { font-size: 1.1875rem; font-weight: 500; }
+.stages p { margin-top: .25rem; font-size: 1rem; max-width: 30ch; color: var(--sheet-quiet); }
+.stages .span { display: block; margin-top: .5rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+@media (min-width: 62rem) {
+  .stages-wrap { padding-inline: 3rem; }
+  .stages { display: flex; border-top: 1px solid var(--edge); }
+  .stages li { flex: 1 1 0; border-left: 0; padding: 1.5rem 1.5rem 0 0; }
+  .stages li::before { left: 0; top: -4px; }
+}
+
+.fee { background: var(--hero-field); color: var(--hero-type); }
+.fee-inner { display: flex; flex-direction: column; gap: 1.25rem; }
+.fee .figure { font-size: clamp(4.5rem, 24vw, 8.5rem); font-weight: 500; line-height: .95; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.fee h2 { max-width: 20ch; }
+.fee p { max-width: 46ch; }
+@media (min-width: 62rem) {
+  .fee { padding-inline: 3rem; }
+  .fee-inner { flex-direction: row; align-items: end; justify-content: space-between; gap: 4rem; }
+}
+
+.studio-inner { max-width: 66rem; }
+.people { margin-top: 2.5rem; display: flex; flex-direction: column; gap: 2.5rem; }
+.person .photo-slot { background: var(--slot-sheet); color: var(--sheet-type); }
+.person h3 { margin-top: .9rem; font-size: 1.3125rem; font-weight: 500; }
+.person .role { color: var(--sheet-quiet); font-size: .9375rem; }
+.person p.what { margin-top: .5rem; max-width: 40ch; }
+@media (min-width: 48rem) {
+  .people { flex-direction: row; align-items: flex-start; }
+  .person { flex: 1 1 0; }
+  .person + .person { margin-top: 4rem; }
+}
+@media (min-width: 62rem) { .studio { padding-inline: 3rem; } }
+
+.contact { background: var(--slot-sheet); }
+.contact-inner { display: flex; flex-direction: column; gap: 2.5rem; }
+.contact address { font-style: normal; display: flex; flex-direction: column; gap: .5rem; margin-top: 1.25rem; }
+.contact address a { font-size: 1.125rem; }
+.enquiry { display: flex; flex-direction: column; gap: 1.1rem; max-width: 34rem; }
+.enquiry label { display: block; font-size: .9375rem; color: var(--sheet-quiet); margin-bottom: .3rem; }
+.enquiry input, .enquiry select, .enquiry textarea { width: 100%; background: var(--sheet); color: var(--sheet-type); border: 1px solid var(--edge); border-radius: 999px; padding: .85rem 1.25rem; transition: border-color .15s, background-color .15s; }
+.enquiry textarea { border-radius: 1.5rem; min-height: 8rem; resize: vertical; }
+.enquiry input:hover, .enquiry select:hover, .enquiry textarea:hover { border-color: var(--sheet-type); }
+.send-btn { align-self: flex-start; background: var(--action); color: var(--on-action); border: 1px solid var(--action); border-radius: 999px; padding: 1rem 1.75rem; font-weight: 500; font-size: 1.0625rem; cursor: pointer; transition: background-color .15s, color .15s; }
+.send-btn:hover { background: transparent; color: var(--action); }
+@media (min-width: 62rem) {
+  .contact { padding-inline: 3rem; }
+  .contact-inner { flex-direction: row; justify-content: space-between; gap: 6rem; }
+  .contact-inner > div:first-child { flex: 0 1 22rem; }
+  .enquiry { flex: 1 1 auto; }
+}
+
+.colophon { padding: 2.5rem 1rem 3rem; border-top: 1px solid var(--edge); font-size: .9375rem; display: flex; flex-direction: column; gap: 1rem; }
+.colophon ul { display: flex; flex-wrap: wrap; gap: .4rem 1.5rem; }
+.colophon .hours { color: var(--sheet-quiet); }
+@media (min-width: 62rem) { .colophon { padding-inline: 3rem; flex-direction: row; justify-content: space-between; align-items: baseline; } }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#content">Skip to the content</a>
+
+<header class="hero-zone masthead">
+    <a class="wordmark" href="/" aria-label="Studio Mara home">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M3 29V3h4l9 14L25 3h4v26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="miter"/></svg>
+      <span>Studio Mara</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <ul>
+        <li><a href="#work">Work</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#studio">Studio</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <button type="button" class="theme-switch" id="theme-switch" aria-pressed="false">Dark theme</button>
+</header>
+
+<main id="content">
+    <section class="hero-split hero-zone" aria-labelledby="h1">
+      <div class="claim">
+        <h1 id="h1"><data class="todo" value="31">31</data> buildings drawn and built by one independent architecture studio</h1>
+        <p class="lede">Houses and public buildings, followed from the first sketch to handover on site.</p>
+        <div class="cta-row">
+          <a class="pill-btn" href="ENQUIRY_URL" data-href="ENQUIRY_URL">Request a fee proposal</a>
+        </div>
+        <a class="more" href="#work">The project index with areas and years</a>
+      </div>
+
+      <div class="proofs">
+        <figure class="proof">
+          <div class="photo-slot ratio-45" role="img" aria-label="Photograph slot: timber house on a sloping orchard plot, seen from the lower garden" data-todo="photo: timber-frame house, orchard slope, low afternoon light, 4:5">
+            <svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55"><path d="M0 400H400M40 400V250L200 150L360 250V400M40 250H360M120 400V310H200V400M240 340H320V290H240ZM200 150V400"/></svg>
+          </div>
+          <figcaption><span><data class="todo">Orchard House, timber frame</data></span><span><data class="todo">2023</data></span></figcaption>
+        </figure>
+        <figure class="proof">
+          <div class="photo-slot ratio-32" role="img" aria-label="Photograph slot: primary school courtyard with a brick colonnade" data-todo="photo: school courtyard, brick colonnade, children for scale, 3:2">
+            <svg viewBox="0 0 450 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55"><path d="M0 250H450M30 250V120H420V250M30 120L225 70L420 120M80 250V160M140 250V160M200 250V160M260 250V160M320 250V160M380 250V160M80 160H380"/></svg>
+          </div>
+          <figcaption><span><data class="todo">Hallmoor Primary School</data></span><span><data class="todo">2021</data></span></figcaption>
+        </figure>
+        <figure class="proof">
+          <div class="photo-slot ratio-11" role="img" aria-label="Photograph slot: rear extension to a terraced house with a glazed gable" data-todo="photo: terrace rear extension, glazed gable, dusk, 1:1">
+            <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55"><path d="M0 330H400M60 330V140H170V330M170 330V220L270 170L350 220V330M170 220H350M220 330V250H300V330M60 140H170M60 190H170M60 240H170"/></svg>
+          </div>
+          <figcaption><span><data class="todo">Kiln Lane extension</data></span><span><data class="todo">2022</data></span></figcaption>
+        </figure>
+        <figure class="proof">
+          <div class="photo-slot ratio-32" role="img" aria-label="Photograph slot: town library reading room with a long north-lit window" data-todo="photo: library reading room, north light, 3:2">
+            <svg viewBox="0 0 450 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55"><path d="M0 260H450M20 260V110H430V260M20 110H430M60 220H390V150H60ZM130 150V220M200 150V220M270 150V220M340 150V220"/></svg>
+          </div>
+          <figcaption><span><data class="todo">Quay Street Library</data></span><span><data class="todo">2019</data></span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+  <section class="sheet-section work" id="work" aria-labelledby="h-work">
+    <div class="intro">
+      <h2 id="h-work">Built work, by year</h2>
+      <p class="kicker">A selection from the studio archive; full drawing sets on request.</p>
+    </div>
+    <table class="project-index">
+      <caption>Selected projects with type, place, year and floor area</caption>
+      <thead><tr><th scope="col">Project</th><th scope="col">Type</th><th scope="col">Place</th><th scope="col" class="num">Year</th><th scope="col" class="num">Floor area</th></tr></thead>
+      <tbody>
+        <tr><td><data class="todo">Orchard House</data></td><td><data class="todo">House</data></td><td><data class="todo">Sutton Hill</data></td><td class="num"><data class="todo">2023</data></td><td class="num"><data class="todo">186 m²</data></td></tr>
+        <tr><td><data class="todo">Kiln Lane extension</data></td><td><data class="todo">Extension</data></td><td><data class="todo">Eastfield</data></td><td class="num"><data class="todo">2022</data></td><td class="num"><data class="todo">42 m²</data></td></tr>
+        <tr><td><data class="todo">Hallmoor Primary School</data></td><td><data class="todo">School</data></td><td><data class="todo">Hallmoor</data></td><td class="num"><data class="todo">2021</data></td><td class="num"><data class="todo">2,340 m²</data></td></tr>
+        <tr><td><data class="todo">Quay Street Library</data></td><td><data class="todo">Library</data></td><td><data class="todo">Port Quay</data></td><td class="num"><data class="todo">2019</data></td><td class="num"><data class="todo">1,180 m²</data></td></tr>
+        <tr><td><data class="todo">Ferry Row studios</data></td><td><data class="todo">Workspace</data></td><td><data class="todo">Port Quay</data></td><td class="num"><data class="todo">2017</data></td><td class="num"><data class="todo">760 m²</data></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="sheet-section services" id="services" aria-labelledby="h-services">
+    <div class="services-inner">
+      <h2 id="h-services">A single studio from brief to handover</h2>
+      <dl class="service-list">
+        <div><dt>New houses</dt><dd>Site study, planning, structure and detailing for single dwellings, drawn by the architect who will visit the site.</dd></div>
+        <div><dt>Extensions and renovations</dt><dd>Measured surveys of the existing building, so the new work meets old walls where they really are.</dd></div>
+        <div><dt>Schools and public buildings</dt><dd>Briefing with the people who will use the building, then procurement drawings and contract administration.</dd></div>
+        <div><dt>Planning applications</dt><dd>Drawings, design statements and negotiation with the planning officer, also for projects we did not design.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sheet-section stages-wrap" aria-labelledby="h-stages">
+    <h2 id="h-stages">From first meeting to keys</h2>
+    <ol class="stages">
+      <li><h3>Brief and site</h3><p>Site visit, survey and a written brief.</p><data class="todo span">2 to 3 weeks</data></li>
+      <li><h3>Concept</h3><p>Plans, sections and a model for review.</p><data class="todo span">4 to 6 weeks</data></li>
+      <li><h3>Planning</h3><p>Application drawings and consultation.</p><data class="todo span">8 to 13 weeks</data></li>
+      <li><h3>Technical design</h3><p>Construction drawings and tender package.</p><data class="todo span">8 to 12 weeks</data></li>
+      <li><h3>On site</h3><p>Fortnightly visits until handover.</p><data class="todo span">Build programme</data></li>
+    </ol>
+  </section>
+
+  <section class="sheet-section fee" aria-labelledby="h-fee">
+    <div class="fee-inner">
+      <p class="figure"><data class="todo" value="9">9%</data></p>
+      <div>
+        <h2 id="h-fee">Typical fee for full service, as a share of construction cost</h2>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet-section studio" id="studio" aria-labelledby="h-studio">
+    <div class="studio-inner">
+      <h2 id="h-studio">The people who draw your building</h2>
+      <div class="people">
+        <article class="person">
+          <div class="photo-slot ratio-45" role="img" aria-label="Portrait slot: Mara at the drawing table" data-todo="photo: founder portrait at drawing table, 4:5"></div>
+          <h3><data class="todo">Mara Lindqvist</data></h3>
+          <p class="role"><data class="todo">Founding architect</data></p>
+          <p class="what">Leads every concept design and sits in on each site meeting through to handover.</p>
+        </article>
+        <article class="person">
+          <div class="photo-slot ratio-45" role="img" aria-label="Portrait slot: project architect on site in a hard hat" data-todo="photo: project architect on site, 4:5"></div>
+          <h3><data class="todo">Tomas Reyes</data></h3>
+          <p class="role"><data class="todo">Project architect</data></p>
+          <p class="what">Runs technical design, tender packages and the fortnightly site visits.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet-section contact" id="contact" aria-labelledby="h-contact">
+    <div class="contact-inner">
+      <div>
+        <h2 id="h-contact">Tell us about the site</h2>
+        <address>
+          <a href="mailto:STUDIO_EMAIL" data-href="mailto:STUDIO_EMAIL">Write to the studio</a>
+          <a href="MAP_URL" data-href="MAP_URL">Studio address and directions</a>
+        </address>
+      </div>
+      <form class="enquiry" action="ENQUIRY_URL" method="post">
+        <div><label for="f-name">Your name</label><input id="f-name" name="name" autocomplete="name" required></div>
+        <div><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
+        <div><label for="f-site">Where is the site</label><input id="f-site" name="site"></div>
+        <div><label for="f-kind">Kind of building</label>
+          <select id="f-kind" name="kind"><option>New house</option><option>Extension or renovation</option><option>School or public building</option><option>Something else</option></select></div>
+        <div><label for="f-brief">What you have in mind</label><textarea id="f-brief" name="brief"></textarea></div>
+        <button class="send-btn" type="submit">Send the brief to the studio</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="colophon">
+  <p>Studio Mara, independent architects. <span class="hours">Open <data class="todo">Monday to Friday, 9:00 to 17:30</data></span></p>
+  <ul>
+    <li><a href="mailto:STUDIO_EMAIL" data-href="mailto:STUDIO_EMAIL">Email the studio</a></li>
+    <li><a href="PRIVACY_URL" data-href="PRIVACY_URL">Privacy</a></li>
+    <li><a href="TERMS_URL" data-href="TERMS_URL">Terms of engagement</a></li>
+  </ul>
+  <p>&copy; <span id="y">2026</span> Studio Mara</p>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement, btn = document.getElementById("theme-switch");
+  function paint() {
+    var dark = root.getAttribute("data-theme") === "dark";
+    btn.textContent = dark ? "Light theme" : "Dark theme";
+    btn.setAttribute("aria-pressed", dark ? "true" : "false");
+  }
+  btn.addEventListener("click", function () {
+    var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("mara-theme", next); } catch (e) {}
+    paint();
+  });
+  paint();
+  var y = document.getElementById("y"); if (y) y.textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>

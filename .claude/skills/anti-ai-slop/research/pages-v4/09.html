@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Vaultix | Zero-knowledge password vault</title>
+<meta name="description" content="Vaultix is a password manager that encrypts every login on your own device before it syncs. Autofill in desktop browsers and on phones, from $2.50 a month.">
+<meta property="og:title" content="Vaultix | Zero-knowledge password vault">
+<meta property="og:description" content="Logins are encrypted on your device before they sync, so the server only ever stores ciphertext. Autofill in desktop browsers and on phones.">
+<meta property="og:type" content="website">
+<!--
+LAUNCH TODO
+Launch constants (replace everywhere they appear, in both href and data-href / action):
+  APP_STORE_URL, PLAY_STORE_URL  store listings
+  SIGNUP_URL   sign-up endpoint (form action, GET with email + plan)
+  LOGIN_URL    web vault log in
+  DOCS_URL     documentation
+  SECURITY_DOC_URL  white paper / key derivation write-up
+  STATUS_URL   status page
+  CONTACT_URL  support contact route
+  PRIVACY_URL  privacy policy
+  TERMS_URL    terms of service
+  og:image     absolute https URL of a social image (omitted until one exists)
+Drafted owner facts (<data class="todo">): price per month, plan names, device and item limits,
+  seat count, platform list, cipher and key-derivation names, recovery behaviour, support hours.
+Third-party claims (audits, user counts, reviews) are intentionally absent.
+-->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 26 26%27%3E%3Crect width=%2726%27 height=%2726%27 rx=%278%27 fill=%27%2300637a%27/%3E%3Ccircle cx=%2713%27 cy=%2711%27 r=%273.4%27 fill=%27white%27/%3E%3Cpath d=%27M11.4 13.5h3.2l1 7h-5.2z%27 fill=%27white%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --screen:#f8fdfe;
+  --faceplate:#0a1a20;
+  --faceplate-dim:#44585f;
+  --cyan-key:#00637a;
+  --cyan-key-hover:#004d5f;
+  --on-cyan-key:#ffffff;
+  --cyan-wash:#dcf3f8;
+  --breach-rose:#b3123f;
+  --breach-wash:#fde6ec;
+  --hairline:#b5cbd1;
+  --control-edge:#2a7c92;
+  --vault-glass:#ffffff;
+
+  --r-shell:28px;
+  --r-inner:18px;
+  --r-btn:12px;
+  --gap-section:64px;
+  --pad-x:clamp(16px,5vw,56px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--screen);color:var(--faceplate);
+  font-family:"Familjen Grotesk",system-ui,sans-serif;font-size:15.5px;line-height:1.5;
+  font-weight:400;
+}
+img,svg{max-width:100%;display:block}
+input,select,button{font:inherit;color:inherit}
+a{color:inherit}
+h1,h2,h3,p,dl,dd,figure{margin:0}
+:focus-visible{outline:3px solid var(--cyan-key);outline-offset:3px;border-radius:4px}
+.skip{position:absolute;left:-999px;top:8px;background:var(--faceplate);color:#fff;padding:8px 14px;border-radius:var(--r-btn);z-index:10}
+.skip:focus{left:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px var(--pad-x)}
+.mark{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;font-size:1.25rem}
+.mark svg{width:26px;height:26px;flex:none}
+.topbar nav{display:flex;gap:16px;align-items:center}
+.topbar nav a{text-decoration:none;font-weight:500;padding:6px 0;border-bottom:2px solid transparent;transition:border-color .15s,color .15s}
+.topbar nav a:hover{border-color:var(--cyan-key);color:var(--cyan-key)}
+.topbar nav a.login{border:1px solid var(--control-edge);border-radius:var(--r-btn);padding:6px 12px}
+
+/* opening */
+.opening{padding:12px var(--pad-x) 0}
+.price-line{display:flex;flex-direction:column}
+.price-figure{
+  font-size:clamp(5.5rem,4rem + 12vw,12.5rem);font-weight:700;line-height:.86;
+  color:var(--breach-rose);font-variant-numeric:tabular-nums;margin-left:-.04em;
+}
+.price-unit{font-size:.95rem;color:var(--faceplate-dim);margin-top:6px}
+.opening-copy{margin-top:14px;max-width:38rem}
+h1{font-size:clamp(1.9rem,1.3rem + 3vw,3.1rem);line-height:1.04;font-weight:700;letter-spacing:0}
+.lede{margin-top:10px;font-size:1.06rem;line-height:1.45}
+.signup{margin-top:16px;display:flex;flex-direction:column;gap:6px;max-width:30rem}
+.signup label{font-weight:500;font-size:.9rem}
+.signup-row{display:flex;gap:8px;flex-wrap:wrap}
+.signup input[type=email]{
+  flex:1 1 12rem;min-width:0;padding:12px 14px;border:1.5px solid var(--control-edge);
+  border-radius:var(--r-btn);background:var(--vault-glass);transition:border-color .15s
+}
+.signup input[type=email]:hover{border-color:var(--cyan-key)}
+.signup select{padding:12px;border:1.5px solid var(--control-edge);border-radius:var(--r-btn);background:var(--vault-glass)}
+.go{
+  padding:12px 20px;border:0;border-radius:var(--r-btn);background:var(--cyan-key);color:var(--on-cyan-key);
+  font-weight:600;cursor:pointer;transition:background-color .15s
+}
+.go:hover{background:var(--cyan-key-hover)}
+.evidence{display:inline-block;margin-top:12px;color:var(--faceplate);text-decoration:underline;text-underline-offset:3px;transition:color .15s}
+.evidence:hover{color:var(--cyan-key)}
+
+/* vault app mock */
+.vault-stage{padding:var(--gap-section) var(--pad-x) 0}
+.vault-app{
+  border:1px solid var(--hairline);border-radius:var(--r-shell);background:var(--vault-glass);
+  overflow:hidden;max-width:78rem;
+}
+.vault-app figcaption{padding:10px 20px;font-size:.85rem;color:var(--faceplate-dim);border-top:1px solid var(--hairline)}
+.vault-body{display:flex;flex-wrap:wrap}
+.vault-list{flex:1 1 30rem;min-width:0;padding:14px 8px 8px 20px}
+.vault-list h2{font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.vault-table{width:100%;border-collapse:collapse;font-size:.95rem}
+.vault-table th{text-align:left;font-weight:500;color:var(--faceplate-dim);font-size:.85rem;padding:4px 10px 6px 0;border-bottom:1px solid var(--hairline)}
+.vault-table td{padding:7px 10px 7px 0;border-bottom:1px solid var(--hairline);vertical-align:middle}
+.vault-table tr.picked td{background:var(--cyan-wash)}
+.vault-table tr.picked th,.vault-table tr.picked td{box-shadow:inset 0 -2px 0 var(--cyan-key)}
+.vault-table .item{font-weight:600}
+.vault-table .when{white-space:nowrap}
+.strength{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.strength i{display:inline-block;width:44px;height:6px;border-radius:3px;background:var(--hairline);position:relative;overflow:hidden}
+.strength i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--fill);background:var(--cyan-key)}
+.f92{--fill:92%}
+.f88{--fill:88%}
+.f96{--fill:96%}
+.f30{--fill:30%}
+.f80{--fill:80%}
+.f62{--fill:62%}
+.strength.reused{color:var(--breach-rose);font-weight:600}
+.strength.reused i::after{background:var(--breach-rose)}
+.browser-pane{flex:1 1 17rem;background:var(--cyan-wash);padding:18px 20px;border-left:1px solid var(--hairline)}
+.url-pill{display:inline-block;background:var(--vault-glass);border-radius:999px;padding:4px 12px;font-size:.85rem;border:1px solid var(--hairline)}
+.fake-login{margin-top:14px;background:var(--vault-glass);border-radius:var(--r-inner);padding:14px}
+.fake-login p{font-weight:600;margin-bottom:8px}
+.fake-field{border:1px solid var(--control-edge);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-size:.92rem}
+.fake-field small{display:block;font-size:.75rem;color:var(--faceplate-dim)}
+.fill-menu{margin-top:2px;border:1.5px solid var(--cyan-key);border-radius:var(--r-inner);background:var(--vault-glass);padding:10px 12px;font-size:.92rem}
+.fill-menu strong{display:block}
+.fill-menu span{color:var(--faceplate-dim);font-size:.85rem}
+
+/* sections */
+.zone{padding:var(--gap-section) var(--pad-x) 0}
+.zone h2{font-size:clamp(1.5rem,1.2rem + 1.4vw,2.1rem);line-height:1.1;font-weight:700;margin-bottom:8px}
+.zone .intro{max-width:36rem;margin-bottom:20px}
+
+/* encryption path */
+.key-path{display:flex;flex-wrap:wrap;gap:0;align-items:stretch;max-width:74rem}
+.leg{flex:1 1 15rem;border:1px solid var(--hairline);border-radius:var(--r-shell);padding:20px;background:var(--vault-glass)}
+.leg h3{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+.leg code{display:block;margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;overflow-wrap:anywhere;background:var(--cyan-wash);padding:8px 10px;border-radius:10px}
+.leg.cloud code{background:var(--breach-wash);color:#7a0b2b}
+.hop{flex:0 0 44px;display:flex;align-items:center;justify-content:center;color:var(--cyan-key)}
+.hop svg{width:36px;height:24px}
+
+/* platforms */
+.zone.narrow{max-width:50rem;margin-left:auto;margin-right:0;padding-left:var(--pad-x)}
+.platform-list{display:flex;flex-direction:column}
+.platform-list div{display:flex;flex-wrap:wrap;gap:4px 24px;padding:7px 0}
+.platform-list dt{flex:0 0 9rem;font-weight:700}
+.platform-list dd{flex:1 1 14rem}
+
+/* pricing */
+.plans{width:100%;max-width:62rem;border-collapse:separate;border-spacing:0;border:1px solid var(--hairline);border-radius:var(--r-shell);overflow:hidden;background:var(--vault-glass)}
+.plans caption{text-align:left;padding:0 0 10px;color:var(--faceplate-dim);caption-side:bottom;padding-top:10px;font-size:.88rem}
+.plans th,.plans td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--hairline);vertical-align:top}
+.plans tbody tr:last-child th,.plans tbody tr:last-child td{border-bottom:0}
+.plans thead th{font-size:1.05rem;background:var(--cyan-wash)}
+.plans tbody th{font-weight:500;color:var(--faceplate-dim)}
+.plans .cost{font-size:1.45rem;font-weight:700}
+.plans .cost small{font-size:.85rem;font-weight:400;color:var(--faceplate-dim)}
+.table-scroll{overflow-x:auto;max-width:62rem}
+.table-scroll .plans{min-width:34rem}
+.order{margin-top:28px;max-width:62rem;border:1px solid var(--hairline);border-radius:var(--r-shell);padding:20px;background:var(--vault-glass)}
+.order h3{font-size:1.2rem;font-weight:700;margin-bottom:2px}
+
+/* recovery */
+.zone.measure{max-width:46rem}
+details{padding:10px 0}
+summary{cursor:pointer;font-weight:600;transition:color .15s}
+summary:hover{color:var(--cyan-key)}
+details p{margin-top:6px}
+
+/* footer */
+.foot{margin-top:var(--gap-section);padding:24px var(--pad-x) 32px;border-top:1px solid var(--hairline);display:flex;flex-wrap:wrap;gap:12px 40px;justify-content:space-between}
+.foot ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 18px}
+.foot a{text-underline-offset:3px;transition:color .15s}
+.foot a:hover{color:var(--cyan-key)}
+.foot p{color:var(--faceplate-dim)}
+
+@media (min-width:56rem){
+  .price-line{flex-direction:row;align-items:flex-end;gap:32px}
+  .price-line .price-note{padding-bottom:10px;max-width:34rem}
+  .price-unit{margin:0 0 6px}
+  .opening-copy{margin-top:0}
+}
+@media (max-width:40rem){
+  .topbar nav{gap:12px;font-size:.92rem}
+  .hide-small{display:none}
+  .hop{flex-basis:36px}
+  .hop svg{transform:rotate(90deg)}
+  .browser-pane{border-left:0;border-top:1px solid var(--hairline)}
+  .vault-list{padding-left:14px}
+  .zone.narrow{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar">
+  <a class="mark" href="/" aria-label="Vaultix home">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="8" fill="#00637a"/><circle cx="13" cy="11" r="3.4" fill="#fff"/><path d="M11.4 13.5h3.2l1 7h-5.2z" fill="#fff"/></svg>
+    <span>Vaultix</span>
+  </a>
+  <nav aria-label="Primary">
+    <a href="#encryption">Security</a>
+    <a href="#pricing">Pricing</a>
+    <a class="login" data-href="LOGIN_URL" href="LOGIN_URL">Log in</a>
+  </nav>
+</header>
+
+<main id="content">
+  <section class="opening" aria-labelledby="top-title">
+    <div class="price-line">
+      <div class="price-note">
+        <p class="price-figure"><data class="todo" value="2.50">$2.50</data></p>
+        <p class="price-unit">per month on the Personal plan, billed yearly</p>
+      </div>
+      <div class="opening-copy">
+        <h1 id="top-title">Zero-knowledge password vault</h1>
+        <p class="lede">Every login is encrypted on your own device before it syncs, so the server holds only ciphertext. Autofill works in <data class="todo">four desktop browsers</data> and on iPhone and Android; a free plan covers <data class="todo">one device</data>.</p>
+        <form class="signup" action="SIGNUP_URL" method="get">
+          <label for="hero-email">Email for your vault</label>
+          <div class="signup-row">
+            <input id="hero-email" name="email" type="email" autocomplete="email" required>
+            <input type="hidden" name="plan" value="personal">
+            <button class="go" type="submit">Open a Vaultix vault</button>
+          </div>
+        </form>
+        <a class="evidence" href="#encryption">Where the key is made and where it stays</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="vault-stage" aria-labelledby="vault-title">
+    <figure class="vault-app" aria-label="Vaultix desktop vault with browser autofill open">
+      <div class="vault-body">
+        <div class="vault-list">
+          <h2 id="vault-title">All items</h2>
+          <table class="vault-table">
+            <caption class="sr">Vault items with username, password strength and last use</caption>
+            <thead><tr><th scope="col">Item</th><th scope="col" class="hide-small">Username</th><th scope="col">Strength</th><th scope="col" class="hide-small">Last used</th></tr></thead>
+            <tbody>
+              <tr class="picked"><th scope="row" class="item">Domain registrar</th><td class="hide-small">studio-admin</td><td><span class="strength f92"><i aria-hidden="true"></i>Strong</span></td><td class="when hide-small">Just now</td></tr>
+              <tr><th scope="row" class="item">Work email</th><td class="hide-small">a.ortiz</td><td><span class="strength f88"><i aria-hidden="true"></i>Strong</span></td><td class="when hide-small">Today</td></tr>
+              <tr><th scope="row" class="item">Checking account</th><td class="hide-small">ortiz.joint</td><td><span class="strength f96"><i aria-hidden="true"></i>Strong</span></td><td class="when hide-small">2 days ago</td></tr>
+              <tr><th scope="row" class="item">Router admin</th><td class="hide-small">admin</td><td><span class="strength reused f30"><i aria-hidden="true"></i>Reused 3 times</span></td><td class="when hide-small">3 weeks ago</td></tr>
+              <tr><th scope="row" class="item">Streaming household</th><td class="hide-small">movie-night</td><td><span class="strength reused f30"><i aria-hidden="true"></i>Reused 3 times</span></td><td class="when hide-small">Last month</td></tr>
+              <tr><th scope="row" class="item">Cloud storage</th><td class="hide-small">a.ortiz</td><td><span class="strength f80"><i aria-hidden="true"></i>Strong</span></td><td class="when hide-small">Last month</td></tr>
+              <tr><th scope="row" class="item">Parking permit</th><td class="hide-small">ortiz-2291</td><td><span class="strength f62"><i aria-hidden="true"></i>Fair</span></td><td class="when hide-small">4 months ago</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="browser-pane" aria-hidden="true">
+          <span class="url-pill">registrar-portal sign in</span>
+          <div class="fake-login">
+            <p>Sign in to manage domains</p>
+            <div class="fake-field"><small>Username</small>studio-admin</div>
+            <div class="fill-menu"><strong>Fill Domain registrar</strong><span>studio-admin, strong password</span></div>
+          </div>
+        </div>
+      </div>
+      <figcaption>Sample vault: autofill suggests one match on a sign-in page, and two reused passwords are flagged.</figcaption>
+    </figure>
+  </section>
+
+  <section class="zone" id="encryption" aria-labelledby="enc-title">
+    <h2 id="enc-title">The key is made and kept on your device</h2>
+    <p class="intro">Your master password never travels. Vaultix turns it into a key locally, encrypts the vault with that key, and uploads only the result.</p>
+    <div class="key-path">
+      <div class="leg">
+        <h3>Your device</h3>
+        <p>Master password plus a random salt go through <data class="todo">Argon2id</data> to make the vault key. The vault is sealed with <data class="todo">AES-256-GCM</data>.</p>
+        <code>master password + salt  &gt;  vault key</code>
+      </div>
+      <div class="hop" aria-hidden="true"><svg viewBox="0 0 36 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h28M24 5l7 7-7 7"/></svg></div>
+      <div class="leg cloud">
+        <h3>Vaultix servers</h3>
+        <p>Sync stores an encrypted blob and its version. There is no key on the server, so a database leak exposes ciphertext only.</p>
+        <code>9f3c1a07be42d8e6a5710c3b...</code>
+      </div>
+      <div class="hop" aria-hidden="true"><svg viewBox="0 0 36 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h28M24 5l7 7-7 7"/></svg></div>
+      <div class="leg">
+        <h3>Your other devices</h3>
+        <p>Each device asks for the master password, rebuilds the same key and decrypts in memory. Autofill reads from that unlocked copy.</p>
+        <code>vault key  &gt;  readable logins</code>
+      </div>
+    </div>
+  </section>
+
+  <section class="zone narrow" id="platforms" aria-labelledby="plat-title">
+    <h2 id="plat-title">Platforms</h2>
+    <p class="intro">One vault syncs across everything you sign in from.</p>
+    <dl class="platform-list">
+      <div><dt>Browsers</dt><dd><data class="todo">Chrome, Edge, Firefox and Safari</data> extensions with inline autofill.</dd></div>
+      <div><dt>Phones</dt><dd><data class="todo">iOS and Android</data> apps that fill into other apps through the system autofill service. <a data-href="APP_STORE_URL" href="APP_STORE_URL">App Store</a> and <a data-href="PLAY_STORE_URL" href="PLAY_STORE_URL">Google Play</a>.</dd></div>
+      <div><dt>Desktop</dt><dd><data class="todo">macOS, Windows and Linux</data> apps for the full vault, search and sharing.</dd></div>
+      <div><dt>Web</dt><dd>A web vault for borrowed computers, signed in with the same master password.</dd></div>
+    </dl>
+  </section>
+
+  <section class="zone" id="pricing" aria-labelledby="price-title">
+    <h2 id="price-title">Plans and seats</h2>
+    <p class="intro">Same encryption on every plan. The paid plans add devices and people.</p>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Plan comparison">
+    <table class="plans">
+      <caption>Prices in US dollars. Yearly billing shown as a monthly figure.</caption>
+      <thead><tr><td></td><th scope="col"><data class="todo">Free</data></th><th scope="col"><data class="todo">Personal</data></th><th scope="col"><data class="todo">Family</data></th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Price</th><td class="cost"><data class="todo">$0</data></td><td class="cost"><data class="todo">$2.50</data> <small>per month</small></td><td class="cost"><data class="todo">$4.90</data> <small>per month</small></td></tr>
+        <tr><th scope="row">Seats</th><td><data class="todo">1</data></td><td><data class="todo">1</data></td><td><data class="todo">6</data></td></tr>
+        <tr><th scope="row">Devices</th><td><data class="todo">1</data></td><td>Unlimited</td><td>Unlimited</td></tr>
+        <tr><th scope="row">Logins stored</th><td><data class="todo">50</data></td><td>Unlimited</td><td>Unlimited</td></tr>
+        <tr><th scope="row">Shared vaults</th><td>No</td><td><data class="todo">1</data></td><td><data class="todo">5</data></td></tr>
+        <tr><th scope="row">Reuse and breach flags</th><td>Reuse only</td><td>Reuse and breach</td><td>Reuse and breach</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <form class="order signup" action="SIGNUP_URL" method="get">
+      <h3>Pick a plan and open the vault</h3>
+      <label for="order-email">Email</label>
+      <div class="signup-row">
+        <input id="order-email" name="email" type="email" autocomplete="email" required>
+        <label class="sr" for="order-plan">Plan</label>
+        <select id="order-plan" name="plan">
+          <option value="free">Free</option>
+          <option value="personal" selected>Personal</option>
+          <option value="family">Family</option>
+        </select>
+        <button class="go" type="submit">Open a Vaultix vault</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="zone measure" id="recovery" aria-labelledby="rec-title">
+    <h2 id="rec-title">Losing the master password</h2>
+    <details>
+      <summary>Can Vaultix reset it?</summary>
+      <p>No. The server has no copy of the key, so a reset would mean decrypting your vault. You get a recovery key at sign-up to print or store offline.</p>
+    </details>
+    <details>
+      <summary>What happens if the service goes down?</summary>
+      <p>Each device keeps an encrypted local copy, so unlocking and autofill keep working offline. Sync resumes when the connection returns.</p>
+    </details>
+    <details>
+      <summary>Can I export my logins?</summary>
+      <p>Yes, as a CSV or an encrypted file, from any desktop app or the web vault.</p>
+    </details>
+  </section>
+</main>
+
+<footer class="foot">
+  <div>
+    <p>Vaultix &copy; <span id="y">2026</span></p>
+    <p>Support hours <data class="todo">Mon to Fri, 9:00 to 17:00 UTC</data></p>
+  </div>
+  <ul aria-label="Footer links">
+    <li><a data-href="DOCS_URL" href="DOCS_URL">Docs</a></li>
+    <li><a data-href="SECURITY_DOC_URL" href="SECURITY_DOC_URL">Security paper</a></li>
+    <li><a data-href="STATUS_URL" href="STATUS_URL">Status</a></li>
+    <li><a data-href="CONTACT_URL" href="CONTACT_URL">Contact support</a></li>
+    <li><a data-href="PRIVACY_URL" href="PRIVACY_URL">Privacy</a></li>
+    <li><a data-href="TERMS_URL" href="TERMS_URL">Terms</a></li>
+  </ul>
+</footer>
+<script>
+try{document.getElementById("y").textContent=new Date().getFullYear()}catch(e){}
+</script>
+</body>
+</html>

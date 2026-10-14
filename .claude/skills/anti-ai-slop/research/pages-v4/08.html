@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Greenleaf | Plant delivery and plant care subscription</title>
+<meta name="description" content="Greenleaf ships one potted plant every four weeks with a care schedule written for that plant, and answers questions when a leaf changes.">
+<meta property="og:title" content="Greenleaf | A plant a month, kept alive">
+<meta property="og:description" content="A potted plant delivered every four weeks, with a care schedule for that plant and a person to ask.">
+<meta property="og:type" content="website">
+<!--
+LAUNCH TODO
+Constants (replace everywhere they appear):
+  SIGNUP_URL   = subscription checkout / signup endpoint (hero link and bottom form action)
+  CONTACT_URL  = support contact route (mailto: or contact page)
+  PRIVACY_URL  = privacy policy page
+  TERMS_URL    = terms of service page
+  OG_IMAGE     = absolute https URL of a share image (add og:image once hosted)
+Owner facts drafted in <data class="todo"> (confirm or replace):
+  every four weeks cadence; dispatch day; plan names and prices; plan contents; plant size / pot;
+  packaging; delivery window; carrier tracking; replacement window; skip/cancel cutoff;
+  delivery regions; support hours
+Photos: three <figure class="photo-slot" data-todo> slots (plant 4:5, packed box 1:1, care card 1:1)
+-->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 34 34%27%3E%3Cpath d=%27M5 29C5 15 13 6 29 5c0 15-8 23-21 23%27 fill=%27%2362e8a5%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --soil:#170e19;
+  --pot:#2a1a2f;
+  --bloom:#7b2d78;
+  --bloom-deep:#5f2060;
+  --leaf:#62e8a5;
+  --on-leaf:#0a2517;
+  --petal:#f7f0f8;
+  --stem:#cdbfd0;
+  --petal-field:#f7eef7;
+  --on-field:#2a1230;
+  --radius:12px;
+  --font:"Source Sans 3",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:2rem}
+body{margin:0;background:var(--soil);color:var(--petal);font-family:var(--font);font-size:1.1875rem;line-height:1.55;font-weight:400;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--leaf);outline-offset:3px}
+.skip{position:absolute;left:1rem;top:-4rem;background:var(--leaf);color:var(--on-leaf);padding:.7rem 1rem;border-radius:var(--radius);z-index:10;transition:top .15s}
+.skip:focus{top:1rem}
+
+.page{display:grid;grid-template-columns:minmax(0,1fr)}
+.side{padding:1.5rem 1.25rem 3rem}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:1.35rem;text-decoration:none;letter-spacing:.005em}
+.brand svg{width:34px;height:34px;flex:none}
+.kicker{margin:2.5rem 0 .75rem;color:var(--leaf);font-size:1.0625rem;font-weight:600}
+h1{margin:0;font-size:clamp(2.6rem,12vw,3.5rem);line-height:1.02;font-weight:700;letter-spacing:-.01em}
+.lede{margin:1.5rem 0 0;max-width:28rem}
+.btn{display:inline-block;margin-top:1.75rem;background:var(--leaf);color:var(--on-leaf);font:inherit;font-weight:700;text-decoration:none;padding:1rem 1.6rem;border:0;border-radius:var(--radius);cursor:pointer;transition:background-color .15s,transform .15s}
+.btn:hover{background:#8af0bd}
+.btn:active{transform:translateY(1px)}
+.index{margin-top:2.25rem}
+.index ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.25rem .5rem}
+.index a{display:inline-block;padding:.35rem .75rem;border-radius:var(--radius);background:var(--pot);color:var(--stem);text-decoration:none;font-size:1rem;transition:background-color .15s,color .15s}
+.index a:hover{background:var(--bloom);color:var(--petal)}
+
+main{padding:0 0 2rem}
+section{margin-top:7.5rem;padding:0 1.25rem}
+section.first{margin-top:5rem}
+h2{margin:0 0 1.25rem;font-size:clamp(2rem,6vw,2.75rem);line-height:1.1;font-weight:700}
+.intro{max-width:36rem;color:var(--stem);margin:0 0 2.5rem}
+
+/* box: gallery */
+.shelf{display:grid;grid-template-columns:1fr;gap:1.5rem}
+.photo-slot{margin:0}
+.photo-slot .frame{background:var(--pot);border-radius:var(--radius);overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+.photo-slot svg{width:70%;height:auto;max-height:100%}
+.photo-slot.tall .frame{aspect-ratio:4/5}
+.photo-slot.sq .frame{aspect-ratio:1/1}
+.photo-slot figcaption{margin-top:.75rem;color:var(--stem);font-size:1.0625rem;max-width:26rem}
+
+/* plans: comparison table */
+.plans-wrap{overflow-x:auto}
+caption{position:absolute;left:-999px}
+table{width:100%;border-collapse:separate;border-spacing:0 .6rem;min-width:34rem}
+th,td{text-align:left;padding:1.1rem 1.25rem;vertical-align:top;font-weight:400}
+thead th{color:var(--stem);font-size:1rem;padding-bottom:.2rem}
+tbody th,tbody td{background:var(--pot)}
+tbody th{border-radius:var(--radius) 0 0 var(--radius);font-weight:700;font-size:1.25rem}
+tbody td:last-child{border-radius:0 var(--radius) var(--radius) 0;font-size:1.5rem;font-weight:700;white-space:nowrap;color:var(--leaf)}
+td small{display:block;color:var(--stem);font-size:1rem}
+.plans-note{margin:1rem 0 0;color:var(--stem);max-width:34rem}
+
+/* delivery: sequence */
+.log{list-style:none;margin:0;padding:0;max-width:34rem}
+.log li{display:grid;grid-template-columns:5.5rem 1fr;gap:1.25rem;padding:1.15rem 0}
+.log .day{font-weight:700;color:var(--leaf);font-variant-numeric:tabular-nums}
+.log p{margin:0}
+.log strong{display:block}
+.log span{color:var(--stem)}
+
+/* care: transcript */
+.thread{max-width:30rem;display:flex;flex-direction:column;gap:.75rem;margin-left:0}
+.msg{padding:1rem 1.25rem;border-radius:var(--radius);max-width:92%}
+.msg.team{background:var(--pot)}
+.msg.you{background:var(--bloom);align-self:flex-end}
+.msg b{display:block;font-size:1rem;margin-bottom:.15rem}
+.msg.team b{color:var(--leaf)}
+.msg p{margin:0}
+.thread-cap{margin:1.25rem 0 0;color:var(--stem);font-size:1rem}
+
+/* terms: prose */
+.terms{max-width:38rem}
+.terms h3{margin:2.25rem 0 .5rem;font-size:1.375rem;line-height:1.25}
+.terms p{margin:0}
+
+/* start: saturated band */
+.start{margin-top:7.5rem;padding:5rem 1.25rem 5rem;background:var(--bloom)}
+.start h2{max-width:20rem}
+.start .intro{color:var(--petal)}
+form{display:grid;gap:1.1rem;max-width:26rem}
+label{display:grid;gap:.4rem;font-weight:600}
+input,select{font:inherit;font-weight:400;color:var(--on-field);background:var(--petal-field);border:0;border-radius:var(--radius);padding:.9rem 1rem;width:100%;min-height:3.25rem;transition:box-shadow .15s}
+.start .btn{margin-top:.5rem;justify-self:start}
+.start .btn:focus-visible,.start input:focus-visible,.start select:focus-visible{outline-color:var(--petal)}
+
+footer{grid-column:1/-1;padding:4rem 1.25rem 3rem;color:var(--stem);font-size:1.0625rem}
+footer .row{display:flex;flex-wrap:wrap;gap:.5rem 2rem;margin-top:.75rem}
+footer a{color:var(--petal);transition:color .15s}
+footer a:hover{color:var(--leaf)}
+footer p{margin:0;max-width:34rem}
+
+data.todo{font-style:normal}
+
+@media (min-width:56rem){
+  .page{grid-template-columns:clamp(22rem,42vw,44rem) minmax(0,1fr)}
+  .side{padding:2rem 2.5rem 3rem 3rem;align-self:start}
+  h1{font-size:clamp(3.5rem,7vw,7.25rem);line-height:.98}
+  section{padding:0 3rem 0 1rem}
+  .shelf{grid-template-columns:1.25fr 1fr;grid-template-areas:"a b" "a c";align-items:start;gap:2rem 2rem}
+  .shelf .a{grid-area:a}.shelf .b{grid-area:b}.shelf .c{grid-area:c}
+  #plans{padding-right:3rem}
+  #delivery{padding-left:4rem}
+  #care{padding-left:2rem}
+  #cancel{padding-left:5rem}
+  .start{padding:5rem 3rem 5rem 4rem;margin-top:9rem}
+  footer{padding:4rem 3rem 3rem 1rem}
+}
+@media (min-width:56rem) and (min-height:860px){
+  .side{position:sticky;top:0}
+  .index ul{flex-direction:column;align-items:flex-start}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="page">
+  <header class="side">
+    <a class="brand" href="#top" id="top" aria-label="Greenleaf home">
+      <svg viewBox="0 0 34 34" aria-hidden="true"><path d="M5 29C5 15 13 6 29 5c0 15-8 23-21 23" fill="#62e8a5"/><path d="M7 28C13 20 19 14 25 10" stroke="#170e19" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      Greenleaf
+    </a>
+    <p class="kicker">Plant delivery and plant care subscription</p>
+    <h1>A plant a month, kept alive.</h1>
+    <p class="lede">One potted plant arrives every <data class="todo">four weeks</data>, with a care schedule written for that plant and a person to ask when a leaf changes.</p>
+    <a class="btn" href="SIGNUP_URL" data-href="SIGNUP_URL">Start my plant subscription</a>
+    <nav class="index" aria-label="Sections">
+      <ul>
+        <li><a href="#box">Box</a></li>
+        <li><a href="#plans">Plans</a></li>
+        <li><a href="#delivery">Delivery</a></li>
+        <li><a href="#care">Care</a></li>
+        <li><a href="#cancel">Cancelling</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section id="box" class="first" aria-labelledby="h-box">
+      <h2 id="h-box">What arrives</h2>
+      <p class="intro">A live plant in its grower pot, packed upright, with a care card for that exact plant.</p>
+      <div class="shelf">
+        <figure class="photo-slot tall a" data-todo="Photo: this month's plant, unboxed on a table, 4:5">
+          <div class="frame"><svg viewBox="0 0 200 260" aria-hidden="true"><path d="M100 150C60 140 30 100 38 40c42 6 66 40 62 110z" fill="#62e8a5" opacity=".9"/><path d="M100 150C140 140 170 100 162 40c-42 6-66 40-62 110z" fill="#3fbf80"/><path d="M100 160C86 110 92 70 100 28c10 42 14 82 0 132z" fill="#7bf0b5"/><path d="M62 190h76l-10 62H72z" fill="#7b2d78"/><rect x="56" y="178" width="88" height="16" rx="6" fill="#9a3f96"/></svg></div>
+          <figcaption>The plant, in a <data class="todo">6 in grower pot</data>, already watered.</figcaption>
+        </figure>
+        <figure class="photo-slot sq b" data-todo="Photo: box open from above showing plant in paper sleeve, 1:1">
+          <div class="frame"><svg viewBox="0 0 200 200" aria-hidden="true"><rect x="30" y="60" width="140" height="110" rx="10" fill="#5f2060"/><path d="M100 110C84 106 74 90 78 66c16 2 26 16 22 44z" fill="#62e8a5"/><path d="M100 110c16-4 26-20 22-44-16 2-26 16-22 44z" fill="#3fbf80"/></svg></div>
+          <figcaption>Packed in a <data class="todo">recycled-paper sleeve</data> so soil stays put.</figcaption>
+        </figure>
+        <figure class="photo-slot sq c" data-todo="Photo: printed care card beside the pot, 1:1">
+          <div class="frame"><svg viewBox="0 0 200 200" aria-hidden="true"><rect x="52" y="30" width="96" height="140" rx="10" fill="#f7f0f8"/><rect x="68" y="52" width="64" height="8" rx="4" fill="#7b2d78"/><rect x="68" y="76" width="50" height="6" rx="3" fill="#bba5be"/><rect x="68" y="94" width="58" height="6" rx="3" fill="#bba5be"/><rect x="68" y="112" width="44" height="6" rx="3" fill="#bba5be"/></svg></div>
+          <figcaption>The care card: light, water and when to expect new growth.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="plans" aria-labelledby="h-plans">
+      <h2 id="h-plans">Plans</h2>
+      <div class="plans-wrap">
+        <table>
+          <caption>Greenleaf plans and monthly prices</caption>
+          <thead><tr><th scope="col">Plan</th><th scope="col">What ships</th><th scope="col">Per month</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><data class="todo">One plant</data></th><td>One plant every <data class="todo">4 weeks</data><small>Care schedule and delivery included</small></td><td><data class="todo">$28</data></td></tr>
+            <tr><th scope="row"><data class="todo">Two plants</data></th><td>Two plants in one box<small>Care schedule and delivery included</small></td><td><data class="todo">$49</data></td></tr>
+            <tr><th scope="row"><data class="todo">Care only</data></th><td>No box. Schedules and answers for plants you already own<small>Up to <data class="todo">10</data> plants</small></td><td><data class="todo">$6</data></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="plans-note">Choose which plants you want to avoid, such as pet-unsafe ones, and the next box follows.</p>
+    </section>
+
+    <section id="delivery" aria-labelledby="h-delivery">
+      <h2 id="h-delivery">Delivery</h2>
+      <ol class="log">
+        <li><span class="day">Day 0</span><p><strong>You subscribe</strong><span>Pick a plan and a delivery address.</span></p></li>
+        <li><span class="day">Day <data class="todo">2</data></span><p><strong>The box is packed</strong><span>Dispatched on <data class="todo">Mondays</data> with a tracking link.</span></p></li>
+        <li><span class="day">Day <data class="todo">3 to 5</data></span><p><strong>It arrives</strong><span>Open it the same day and set the plant near the light the card names.</span></p></li>
+        <li><span class="day">Day <data class="todo">7</data></span><p><strong>First check-in</strong><span>We ask how the plant is settling.</span></p></li>
+        <li><span class="day">Day <data class="todo">28</data></span><p><strong>The next plant ships</strong><span>Unless you skipped.</span></p></li>
+      </ol>
+    </section>
+
+    <section id="care" aria-labelledby="h-care">
+      <h2 id="h-care">Care</h2>
+      <p class="intro">Each plant gets a schedule built from its species and your light, then a thread you can write to.</p>
+      <div class="thread" role="group" aria-label="Sample care conversation">
+        <div class="msg team"><b>Greenleaf</b><p>Your pothos arrived Thursday. Water it this Sunday with a cup, then wait until the top two inches of soil are dry.</p></div>
+        <div class="msg you"><b>You</b><p>The edges of two leaves are going brown.</p></div>
+        <div class="msg team"><b>Greenleaf</b><p>That is usually dry air or too little water between drinks. Move it away from the heater and send a photo on Sunday.</p></div>
+      </div>
+      <p class="thread-cap">Sample thread.</p>
+    </section>
+
+    <section id="cancel" aria-labelledby="h-cancel">
+      <h2 id="h-cancel">Cancelling and replacements</h2>
+      <div class="terms">
+        <h3>Skip or cancel</h3>
+        <p>Skip a month or cancel from your account. Changes made before <data class="todo">Friday 5 pm</data> apply to the next box, and nothing else is charged.</p>
+        <h3>A plant that arrives damaged</h3>
+        <p>Send a photo within <data class="todo">7 days</data> and we replace it at no cost.</p>
+        <h3>Where we deliver</h3>
+        <p><data class="todo">Mainland US addresses</data>. Plants do not ship in freezing weather; the box waits until it is safe.</p>
+      </div>
+    </section>
+
+    <section class="start" id="start" aria-labelledby="h-start">
+      <h2 id="h-start">Start your subscription</h2>
+      <p class="intro">Tell us where the box goes. You choose your first plant on the next screen.</p>
+      <form action="SIGNUP_URL" method="post">
+        <label>Email<input type="email" name="email" autocomplete="email" required></label>
+        <label>Plan
+          <select name="plan">
+            <option value="one"><data class="todo">One plant, $28 a month</data></option>
+            <option value="two"><data class="todo">Two plants, $49 a month</data></option>
+            <option value="care"><data class="todo">Care only, $6 a month</data></option>
+          </select>
+        </label>
+        <label>Delivery ZIP code<input type="text" name="zip" inputmode="numeric" autocomplete="postal-code" required></label>
+        <button class="btn" type="submit">Subscribe to Greenleaf</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>Questions about a box or a plant: <a href="CONTACT_URL" data-href="CONTACT_URL">contact Greenleaf</a>. Replies <data class="todo">Monday to Friday, 9 am to 5 pm</data>.</p>
+    <div class="row">
+      <a href="PRIVACY_URL" data-href="PRIVACY_URL">Privacy</a>
+      <a href="TERMS_URL" data-href="TERMS_URL">Terms</a>
+      <span>&copy; <span id="y">2026</span> Greenleaf</span>
+    </div>
+  </footer>
+</div>
+<script>
+try{document.getElementById('y').textContent=new Date().getFullYear()}catch(e){}
+</script>
+</body>
+</html>

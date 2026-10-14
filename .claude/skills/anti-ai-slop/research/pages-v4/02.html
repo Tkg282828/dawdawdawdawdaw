@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Brewly | Specialty coffee beans roasted to order</title>
+<meta name="description" content="Brewly is a local specialty coffee roastery. Small-batch beans roasted twice a week and shipped fresh to home brewers, or picked up at the roastery.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Brewly | Specialty coffee beans roasted to order">
+<meta property="og:description" content="Small-batch specialty beans from a local roastery, roasted the day before they ship.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cellipse cx='12' cy='12' rx='7.5' ry='10' fill='%233a62ff' transform='rotate(25 12 12)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<!--
+LAUNCH TODO (replace before going live)
+Constants:
+  SHOP_URL        = the shop / collection page that the main call to action opens
+  CART_URL        = the cart endpoint that the "Add to cart" forms post to
+  CONTACT_EMAIL   = the roastery's customer email address
+  MAPS_URL        = a map link for the roastery
+  PRIVACY_URL     = privacy policy page
+  TERMS_URL       = terms of sale page
+  og:image        = absolute https URL of a share image (omitted until one exists)
+Draft owner facts (all marked <data class="todo">): product names, prices, bag weight, roast days,
+  order cutoff, ship day, rest time, delivery window, shipping price, free-shipping threshold,
+  pickup hours, returns terms.
+Photo slots (figure.photo-slot, data-todo holds the shot brief): hero, four bags, roastery.
+-->
+<style>
+:root{
+  --daylight: #e6ecfe;
+  --daylight-deep: #d3dcfb;
+  --night: #0a1850;
+  --night-lift: #14297a;
+  --ink-on-daylight: #0a1340;
+  --quiet-on-daylight: #3b4783;
+  --ink-on-night: #eef1ff;
+  --quiet-on-night: #b4bfef;
+  --buy-fill: #3a62ff;
+  --buy-fill-hover: #2a4fe6;
+  --on-buy: #ffffff;
+  --edge-daylight: #6b7bc4;
+  --edge-night: #7d8fe0;
+  --link-on-daylight: #1636b8;
+  --link-on-night: #c9d3ff;
+
+  --step0: 1.1rem;
+  --step1: 1.466rem;
+  --step2: 1.954rem;
+  --step3: 2.605rem;
+  --measure: 66ch;
+  --font: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--font);font-size:var(--step0);line-height:1.55;color:var(--ink-on-daylight);background:var(--daylight);font-optical-sizing:auto}
+img,svg{max-width:100%;display:block}
+button,input,select{font:inherit;color:inherit}
+h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--buy-fill);outline-offset:3px}
+.band-night :focus-visible{outline-color:#ffffff}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media (prefers-reduced-motion: no-preference){html{scroll-behavior:smooth}}
+
+.jump-to-main{position:absolute;left:1rem;top:-4rem;background:var(--night);color:var(--ink-on-night);padding:.6rem 1.1rem;border-radius:999px;z-index:10;transition:top .15s}
+.jump-to-main:focus{top:1rem}
+
+.band-day{background:var(--daylight);color:var(--ink-on-daylight)}
+.band-night{background:var(--night);color:var(--ink-on-night)}
+.band-day .quiet{color:var(--quiet-on-daylight)}
+.band-night .quiet{color:var(--quiet-on-night)}
+.band-day a:not(.buy-pill){color:var(--link-on-daylight)}
+.band-night a:not(.buy-pill){color:var(--link-on-night)}
+
+/* masthead */
+.masthead{padding:1rem 1.25rem 0;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem 1.5rem;max-width:62rem;margin:0 auto}
+.brand-mark{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;font-weight:700;font-size:var(--step1);color:var(--ink-on-daylight)!important;line-height:1}
+.brand-mark svg{width:1.4rem;height:1.4rem}
+.site-links{display:flex;flex-wrap:wrap;gap:.25rem 1.1rem;list-style:none;padding:0;margin:0;font-size:.95rem}
+.site-links a{display:inline-block;padding:.5rem 0;text-decoration:none;font-weight:500;background:linear-gradient(currentColor,currentColor) left bottom .35rem/0 2px no-repeat;transition:background-size .2s}
+.site-links a:hover{background-size:100% 2px}
+
+/* opening */
+.opening{padding:3rem 1.25rem 4.5rem}
+.opening-text{max-width:var(--measure);margin:0 auto}
+.opening h1{font-size:var(--step2);line-height:1.12;font-weight:700;letter-spacing:0;text-wrap:balance}
+.opening .lede{margin-top:1.25rem;font-size:var(--step1);line-height:1.45;max-width:36ch}
+.opening .lede-sub{margin-top:1rem}
+.opening .actions{margin-top:2rem}
+.proof-link{display:block;margin-top:1rem;text-decoration:underline;text-underline-offset:.2em}
+.opening-figure{max-width:64rem;margin:3.5rem auto 0}
+
+/* controls: pills */
+.buy-pill{display:inline-block;border:2px solid var(--buy-fill);background:var(--buy-fill);color:var(--on-buy);text-decoration:none;font-weight:700;padding:.85rem 1.7rem;border-radius:999px;cursor:pointer;line-height:1.2;transition:background-color .15s,border-color .15s}
+.buy-pill:hover{background:var(--buy-fill-hover);border-color:var(--buy-fill-hover)}
+.band-night .buy-pill{border-color:#ffffff}
+.band-night .buy-pill:hover{border-color:#ffffff}
+.pick{display:block;width:100%;border:2px solid var(--edge-night);background:transparent;border-radius:999px;padding:.55rem 1rem;appearance:none;-webkit-appearance:none;color:var(--ink-on-night);transition:border-color .15s}
+.pick option{color:#0a1340;background:#ffffff}
+.pick:hover{border-color:#ffffff}
+
+/* photo slots */
+.photo-slot{position:relative;background:var(--daylight-deep);overflow:hidden;border-radius:0}
+.photo-slot svg{position:absolute;inset:0;width:100%;height:100%}
+.band-night .photo-slot{background:var(--night-lift)}
+.slot-wide{aspect-ratio:16/9}
+.slot-tall{aspect-ratio:4/5}
+
+/* section scaffolding */
+.section-pad{padding:4.5rem 1.25rem}
+.section-head{max-width:var(--measure);margin:0 auto 2.5rem}
+.section-head h2{font-size:var(--step2);line-height:1.15;font-weight:700;text-wrap:balance}
+.section-head p{margin-top:.75rem}
+
+/* beans */
+.bag-shelf{list-style:none;padding:0;margin:0 auto;max-width:62rem;display:grid;grid-template-columns:1fr;gap:3.5rem 2.5rem}
+.bag-name{font-size:var(--step1);font-weight:700;line-height:1.2;margin-top:1.1rem}
+.bag-origin{margin-top:.2rem}
+.bag-notes{margin-top:.75rem}
+.bag-price{margin-top:.75rem;font-size:var(--step1);font-weight:600}
+.bag-price small{font-size:.9rem;font-weight:400;color:var(--quiet-on-night)}
+.bag-order{margin-top:1rem;display:grid;gap:.75rem;max-width:20rem}
+.bag-order label{font-size:.95rem}
+@media (min-width:720px){
+  .bag-shelf{grid-template-columns:1fr 1fr}
+}
+
+/* roast log */
+.roast-log{max-width:var(--measure);margin:0 auto;list-style:none;padding:0;border-left:3px solid var(--ink-on-daylight)}
+.roast-log li{position:relative;padding:0 0 2.25rem 1.75rem}
+.roast-log li:last-child{padding-bottom:0}
+.roast-log li::before{content:"";position:absolute;left:-.6rem;top:.45rem;width:1.05rem;height:1.05rem;background:var(--buy-fill);border:3px solid var(--daylight);border-radius:50%}
+.log-when{font-weight:700;font-size:var(--step1);line-height:1.2}
+.log-what{margin-top:.25rem}
+
+/* brew chart */
+.brew-chart-wrap{max-width:52rem;margin:0 auto}
+.brew-chart{width:100%;border-collapse:collapse}
+.brew-chart th,.brew-chart td{text-align:left;padding:1rem 1rem 1rem 0;vertical-align:top;border-bottom:1px solid var(--edge-night)}
+.brew-chart thead th{font-weight:600;font-size:.95rem;color:var(--quiet-on-night);border-bottom:2px solid var(--ink-on-night)}
+.brew-chart tbody th{font-weight:700}
+@media (max-width:639px){
+  .brew-chart thead{position:absolute;left:-9999px}
+  .brew-chart,.brew-chart tbody,.brew-chart tr,.brew-chart th,.brew-chart td{display:block}
+  .brew-chart tr{padding:1rem 0;border-bottom:1px solid var(--edge-night)}
+  .brew-chart th,.brew-chart td{border:0;padding:.15rem 0}
+  .brew-chart td::before{content:attr(data-label) ": ";color:var(--quiet-on-night)}
+}
+
+/* terms */
+.terms{max-width:46rem;margin:0 auto}
+.terms-row{display:grid;grid-template-columns:1fr;gap:.15rem;padding:1.1rem 0}
+.terms dt{font-weight:700}
+@media (min-width:720px){
+  .terms-row{grid-template-columns:13rem 1fr;gap:1.5rem}
+}
+
+/* roastery close */
+.roastery-close{padding:5rem 1.25rem 2.5rem}
+.roastery-inner{max-width:62rem;margin:0 auto;display:grid;grid-template-columns:1fr;gap:2.5rem}
+.roastery-inner h2{font-size:var(--step2);line-height:1.15;font-weight:700;text-wrap:balance;max-width:20ch}
+.hours{margin-top:1rem}
+.visit-links{margin-top:1.25rem;display:grid;gap:.4rem;justify-items:start}
+.roastery-inner .buy-pill{margin-top:1.75rem}
+@media (min-width:860px){
+  .roastery-inner{grid-template-columns:1fr 24rem;align-items:start;gap:4rem}
+}
+.fine-print{max-width:62rem;margin:4rem auto 0;padding-top:1.25rem;border-top:1px solid var(--edge-night);display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;justify-content:space-between;font-size:.95rem}
+.fine-print ul{display:flex;gap:1.25rem;list-style:none;padding:0;margin:0}
+
+data.todo{font-style:normal}
+
+@media (min-width:720px){
+  .opening h1{font-size:var(--step3)}
+  .opening{padding-top:4.5rem}
+  .masthead{padding-top:1.5rem}
+  .section-pad{padding:6rem 2.5rem}
+  .opening{padding-left:2.5rem;padding-right:2.5rem}
+}
+</style>
+</head>
+<body>
+<a class="jump-to-main" href="#main">Skip to content</a>
+
+<div class="band-day">
+<header>
+  <div class="masthead">
+    <a class="brand-mark" href="/" aria-label="Brewly home">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><ellipse cx="12" cy="12" rx="7.5" ry="10" fill="#3a62ff" transform="rotate(25 12 12)"/><path d="M9 2.8c4.2 3.6-1 6.8 2.8 9.4 3.4 2.3-.8 6.2 3 9" fill="none" stroke="#e6ecfe" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Brewly
+    </a>
+    <nav aria-label="Primary">
+      <ul class="site-links">
+        <li><a href="#beans">Beans</a></li>
+        <li><a href="#schedule">Schedule</a></li>
+        <li><a href="#brewing">Brewing</a></li>
+        <li><a href="#shipping">Shipping</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+</div>
+
+<main id="main">
+
+<section class="band-day opening" aria-labelledby="opening-title">
+  <div class="opening-text">
+    <h1 id="opening-title">Specialty coffee beans for home brewers that we roast <data class="todo">the day before they ship</data></h1>
+    <p class="lede">Small batches from a local roastery, bagged whole and sent to your door. Order by <data class="todo">Sunday night</data> and your bag ships <data class="todo">Wednesday</data>.</p>
+    <div class="actions">
+      <a class="buy-pill" href="SHOP_URL" data-href="SHOP_URL">Buy this week's beans</a>
+      <a class="proof-link" href="#schedule">Roast days and order cutoffs</a>
+    </div>
+  </div>
+  <figure class="opening-figure photo-slot slot-wide" data-todo="photo: open bag of whole beans on the roaster cooling tray, top-lit, shot at 16:9" role="img" aria-label="Freshly roasted beans on the cooling tray at the Brewly roastery">
+    <svg viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="#6b7bc4" stroke-width=".5">
+        <circle cx="80" cy="56" r="30"/>
+        <circle cx="80" cy="56" r="21"/>
+        <path d="M50 56h60M80 26v60"/>
+      </g>
+      <g fill="#3a62ff" opacity=".85">
+        <ellipse cx="62" cy="48" rx="6" ry="4" transform="rotate(-25 62 48)"/>
+        <ellipse cx="82" cy="40" rx="6" ry="4" transform="rotate(15 82 40)"/>
+        <ellipse cx="96" cy="58" rx="6" ry="4" transform="rotate(-50 96 58)"/>
+        <ellipse cx="72" cy="68" rx="6" ry="4" transform="rotate(30 72 68)"/>
+        <ellipse cx="88" cy="70" rx="6" ry="4" transform="rotate(-10 88 70)"/>
+      </g>
+    </svg>
+  </figure>
+</section>
+
+<section id="beans" class="band-night section-pad" aria-labelledby="beans-title">
+  <div class="section-head">
+    <h2 id="beans-title">This week's beans</h2>
+    <p class="quiet">Each bag holds <data class="todo">250 g</data> of whole beans. Choose a grind at checkout if you do not own a grinder.</p>
+  </div>
+  <ul class="bag-shelf">
+    <li>
+      <figure class="photo-slot slot-tall" data-todo="photo: 250 g bag, front label facing camera, on a pale concrete shelf, soft side light, 4:5" role="img" aria-label="Brewly Guji Natural, a 250 gram bag">
+        <svg viewBox="0 0 80 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path d="M22 14h36l6 14v62H16V28z" fill="none" stroke="#7d8fe0" stroke-width="1"/><path d="M22 14h36" stroke="#7d8fe0" stroke-width="3"/><rect x="26" y="44" width="28" height="22" fill="none" stroke="#7d8fe0" stroke-width="1"/></svg>
+      </figure>
+      <h3 class="bag-name"><data class="todo">Guji Natural</data></h3>
+      <p class="bag-origin quiet">Ethiopia, light roast</p>
+      <p class="bag-notes">Blueberry, jasmine, honey</p>
+      <p class="bag-price"><data class="todo">$19</data> <small>per bag</small></p>
+      <form class="bag-order" action="CART_URL" method="post">
+        <input type="hidden" name="product" value="guji-natural">
+        <label for="grind-1">Grind</label>
+        <select class="pick" id="grind-1" name="grind"><option>Whole bean</option><option>Espresso</option><option>Filter</option></select>
+        <button class="buy-pill" type="submit">Add Guji Natural to cart</button>
+      </form>
+    </li>
+    <li>
+      <figure class="photo-slot slot-tall" data-todo="photo: 250 g bag, three-quarter angle, scoop of beans beside it, 4:5" role="img" aria-label="Brewly Huila Washed, a 250 gram bag">
+        <svg viewBox="0 0 80 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path d="M22 14h36l6 14v62H16V28z" fill="none" stroke="#7d8fe0" stroke-width="1"/><path d="M22 14h36" stroke="#7d8fe0" stroke-width="3"/><rect x="26" y="44" width="28" height="22" fill="none" stroke="#7d8fe0" stroke-width="1"/></svg>
+      </figure>
+      <h3 class="bag-name"><data class="todo">Huila Washed</data></h3>
+      <p class="bag-origin quiet">Colombia, medium roast</p>
+      <p class="bag-notes">Red apple, panela, cocoa</p>
+      <p class="bag-price"><data class="todo">$17</data> <small>per bag</small></p>
+      <form class="bag-order" action="CART_URL" method="post">
+        <input type="hidden" name="product" value="huila-washed">
+        <label for="grind-2">Grind</label>
+        <select class="pick" id="grind-2" name="grind"><option>Whole bean</option><option>Espresso</option><option>Filter</option></select>
+        <button class="buy-pill" type="submit">Add Huila Washed to cart</button>
+      </form>
+    </li>
+    <li>
+      <figure class="photo-slot slot-tall" data-todo="photo: 250 g bag held in one hand against the roastery wall, 4:5" role="img" aria-label="Brewly Cerrado Honey, a 250 gram bag">
+        <svg viewBox="0 0 80 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path d="M22 14h36l6 14v62H16V28z" fill="none" stroke="#7d8fe0" stroke-width="1"/><path d="M22 14h36" stroke="#7d8fe0" stroke-width="3"/><rect x="26" y="44" width="28" height="22" fill="none" stroke="#7d8fe0" stroke-width="1"/></svg>
+      </figure>
+      <h3 class="bag-name"><data class="todo">Cerrado Honey</data></h3>
+      <p class="bag-origin quiet">Brazil, medium-dark roast</p>
+      <p class="bag-notes">Hazelnut, dark chocolate, brown sugar</p>
+      <p class="bag-price"><data class="todo">$16</data> <small>per bag</small></p>
+      <form class="bag-order" action="CART_URL" method="post">
+        <input type="hidden" name="product" value="cerrado-honey">
+        <label for="grind-3">Grind</label>
+        <select class="pick" id="grind-3" name="grind"><option>Whole bean</option><option>Espresso</option><option>Filter</option></select>
+        <button class="buy-pill" type="submit">Add Cerrado Honey to cart</button>
+      </form>
+    </li>
+    <li>
+      <figure class="photo-slot slot-tall" data-todo="photo: 250 g bag beside a portafilter with a fresh espresso shot, 4:5" role="img" aria-label="Brewly House Espresso, a 250 gram bag">
+        <svg viewBox="0 0 80 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><path d="M22 14h36l6 14v62H16V28z" fill="none" stroke="#7d8fe0" stroke-width="1"/><path d="M22 14h36" stroke="#7d8fe0" stroke-width="3"/><rect x="26" y="44" width="28" height="22" fill="none" stroke="#7d8fe0" stroke-width="1"/></svg>
+      </figure>
+      <h3 class="bag-name"><data class="todo">House Espresso</data></h3>
+      <p class="bag-origin quiet">Blend, medium-dark roast</p>
+      <p class="bag-notes">Dark cherry, caramel, cocoa nib</p>
+      <p class="bag-price"><data class="todo">$15</data> <small>per bag</small></p>
+      <form class="bag-order" action="CART_URL" method="post">
+        <input type="hidden" name="product" value="house-espresso">
+        <label for="grind-4">Grind</label>
+        <select class="pick" id="grind-4" name="grind"><option>Whole bean</option><option>Espresso</option><option>Filter</option></select>
+        <button class="buy-pill" type="submit">Add House Espresso to cart</button>
+      </form>
+    </li>
+  </ul>
+</section>
+
+<section id="schedule" class="band-day section-pad" aria-labelledby="schedule-title">
+  <div class="section-head">
+    <h2 id="schedule-title">Roast days and cutoffs</h2>
+    <p class="quiet">We only roast what has been ordered, so every bag has a roast date you can check on the label.</p>
+  </div>
+  <ol class="roast-log">
+    <li>
+      <p class="log-when"><data class="todo">Sunday, 23:59</data></p>
+      <p class="log-what">Order cutoff for the week's roast.</p>
+    </li>
+    <li>
+      <p class="log-when"><data class="todo">Tuesday</data></p>
+      <p class="log-what">Small-batch roast, cupped before anything is bagged.</p>
+    </li>
+    <li>
+      <p class="log-when"><data class="todo">Wednesday</data></p>
+      <p class="log-what">Bagged with the roast date on the label and handed to the courier.</p>
+    </li>
+    <li>
+      <p class="log-when"><data class="todo">Thursday to Friday</data></p>
+      <p class="log-what">Delivery. Beans taste best from the second day after roasting, so a bag that arrives now is nearly ready to brew.</p>
+    </li>
+  </ol>
+</section>
+
+<section id="brewing" class="band-night section-pad" aria-labelledby="brewing-title">
+  <div class="section-head">
+    <h2 id="brewing-title">Which bean for which brewer</h2>
+  </div>
+  <div class="brew-chart-wrap">
+    <table class="brew-chart">
+      <thead>
+        <tr><th scope="col">Bean</th><th scope="col">Roast</th><th scope="col">Brews best in</th><th scope="col">Grind</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row"><data class="todo">Guji Natural</data></th><td data-label="Roast">Light</td><td data-label="Brews best in">Pour-over, AeroPress</td><td data-label="Grind">Medium-fine</td></tr>
+        <tr><th scope="row"><data class="todo">Huila Washed</data></th><td data-label="Roast">Medium</td><td data-label="Brews best in">Drip machine, French press</td><td data-label="Grind">Medium to coarse</td></tr>
+        <tr><th scope="row"><data class="todo">Cerrado Honey</data></th><td data-label="Roast">Medium-dark</td><td data-label="Brews best in">Moka pot, French press</td><td data-label="Grind">Medium-fine to coarse</td></tr>
+        <tr><th scope="row"><data class="todo">House Espresso</data></th><td data-label="Roast">Medium-dark</td><td data-label="Brews best in">Espresso machine, moka pot</td><td data-label="Grind">Fine</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="shipping" class="band-day section-pad" aria-labelledby="shipping-title">
+  <div class="section-head">
+    <h2 id="shipping-title">Shipping and pickup</h2>
+  </div>
+  <dl class="terms">
+    <div class="terms-row"><dt>Delivery</dt><dd><data class="todo">1 to 3 working days</data> after the Wednesday dispatch, by tracked courier.</dd></div>
+    <div class="terms-row"><dt>Shipping price</dt><dd><data class="todo">$5</data> per order, free over <data class="todo">$40</data>.</dd></div>
+    <div class="terms-row"><dt>Pickup</dt><dd>Collect at the roastery from <data class="todo">Thursday 10:00</data>, free, no minimum order.</dd></div>
+    <div class="terms-row"><dt>Returns</dt><dd>If a bag arrives damaged or tastes wrong to you, write to us within <data class="todo">14 days</data> and we will replace it.</dd></div>
+  </dl>
+</section>
+
+</main>
+
+<footer class="band-night roastery-close">
+  <div class="roastery-inner">
+    <div>
+      <h2>Come and smell the roaster</h2>
+      <p class="hours quiet">Pickup counter open <data class="todo">Thursday to Saturday, 10:00 to 16:00</data>.</p>
+      <div class="visit-links">
+        <a href="MAPS_URL">Find the roastery on the map</a>
+        <a href="mailto:CONTACT_EMAIL">Email the roastery</a>
+      </div>
+      <a class="buy-pill" href="SHOP_URL" data-href="SHOP_URL">Buy this week's beans</a>
+    </div>
+    <figure class="photo-slot slot-wide" data-todo="photo: roastery pickup counter with bags on the shelf behind, 16:9" role="img" aria-label="The pickup counter at the Brewly roastery">
+      <svg viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><g fill="none" stroke="#7d8fe0" stroke-width=".6"><path d="M10 62h140M10 30h140M30 30v32M60 30v32M90 30v32M120 30v32"/></g></svg>
+    </figure>
+  </div>
+  <div class="fine-print">
+    <p>&copy; <span id="y">2026</span> Brewly</p>
+    <ul>
+      <li><a href="PRIVACY_URL">Privacy</a></li>
+      <li><a href="TERMS_URL">Terms of sale</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+(function(){var y=document.getElementById('y');if(y){y.textContent=new Date().getFullYear();}})();
+</script>
+</body>
+</html>
