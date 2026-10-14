@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ledgerly - Invoicing and accounting for freelancers</title>
+<meta name="description" content="Ledgerly makes invoicing, expenses and taxes simple for freelancers.">
+<style>
+:root{--bg:#fbfaf7;--fg:#1c2321;--muted:#5d6b66;--brand:#0f766e;--brand-d:#0b5a54;--card:#fff;--line:#e4e1d9;--soft:#e7f3f1}
+@media (prefers-color-scheme:dark){:root{--bg:#111716;--fg:#eef2f0;--muted:#9aaba5;--brand:#2dd4bf;--brand-d:#5eead4;--card:#182120;--line:#2a3633;--soft:#14302d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+.logo{font-weight:800;font-size:1.3rem;letter-spacing:-.02em}.logo span{color:var(--brand)}
+.btn{display:inline-block;background:var(--brand);color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600;border:0;font-size:1rem;cursor:pointer}
+@media (prefers-color-scheme:dark){.btn{color:#062421}}
+.btn:hover{background:var(--brand-d)}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:56px 0 72px}
+h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.1;letter-spacing:-.03em;margin:0 0 16px}
+.lead{color:var(--muted);font-size:1.15rem;margin:0 0 28px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.invoice{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 20px 40px -20px rgba(0,0,0,.25)}
+.invoice h3{margin:0 0 4px}.invoice small{color:var(--muted)}
+.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.total{font-weight:700;font-size:1.2rem;border:0;padding-top:16px}
+.tag{display:inline-block;background:var(--soft);color:var(--brand);padding:3px 10px;border-radius:99px;font-size:.8rem;font-weight:700}
+section{padding:56px 0}
+h2{font-size:clamp(1.6rem,3.5vw,2.2rem);letter-spacing:-.02em;margin:0 0 32px;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px}
+.card h3{margin:8px 0}.card p{margin:0;color:var(--muted)}
+.ico{width:42px;height:42px;border-radius:10px;background:var(--soft);display:grid;place-items:center;font-size:1.3rem}
+.price{text-align:center}.price .n{font-size:2.4rem;font-weight:800}.price ul{list-style:none;padding:0;margin:16px 0 24px;color:var(--muted)}
+.price .feat{border:2px solid var(--brand)}
+.final{text-align:center;background:var(--soft);border-radius:20px;padding:48px 20px;margin-bottom:48px}
+.final form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+input{padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-size:1rem;min-width:240px}
+footer{color:var(--muted);text-align:center;padding:24px 0 40px;font-size:.9rem}
+@media(max-width:760px){.hero{grid-template-columns:1fr;padding-top:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav><div class="logo">Ledger<span>ly</span></div><a class="btn ghost" href="#start">Sign in</a></nav>
+
+<header class="hero">
+<div>
+<h1>Get paid faster. Stress less at tax time.</h1>
+<p class="lead">Ledgerly is the invoicing and accounting tool built for freelancers. Send polished invoices, track expenses, and always know what you owe.</p>
+<div class="cta"><a class="btn" href="#start">Start free for 30 days</a><a class="btn ghost" href="#features">See features</a></div>
+</div>
+<div class="invoice" aria-label="Example invoice">
+<div class="row" style="border:0;padding-top:0"><div><h3>Invoice #1042</h3><small>Northwind Studio</small></div><span class="tag">Paid</span></div>
+<div class="row"><span>Brand design</span><span>$1,800</span></div>
+<div class="row"><span>Landing page build</span><span>$2,400</span></div>
+<div class="row"><span>Revisions (4h)</span><span>$320</span></div>
+<div class="row total"><span>Total</span><span>$4,520</span></div>
+</div>
+</header>
+
+<section id="features">
+<h2>Everything a one-person business needs</h2>
+<div class="grid">
+<div class="card"><div class="ico">&#9993;</div><h3>Beautiful invoices</h3><p>Create and send branded invoices in under a minute, with online payment built in.</p></div>
+<div class="card"><div class="ico">&#9200;</div><h3>Automatic reminders</h3><p>Friendly nudges go out for you, so you never have to chase a client again.</p></div>
+<div class="card"><div class="ico">&#128200;</div><h3>Expense tracking</h3><p>Snap receipts, sync your bank, and categorize spending automatically.</p></div>
+<div class="card"><div class="ico">&#127970;</div><h3>Tax-ready reports</h3><p>Profit and loss, quarterly estimates, and one-click exports for your accountant.</p></div>
+</div>
+</section>
+
+<section>
+<h2>Simple pricing</h2>
+<div class="grid">
+<div class="card price"><h3>Solo</h3><div class="n">$9<small style="font-size:1rem;font-weight:400">/mo</small></div><ul><li>Unlimited invoices</li><li>Expense tracking</li><li>Basic reports</li></ul><a class="btn ghost" href="#start">Choose Solo</a></div>
+<div class="card price feat"><span class="tag">Most popular</span><h3>Pro</h3><div class="n">$19<small style="font-size:1rem;font-weight:400">/mo</small></div><ul><li>Everything in Solo</li><li>Bank sync and reminders</li><li>Tax estimates and exports</li></ul><a class="btn" href="#start">Choose Pro</a></div>
+</div>
+</section>
+
+<div class="final" id="start">
+<h2 style="margin-bottom:8px">Ready to simplify your finances?</h2>
+<p class="lead" style="margin:0">No credit card required.</p>
+<form onsubmit="event.preventDefault();this.innerHTML='<strong>Thanks! Check your inbox.</strong>'">
+<input type="email" required placeholder="you@example.com" aria-label="Email address"><button class="btn" type="submit">Get started</button>
+</form>
+</div>
+<footer>&copy; 2026 Ledgerly. Made for freelancers.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FitPulse - Track Every Beat</title>
+<meta name="description" content="FitPulse is the mobile fitness tracker that turns your workouts into progress.">
+<style>
+:root{--bg:#0b0f1a;--card:#141a2b;--text:#eef1f8;--muted:#9aa4bd;--accent:#ff4d6d;--accent2:#ff9e4d;--line:#232b42}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+.logo{font-weight:800;font-size:1.3rem}.logo span{color:var(--accent)}
+.btn{display:inline-block;padding:12px 24px;border-radius:999px;font-weight:600;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn.ghost{background:none;border:1px solid var(--line)}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:60px 0 80px}
+h1{font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.1;margin-bottom:18px}
+h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);font-size:1.1rem;margin-bottom:28px;max-width:480px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.phone{width:240px;height:440px;margin:auto;border-radius:36px;border:6px solid #2a3350;background:var(--card);padding:22px 18px;box-shadow:0 30px 80px rgba(255,77,109,.2)}
+.ring{width:140px;height:140px;border-radius:50%;margin:16px auto;background:conic-gradient(var(--accent) 0 72%,var(--line) 0);display:grid;place-items:center}
+.ring div{width:108px;height:108px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-weight:800;font-size:1.5rem;text-align:center;line-height:1.1}
+.ring small{display:block;font-size:.7rem;color:var(--muted);font-weight:400}
+.stat{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+.stat b{color:var(--text)}
+section{padding:60px 0}
+h2{font-size:2rem;text-align:center;margin-bottom:40px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px}
+.card .ic{font-size:1.8rem;margin-bottom:10px}
+.card h3{margin-bottom:6px}.card p{color:var(--muted);font-size:.95rem}
+.nums{display:flex;justify-content:space-around;flex-wrap:wrap;gap:20px;text-align:center}
+.nums b{font-size:2.4rem;display:block;color:var(--accent)}.nums span{color:var(--muted)}
+.final{text-align:center;background:var(--card);border-radius:24px;padding:60px 20px;border:1px solid var(--line)}
+.final p{color:var(--muted);margin:10px 0 24px}
+footer{text-align:center;color:var(--muted);padding:40px 0;font-size:.9rem}
+@media(max-width:760px){.hero{grid-template-columns:1fr;text-align:center;padding-top:20px}.hero p{margin-inline:auto}.cta{justify-content:center}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav><div class="logo">Fit<span>Pulse</span></div><a class="btn" href="#get">Get the app</a></nav>
+<header class="hero">
+<div>
+<h1>Track every beat. <em>Own your progress.</em></h1>
+<p>FitPulse turns workouts, heart rate, and sleep into simple insights that keep you moving, every single day.</p>
+<div class="cta"><a class="btn" href="#get">Download free</a><a class="btn ghost" href="#features">See features</a></div>
+</div>
+<div class="phone" aria-hidden="true">
+<div style="color:var(--muted);font-size:.8rem">Today</div>
+<div class="ring"><div>7,214<small>of 10,000 steps</small></div></div>
+<div class="stat"><span>Heart rate</span><b>68 bpm</b></div>
+<div class="stat"><span>Calories</span><b>512 kcal</b></div>
+<div class="stat"><span>Active</span><b>46 min</b></div>
+</div>
+</header>
+
+<section id="features">
+<h2>Everything you need to get stronger</h2>
+<div class="grid">
+<div class="card"><div class="ic">&#128170;</div><h3>Workout tracking</h3><p>Log runs, lifts, and rides with one tap and automatic detection.</p></div>
+<div class="card"><div class="ic">&#10084;&#65039;</div><h3>Heart rate zones</h3><p>Train smarter with live zones and recovery insights.</p></div>
+<div class="card"><div class="ic">&#127769;</div><h3>Sleep analysis</h3><p>Understand your rest and wake up ready to perform.</p></div>
+<div class="card"><div class="ic">&#127942;</div><h3>Goals and streaks</h3><p>Stay motivated with challenges, badges, and friends.</p></div>
+</div>
+</section>
+
+<section>
+<div class="nums">
+<div><b>2M+</b><span>Active users</span></div>
+<div><b>4.8</b><span>App store rating</span></div>
+<div><b>150M</b><span>Workouts logged</span></div>
+</div>
+</section>
+
+<section id="get">
+<div class="final">
+<h2 style="margin-bottom:0">Start your first workout today</h2>
+<p>Free on iOS and Android. No credit card required.</p>
+<a class="btn" href="#get">Download FitPulse</a>
+</div>
+</section>
+<footer>&copy; 2026 FitPulse. All rights reserved.</footer>
+</div>
+</body>
+</html>

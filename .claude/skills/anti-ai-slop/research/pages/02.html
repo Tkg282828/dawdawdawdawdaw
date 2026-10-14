@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brewly - Local Specialty Coffee Roastery</title>
+<meta name="description" content="Small-batch specialty coffee, roasted locally and shipped fresh to your door.">
+<style>
+:root{--bg:#faf6f0;--ink:#2a1d15;--muted:#6f5d50;--accent:#b5562b;--card:#fff;--line:#e8dccd;--dark:#2a1d15}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1410;--ink:#f4ebe0;--muted:#b9a695;--accent:#e08653;--card:#271b15;--line:#3a2b22;--dark:#120c09}}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 Georgia,"Times New Roman",serif}
+h1,h2,h3,.brand,.btn,nav a{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+header{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+.brand{font-weight:800;font-size:1.5rem;letter-spacing:-.02em}
+.brand span{color:var(--accent)}
+nav a{color:var(--ink);text-decoration:none;margin-left:20px;font-size:.95rem}
+nav a:hover{color:var(--accent)}
+.hero{padding:56px 0 72px;display:grid;gap:32px;grid-template-columns:1.2fr 1fr;align-items:center}
+.hero h1{font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.08;letter-spacing:-.03em}
+.hero p{color:var(--muted);margin:18px 0 28px;max-width:34em}
+.btn{display:inline-block;background:var(--accent);color:#fff;padding:13px 26px;border-radius:999px;text-decoration:none;font-weight:600;border:0;cursor:pointer;font-size:1rem}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);margin-left:10px}
+.art{aspect-ratio:1;border-radius:28px;background:radial-gradient(circle at 30% 25%,#d98a54,#7a3a1b 55%,#2a1d15);display:grid;place-items:center;font-size:7rem}
+section{padding:56px 0}
+h2{font-size:1.9rem;letter-spacing:-.02em;margin-bottom:8px}
+.sub{color:var(--muted);margin-bottom:32px}
+.grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px}
+.card h3{font-size:1.15rem;margin-bottom:4px}
+.tag{font:600 .75rem system-ui,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.card p{color:var(--muted);font-size:.95rem;margin:8px 0 16px}
+.row{display:flex;justify-content:space-between;align-items:center}
+.price{font:700 1.1rem system-ui,sans-serif}
+.card .btn{padding:8px 18px;font-size:.9rem}
+.steps{counter-reset:s}
+.steps .card::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font:700 1rem system-ui;margin-bottom:12px}
+.cta{background:var(--dark);color:#f4ebe0;border-radius:28px;padding:48px 24px;text-align:center}
+.cta p{color:#c9b8a8;margin-bottom:22px}
+form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+input{padding:13px 18px;border-radius:999px;border:0;min-width:240px;font-size:1rem}
+footer{padding:36px 0;color:var(--muted);font-size:.9rem;text-align:center}
+#msg{margin-top:14px;min-height:1.4em}
+@media (max-width:720px){.hero{grid-template-columns:1fr;padding-top:24px}.art{max-width:280px;font-size:5rem}nav a:not(.keep){display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="brand">Brew<span>ly</span></div>
+<nav><a href="#beans">Beans</a><a href="#how">How it works</a><a class="keep" href="#join">Subscribe</a></nav></header>
+
+<div class="hero">
+<div>
+<h1>Coffee roasted this week, at your door this week.</h1>
+<p>Brewly is a small neighborhood roastery. We source traceable beans from farms we trust, roast in tiny batches, and ship within 48 hours.</p>
+<a class="btn" href="#beans">Shop beans</a><a class="btn ghost" href="#how">How it works</a>
+</div>
+<div class="art" aria-hidden="true">&#9749;</div>
+</div>
+
+<section id="beans">
+<h2>This month's roasts</h2>
+<p class="sub">All beans are 250g, roasted to order.</p>
+<div class="grid">
+<div class="card"><span class="tag">Light roast</span><h3>Yirgacheffe</h3><p>Ethiopia. Jasmine, bergamot and ripe peach. Bright and tea-like.</p><div class="row"><span class="price">$17</span><button class="btn">Add to cart</button></div></div>
+<div class="card"><span class="tag">Medium roast</span><h3>Huila Honey</h3><p>Colombia. Brown sugar, red apple and milk chocolate. Sweet and balanced.</p><div class="row"><span class="price">$15</span><button class="btn">Add to cart</button></div></div>
+<div class="card"><span class="tag">Dark roast</span><h3>Brewly Night</h3><p>Brazil and Sumatra blend. Cocoa, toasted nuts and a syrupy body.</p><div class="row"><span class="price">$14</span><button class="btn">Add to cart</button></div></div>
+</div>
+</section>
+
+<section id="how">
+<h2>How it works</h2>
+<p class="sub">Fresh coffee without the guesswork.</p>
+<div class="grid steps">
+<div class="card"><h3>Pick your beans</h3><p>Choose a roast, or let us surprise you each month.</p></div>
+<div class="card"><h3>We roast to order</h3><p>Your batch is roasted the day before it ships.</p></div>
+<div class="card"><h3>Brew and enjoy</h3><p>Peak flavor from day three to week four. Pause or cancel anytime.</p></div>
+</div>
+</section>
+
+<section id="join">
+<div class="cta">
+<h2>Get 10% off your first bag</h2>
+<p>Join the list for new roasts and brewing tips. No spam.</p>
+<form id="f"><input type="email" required placeholder="you@example.com" aria-label="Email"><button class="btn">Sign me up</button></form>
+<div id="msg" role="status"></div>
+</div>
+</section>
+
+<footer>&copy; 2026 Brewly Coffee Roasters. Roasted with care, locally.</footer>
+</div>
+<script>
+document.getElementById('f').addEventListener('submit',function(e){e.preventDefault();document.getElementById('msg').textContent='Thanks! Check your inbox for your discount code.';e.target.reset()});
+document.querySelectorAll('.card .btn').forEach(function(b){b.addEventListener('click',function(){b.textContent='Added';setTimeout(function(){b.textContent='Add to cart'},1500)})});
+</script>
+</body>
+</html>

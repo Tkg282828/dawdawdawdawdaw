@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lingo Loop</title>
+<style>
+:root{--bg:#fffaf3;--fg:#1f2430;--muted:#5d6577;--card:#fff;--brand:#ff6b3d;--brand2:#5b4bff;--line:#eadfce}
+@media (prefers-color-scheme:dark){:root{--bg:#14161d;--fg:#f3f1ec;--muted:#a3a9b8;--card:#1d2029;--line:#2c303c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+.logo{font-weight:800;font-size:1.3rem}.logo span{color:var(--brand)}
+.btn{display:inline-block;background:var(--brand);color:#fff;padding:12px 24px;border-radius:999px;font-weight:700;text-decoration:none}
+.btn.alt{background:transparent;color:var(--fg);border:2px solid var(--line);margin-left:8px}
+.hero{text-align:center;padding:56px 0 40px}
+h1{font-size:clamp(2.2rem,6vw,3.8rem);line-height:1.1;margin:0 0 16px}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--brand),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{max-width:540px;margin:0 auto 28px;color:var(--muted);font-size:1.15rem}
+.hero .btn{margin:4px}
+.langs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:32px}
+.langs span{background:var(--card);border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-size:.9rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;padding:40px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px}
+.card .ic{font-size:2rem}.card h3{margin:8px 0 4px}.card p{margin:0;color:var(--muted)}
+.cta{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:24px;text-align:center;padding:48px 20px;margin:24px 0 48px}
+.cta h2{margin:0 0 8px;font-size:2rem}.cta .btn{background:#fff;color:#1f2430;margin-top:16px}
+footer{text-align:center;color:var(--muted);padding:24px 0 40px;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav><div class="logo">Lingo<span>Loop</span></div><a class="btn" href="#get">Get the app</a></nav>
+<section class="hero">
+<h1>Learn a language in a <em>loop</em> that sticks.</h1>
+<p>Five-minute daily lessons that cycle through speaking, listening and review, so new words come back right before you forget them.</p>
+<a class="btn" href="#get">Start free</a><a class="btn alt" href="#features">See how it works</a>
+<div class="langs"><span>Spanish</span><span>French</span><span>Japanese</span><span>German</span><span>Italian</span><span>Korean</span></div>
+</section>
+<section id="features" class="grid">
+<div class="card"><div class="ic">🔁</div><h3>Smart review loops</h3><p>Spaced repetition schedules each word at the perfect moment.</p></div>
+<div class="card"><div class="ic">🎙️</div><h3>Speak from day one</h3><p>Instant pronunciation feedback builds real confidence.</p></div>
+<div class="card"><div class="ic">🔥</div><h3>Streaks that motivate</h3><p>Daily goals, friendly leagues and rewards keep you going.</p></div>
+</section>
+<section id="get" class="cta">
+<h2>Ready to close the loop?</h2>
+<p>Join learners worldwide. Free on iOS and Android.</p>
+<a class="btn" href="#">Download Lingo Loop</a>
+</section>
+<footer>&copy; 2026 Lingo Loop. All rights reserved.</footer>
+</div>
+</body>
+</html>
