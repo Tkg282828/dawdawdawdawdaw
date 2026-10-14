@@ -23,7 +23,19 @@ comments removed; copy rules run on visible text only.
 
 Each hit is a FAIL (hard ban) or a WARN (a smell that needs a human reason).
 Never clear a WARN by nudging a value: WARNs describe shapes, and the colour
-and font rules match by distance. Exit code 1 if any FAIL (or WARN with
+and font rules match by distance.
+
+Seed stamp: paste the last line of brief_seed.py's output into the page,
+  <!-- seed: "<brief>" salt=N -->
+The checker recomputes that seed and (a) does not WARN on values the seed
+assigned (colours inside the assigned OKLCH hue range, its edges, fonts,
+template features), (b) WARNs "seed not followed" [seed:font] / [seed:hue]
+when the page uses another font or accent hue without a
+<!-- seed override: <axis> <reason> --> comment. No stamp: WARN [seed:none].
+
+Keeping a WARN: every WARN prints a key, e.g. WARN [color:tailwind-near].
+  <!-- slop-ok: color:tailwind-near <reason of >= 4 words> -->
+turns that WARN into an OK* line showing the reason. A FAIL is never kept. Exit code 1 if any FAIL (or WARN with
 --strict). Python 3.7+ stdlib only; --render optionally uses Playwright.
 """
 import json
@@ -125,24 +137,33 @@ COPY_FAIL = [
     (r"northwind|acme corp|lorem ipsum", "placeholder company/text", False),
 ]
 COPY_WARN = [
-    (r"\b(instant(ly)?|one[- ](click|tap))\b", "vague speed claim (instant/one click) - give a measured fact"),
-    (r"\bsmart [a-z]+", "'Smart X' filler"),
-    (r"\bsimple pricing\b", "'Simple pricing' heading"),
-    (r"\b\d+(\.\d+)?[km]\+\s", "round '+' stat (2M+, 10K+) - is it real?"),
-    (r"\b(join|trusted by) (thousands|millions|\d)", "social-proof claim - is it real?"),
+    (r"\b(instant(ly)?|one[- ](click|tap))\b", "vague speed claim (instant/one click) - give a measured fact", "copy:instant"),
+    (r"\bsmart [a-z]+", "'Smart X' filler", "copy:smart-x"),
+    (r"\bsimple pricing\b", "'Simple pricing' heading", "copy:simple-pricing"),
+    (r"\b\d+(\.\d+)?[km]\+\s", "round '+' stat (2M+, 10K+) - is it real?", "copy:round-stat"),
+    (r"\b(join|trusted by) (thousands|millions|\d)", "social-proof claim - is it real?", "copy:social-proof"),
 ]
 DISCLAIMERS = r"(?i:\bnot (?:yet )?connected\b|\bnothing is sent\b|\bpre-launch\b|\bprototype\b|\bnot released\b)|\[[^\]]{1,60}\bNEEDED\]"
 
 EMOJI = re.compile("[\U0001F300-\U0001FAFF\U00002600-\U000027BF\U0001F000-\U0001F2FF⭐⬆↔-⇿]")
 
-# Category inference: first match wins (title + meta description + h1 + lede).
+# Category inference: keyword hits weighted by where they occur (title/h1 >
+# meta description/lede > body). A category needs a title/h1 hit or >= 2 hits
+# in title/meta/h1/lede; the highest score wins. Order breaks ties.
 CATEGORY_RULES = [
-    ("shop", r"(?<!app )\bstore\b|\b(shop|coffee|beans|roaster|roastery|bakery|merch)\b"),
-    ("delivery", r"plants?\b|\bdelivery\b|\bdelivers?\b|\bsubscription box\b"),
+    ("shop", r"(?<!app )(?<!play )\bstore\b|\b(shop|coffee|beans|roaster|roastery|bakery|merch)\b"),
+    ("delivery", r"\bplants?\b|\bdelivery\b|\bdelivers?\b|\bsubscription box\b"),
     ("devtool", r"\b(deploy\w*|cli|api|sdk|developers?|devops|git|ci/cd|health check|rollbacks?)\b"),
-    ("app", r"\b(mobile|ios|android|iphone|ipad|app store|google play|play store|phone app)\b"),
+    ("security", r"\b(passwords?|vault|encrypt\w*|cybersecurity|security|zero-knowledge|2fa|vpn)\b"),
+    ("finance", r"\b(invoic\w*|accounting|bookkeeping|ledger|tax(es)?|payroll|banking)\b"),
+    ("fitness", r"\b(fitness|workouts?|gym|training|running|lifting|reps)\b"),
+    ("learning", r"\b(learn\w*|language|lessons?|course|flashcards?|vocabulary)\b"),
+    ("ai", r"\b(ai|gpt|llm|assistant|copilot)\b"),
+    ("app", r"\b(mobile|ios|android|iphone|ipad|app store|google play|play store|phone app)\b|(?<!web )\bapp\b"),
     ("studio", r"\b(studio|architect\w*|agency)\b"),
+    ("saas", r"\b(task\w*|projects?|small teams|crm|saas|kanban|workflows?)\b"),
 ]
+MOBILE_CATS = ("app", "fitness", "learning")
 
 LAUNCH_CONST = re.compile(r"^[A-Z][A-Z0-9_]*_(URL|HREF|LINK)$")
 
@@ -285,19 +306,36 @@ def hue_in(h, lo, hi):
     return lo <= h <= hi if lo <= hi else (h >= lo or h <= hi)
 
 
+# One hue table shared with brief_seed.py (seed sectors are assigned inside
+# these buckets and outside the banned regions). Local copy if it is missing.
+ACCENT_BUCKETS = [("red", 345, 32), ("orange-amber-yellow", 32, 95), ("lime-green", 95, 160),
+                  ("teal-cyan", 160, 225), ("blue", 225, 262), ("indigo-violet", 262, 300),
+                  ("magenta-pink", 300, 345)]
+BANNED_HUES = {"orange": (32, 95), "indigo": (262, 300)}
+if _seed is not None:
+    try:
+        ACCENT_BUCKETS = [tuple(b) for b in _seed.ACCENT_BUCKETS]
+        for lo, hi, label in _seed.BANNED_HUES:
+            BANNED_HUES["indigo" if "indigo" in label else "orange"] = (lo, hi)
+    except Exception:
+        pass
+
+
 # Banned regions, in OKLCH (L 0-1, C ~0-0.37, H degrees).
 def is_indigo_violet(c):
     L, C, H = oklch(c)
-    return C >= 0.12 and hue_in(H, 262, 300) and 0.3 <= L <= 0.85
+    return C >= 0.12 and hue_in(H, *BANNED_HUES["indigo"]) and 0.3 <= L <= 0.85
 
 
 def is_orange_amber(c):
     L, C, H = oklch(c)
-    return C >= 0.10 and hue_in(H, 32, 95) and L >= 0.6
+    return C >= 0.10 and hue_in(H, *BANNED_HUES["orange"]) and L >= 0.6
 
 
 def is_sage_ground(c):
     L, C, H = oklch(c)
+    if C > 0.03 and H < 115:        # light yellow-cream / pale chartreuse, not grey-green
+        return False
     return L >= 0.82 and 0.006 <= C <= 0.06 and hue_in(H, 95, 185)
 
 
@@ -325,9 +363,7 @@ def hue_bucket(c, neutral_c=0.03):
     L, C, H = oklch(c)
     if C < neutral_c:
         return "neutral"
-    for name, lo, hi in (("red", 345, 32), ("orange-amber-yellow", 32, 95), ("lime-green", 95, 160),
-                         ("teal-cyan", 160, 225), ("blue", 225, 262), ("indigo-violet", 262, 300),
-                         ("magenta-pink", 300, 345)):
+    for name, lo, hi in ACCENT_BUCKETS:
         if hue_in(H, lo, hi):
             return name
     return "neutral"
@@ -1259,6 +1295,8 @@ class Page:
         self._styles = {}
         self.name = os.path.basename(os.path.dirname(path)) if os.path.basename(path) == "index.html" \
             else os.path.splitext(os.path.basename(path))[0]
+        self.seed, self.stamp, self.seed_error = read_seed(self.comments)
+        self.suppressed = []        # (key, message) WARNs dropped because the seed assigned them
 
     def styles(self, theme, width=1280):
         key = (theme, width)
@@ -1308,6 +1346,93 @@ class Page:
         return out
 
 
+
+# =============================================================================
+# 7b. Seed stamp (brief_seed.py) and slop-ok comments
+# =============================================================================
+
+STAMP_RE = re.compile(r'\bseed:\s*"((?:[^"\\]|\\.)*)"\s*salt\s*=\s*(\d+)', re.I)
+SLOP_OK_RE = re.compile(r"slop-ok:\s*([\w.-]+:[\w.-]+)[ \t]*([^\n]*)", re.I)
+GREEN_BLACK_HUES = (120, 200)    # is_green_black
+SAGE_HUES = (95, 130)            # where a seed-assigned olive/chartreuse tint reads as sage
+
+
+def read_seed(comment_texts):
+    """(seed dict | None, (brief, salt) | None, error | None) from a
+    <!-- seed: "<brief>" salt=N --> comment."""
+    for c in comment_texts:
+        m = STAMP_RE.search(c)
+        if not m:
+            continue
+        brief = re.sub(r"\\(.)", r"\1", m.group(1))
+        salt = int(m.group(2))
+        if _seed is None or not hasattr(_seed, "seed"):
+            return None, (brief, salt), "brief_seed.py not importable next to slop_check.py"
+        try:
+            s = _seed.seed(brief, salt)
+        except Exception as e:  # pragma: no cover
+            return None, (brief, salt), "brief_seed.seed() failed: %s" % e
+        if "hue_range" not in s.get("color", {}):
+            return None, (brief, salt), "brief_seed.py is too old (no OKLCH hue_range)"
+        return s, (brief, salt), None
+    return None, None, None
+
+
+def _ranges_overlap(lo, hi, a, b):
+    pts = [(lo + i) % 360 for i in range(((hi - lo) % 360) + 1)]
+    return any(hue_in(x, a, b) for x in pts)
+
+
+def seed_hue(p, c, tol=6, with_b=True):
+    """Is colour c chromatic and inside the seed's assigned hue sector (or the
+    duotone's derived hue B)?"""
+    s = p.seed
+    if not s or c is None or not s["color"].get("hue_range"):
+        return False
+    L, C, H = oklch(c)
+    if C < 0.02:
+        return False
+    rngs = [s["color"]["hue_range"]]
+    if with_b and s["color"].get("hue_b_range"):
+        rngs.append(s["color"]["hue_b_range"])
+    return any(hue_in(H, (lo - tol) % 360, (hi + tol) % 360) for lo, hi in rngs)
+
+
+def seed_sector_overlaps(p, a, b):
+    if not p.seed or not p.seed["color"].get("hue_range"):
+        return False
+    lo, hi = p.seed["color"]["hue_range"]
+    return _ranges_overlap(lo, hi, a, b)
+
+
+def seed_fonts(p):
+    """(shortlist, allowed) lower-case font names from the seed."""
+    t = p.seed["type"]
+    short = [f.lower() for f in t["shortlist"]]
+    allowed = list(short)
+    if t.get("text_face"):
+        allowed.append(t["text_face"].lower())
+    if "display only" in t["class"] or "brand voice" in t["class"]:
+        allowed += [f.lower() for f in getattr(_seed, "TEXT_FACES", [])]
+    return short, allowed
+
+
+def has_override(p, *words):
+    for c in p.comments:
+        m = re.search(r"seed override:(.*)", c, flags=re.I | re.S)
+        if m and any(w.lower() in m.group(1).lower() for w in words):
+            return True
+    return False
+
+
+def slop_oks(p):
+    """{rule-key: reason} from <!-- slop-ok: <key> <reason> --> comments."""
+    out = {}
+    for c in p.comments:
+        for m in SLOP_OK_RE.finditer(c):
+            out[m.group(1).lower()] = m.group(2).strip().rstrip("-").strip()
+    return out
+
 # =============================================================================
 # 8. Checks
 # =============================================================================
@@ -1316,11 +1441,11 @@ def check_layout(p, add):
     css = p.css
     if re.search(r"\.(wrap|container|wrapper)\b", css) and any(
             1000 <= int(m) <= 1100 for m in re.findall(r"max-width\s*:\s*(\d+)px", css)):
-        add("WARN", "layout", "one global wrapper width shared by every section - choose widths per section")
+        add("WARN", "layout", "one global wrapper width shared by every section - choose widths per section", "layout:global-wrapper")
     if re.search(r"repeat\(\s*auto-(fit|fill)\s*,\s*minmax\(\s*2[0-9]{2}px\s*,\s*1fr", css):
         add("FAIL", "layout", "auto-fit card grid (icon + h3 + line in equal cards) - pick a form for the content")
     if re.search(r"grid-template-columns\s*:\s*1\.1fr\s+\.9fr", css):
-        add("WARN", "layout", "near-even copy/artifact split hero (the v1 split)")
+        add("WARN", "layout", "near-even copy/artifact split hero (the v1 split)", "layout:v1-split")
 
 
 def declared_colors(p):
@@ -1390,15 +1515,18 @@ def check_colour(p, add):
         add("FAIL", "color", "stock Tailwind hexes: " + ", ".join("%s (%s)" % (h, TAILWIND_HEXES[h]) for h in exact[:6]))
     near = []
     for h, c in cols.items():
-        if h in TAILWIND_HEXES:
+        if h in TAILWIND_HEXES or oklch(c)[1] < 0.02:    # neutral greys are nobody's swatch
             continue
         for th, name in TAILWIND_HEXES.items():
             tc = parse_color(th)
             if oklch(tc)[1] >= 0.04 and delta_e(c, tc) < DELTA_E:
-                near.append("%s ~ %s" % (h, name))
+                if seed_hue(p, c):
+                    p.suppressed.append(("color:tailwind-near", "%s ~ %s (inside the seed's hue)" % (h, name)))
+                else:
+                    near.append("%s ~ %s" % (h, name))
                 break
     if near:
-        add("WARN", "color", "nudged stock Tailwind swatches (same colour within ΔE .05): " + ", ".join(near[:5]))
+        add("WARN", "color", "nudged stock Tailwind swatches (same colour within ΔE .05): " + ", ".join(near[:5]), "color:tailwind-near")
     for h, c in ground_colors(p).items():
         for bh, label in BANNED_SWATCHES.items():
             bc = parse_color(bh)
@@ -1407,44 +1535,63 @@ def check_colour(p, add):
             limit = DELTA_E if oklch(bc)[1] >= 0.04 else 0.02
             if de < limit and same_cell(c, bc):
                 lvl = "FAIL" if de < 0.01 or h in STOCK_NAVY else "WARN"
+                if lvl == "WARN" and seed_ground_ok(p, c, label):
+                    p.suppressed.append(("color:converged-ground", "%s ~ %s" % (h, label)))
+                    break
                 add(lvl, "color", "ground %s is the converged %s (ΔE %.3f) - a nudged hex is the same choice"
-                    % (h, label, de))
+                    % (h, label, de), "color:converged-ground")
                 break
     # regions
-    indigo = sorted(h for h, c in cols.items() if is_indigo_violet(c) and h not in TAILWIND_HEXES)
+    indigo = sorted(h for h, c in cols.items() if is_indigo_violet(c) and h not in TAILWIND_HEXES
+                    and not seed_hue(p, c, with_b=False))
     if indigo:
-        add("WARN", "color", "indigo/violet accent family (%s) - the v1 default hue" % ", ".join(indigo[:3]))
+        add("WARN", "color", "indigo/violet accent family (%s) - the v1 default hue" % ", ".join(indigo[:3]), "color:indigo-violet")
     fills = cta_fills(p)
     orange = sorted({to_hex(c) for n, c in fills if is_orange_amber(c)})
     if not fills:
         orange = sorted(h for h, c in cols.items() if is_orange_amber(c) and re.search(
             r"--[\w-]*(accent|cta|primary|action|brand|button|btn)[\w-]*\s*:\s*%s" % h, css))
     if orange:
-        add("WARN", "color", "orange/amber/safety-yellow CTA fill (%s) - the v3 converged action colour" % ", ".join(orange[:3]))
+        add("WARN", "color", "orange/amber/safety-yellow CTA fill (%s) - the v3 converged action colour" % ", ".join(orange[:3]), "color:orange-cta")
     for theme in p.themes:
         g = page_ground(p, theme)
         if not g:
             continue
         hx = to_hex(g)
-        if theme == "light" and is_sage_ground(g):
-            add("WARN", "color", "page ground is sage/grey-green paper (%s) - the v2 template ground" % hx)
+        if theme == "light" and is_sage_ground(g) and not seed_ground_ok(p, g, "sage"):
+            add("WARN", "color", "page ground is sage/grey-green paper (%s) - the v2 template ground" % hx, "color:sage-ground")
         if is_cool_grey_ground(g):
-            add("WARN", "color", "page ground is a cool 'galvanized' grey (%s) - a v3 converged ground" % hx)
-        if is_green_black(g):
-            add("WARN", "color", "[%s] page ground is green-black (%s) - the v2 dark template" % (theme, hx))
+            add("WARN", "color", "page ground is a cool 'galvanized' grey (%s) - a v3 converged ground" % hx, "color:cool-grey-ground")
+        if is_green_black(g) and not seed_ground_ok(p, g, "green-black"):
+            add("WARN", "color", "[%s] page ground is green-black (%s) - the v2 dark template" % (theme, hx), "color:green-black-ground")
         if is_navy_ground(g) and hx not in STOCK_NAVY:
-            add("WARN", "color", "[%s] page ground is stock navy-black (%s)" % (theme, hx))
+            add("WARN", "color", "[%s] page ground is stock navy-black (%s)" % (theme, hx), "color:navy-ground")
     texty = set(re.findall(r"(?<![-\w])color\s*:\s*(#[0-9a-f]{3,8}|rgba?\([^)]*\)|oklch\([^)]*\))", css))
     texty |= {v.strip() for v in re.findall(r"--[\w-]*(?:muted|dim|soft|subtle|secondary|quiet|faint)[\w-]*\s*:\s*([^;]+)", css)}
     bg_ = sorted({to_hex(c) for c in (parse_color(v) for v in texty) if c and is_blue_gray_text(c)})
     if bg_:
         add("FAIL", "color", "blue-gray muted text (%s) - tint neutrals toward the brand hue" % ", ".join(bg_[:4]))
     if re.search(r"--accent-?2\s*:", css):
-        add("WARN", "color", "a second accent token that exists only to feed a gradient")
+        add("WARN", "color", "a second accent token that exists only to feed a gradient", "color:accent2-token")
     if re.search(r"linear-gradient\(\s*1[23]5deg\s*,\s*var\(--accent", css):
         add("FAIL", "color", "diagonal accent→accent2 gradient")
     if re.search(r"background-clip\s*:\s*text", css):
         add("FAIL", "effects", "gradient-clipped text")
+
+
+def seed_ground_ok(p, c, label):
+    """A green-black or sage ground the seed itself produced: near-black (or a
+    dark theme) + an assigned green/teal hue, or an assigned olive/chartreuse
+    hue on a light tint."""
+    if not p.seed:
+        return False
+    if "green-black" in label:
+        dark = p.seed["color"]["strategy"].startswith("near-black") or "dark" in p.seed["color"]["theme"] \
+            or p.seed["color"]["strategy"].startswith(("alternating", "monochrome", "pastel field"))
+        return dark and seed_sector_overlaps(p, *GREEN_BLACK_HUES)
+    if "sage" in label:
+        return seed_sector_overlaps(p, *SAGE_HUES)
+    return False
 
 
 def font_overridden(p, fam):
@@ -1467,28 +1614,61 @@ def check_type(p, add):
         has_font = fams or re.search(r"use\.typekit|@font-face", low)
         if not has_font:
             add("FAIL", "type", "no typeface loaded - system-ui only")
-        conv = [f for f in fams if is_converged_font(f) and not font_overridden(p, f)]
+        short, allowed = seed_fonts(p) if p.seed else ([], [])
+        conv = [f for f in fams if is_converged_font(f) and not font_overridden(p, f) and f.lower() not in allowed]
         for f in conv:
             only = len(fams) == 1
             add("FAIL" if only else "WARN", "type",
                 "converged font '%s'%s - a family earlier runs landed on; take the seed's class "
-                "(or note 'seed override: %s' with a visitor reason)" % (f, " is the only family" if only else "", f))
+                "(or note 'seed override: %s' with a visitor reason)" % (f, " is the only family" if only else "", f), "type:converged-font")
+        if p.seed and fams:
+            has_code = p.dom.find("pre", "code", "kbd", "samp")
+            own = [f for f in fams if not (has_code and re.search(r"mono|code", f, re.I))]
+            t = p.seed["type"]
+            stray = [f for f in own if f.lower() not in allowed]
+            if not any(f.lower() in short for f in own) or (stray and not ("display only" in t["class"])):
+                if not has_override(p, "font", "type", "typeface", *fams):
+                    add("WARN", "seed", "seed not followed: loaded %s; the seed assigned %s (alternate %s)%s - "
+                        "use it, or write <!-- seed override: font <visitor reason> -->"
+                        % (", ".join(fams), t["shortlist"][0], t["shortlist"][1] if len(t["shortlist"]) > 1 else "-",
+                           ", text face %s" % t["text_face"] if t.get("text_face") else ""), "seed:font")
     if re.search(r"clamp\(\s*2\.[0-9]+rem\s*,\s*[56](\.\d+)?vw\s*,\s*3\.[5-9]+rem", css):
-        add("WARN", "type", "h1 sized with the stock fluid-clamp formula (v1 hero size)")
+        add("WARN", "type", "h1 sized with the stock fluid-clamp formula (v1 hero size)", "type:stock-clamp")
     if re.search(r"font-weight\s*:\s*800", css):
-        add("WARN", "type", "extra-bold weight used - by choice or by reflex?")
+        add("WARN", "type", "extra-bold weight used - by choice or by reflex?", "type:weight-800")
 
 
 def check_components(p, add):
     css, low = p.css, p.low
     if re.search(r"padding\s*:\s*1[23]px\s+2[2-6]px", css):
-        add("WARN", "components", "stock button proportions (the v1 pill/button padding)")
+        add("WARN", "components", "stock button proportions (the v1 pill/button padding)", "components:stock-button")
     if re.search(r"\.(btn-?)?ghost\b|\.btn-outline\b|\.btn\.secondary", css):
-        add("WARN", "components", "solid + ghost button pair")
+        add("WARN", "components", "solid + ghost button pair", "components:ghost-pair")
     if re.search(r'class="[^"]*logo[^"]*"[^>]*>[^<]*<span', low):
         add("FAIL", "components", "split two-tone wordmark (Brand<span>name</span>)")
-    if re.search(r"©\s*20\d\d|&copy;\s*20\d\d", p.visible + " " + p.low):
-        add("WARN", "copy", "hardcoded copyright year")
+    if static_year(p):
+        add("WARN", "copy", "hardcoded copyright year", "copy:static-year")
+
+
+def static_year(p):
+    """A '© 2026' a script does not keep current. A year inside an element
+    whose id/class/data-attribute a getFullYear() script targets is the
+    allowed static fallback, not a hardcoded year."""
+    scripts = " ".join(re.findall(r"<script[^>]*>(.*?)</script>", p.code, flags=re.S | re.I))
+    dyn = "getfullyear" in scripts.lower()
+    for m in re.finditer(r"(?:©|&copy;|&#169;|&#xa9;)\s*((?:<[^>]+>\s*)*)(20\d\d)", p.code, re.I):
+        tags = m.group(1)
+        if dyn and tags:
+            names = []
+            for tag in re.findall(r"<[^/][^>]*>", tags):
+                names += re.findall(r'\bid="([^"]+)"', tag)
+                for cls in re.findall(r'\bclass="([^"]+)"', tag):
+                    names += cls.split()
+                names += re.findall(r"\b(data-[\w-]+)", tag)
+            if any(re.search(r"[\"'`\[(][#.]?%s[\"'`\]=)]" % re.escape(n), scripts) for n in names):
+                continue
+        return True
+    return False
 
 
 def check_a11y_meta(p, add):
@@ -1501,17 +1681,19 @@ def check_a11y_meta(p, add):
         add("FAIL", "a11y", "motion without prefers-reduced-motion")
     if not p.dom.find("main"):
         add("FAIL", "a11y", "no <main> landmark")
-    if not re.search(r'href="#(main|content)', low):
-        add("WARN", "a11y", "no skip link")
+    main = p.dom.find("main")
+    targets = ["main", "content"] + ([main.attrs["id"].lower()] if main is not None and main.attrs.get("id") else [])
+    if not any(re.search(r'href="#%s"' % re.escape(t), low) for t in targets):
+        add("WARN", "a11y", "no skip link", "a11y:skip-link")
     if not re.search(r'<meta[^>]+name="description"', low):
-        add("WARN", "code", "no meta description")
+        add("WARN", "code", "no meta description", "code:meta-description")
     if not re.search(r'property="og:', low):
-        add("WARN", "code", "no Open Graph tags")
+        add("WARN", "code", "no Open Graph tags", "code:og-tags")
     if not re.search(r'<link[^>]+rel="[^"]*icon', low):
-        add("WARN", "imagery", "no favicon")
+        add("WARN", "imagery", "no favicon", "imagery:favicon")
     if not p.dom.find("img", "svg", "picture", "video", "canvas"):
         if re.search(r'role="img"[^>]*aria-label|aria-label="[^"]+"[^>]*role="img"', low):
-            add("WARN", "imagery", "no image/SVG - hero artifact is CSS-drawn (role=img); fine if it shows a real state")
+            add("WARN", "imagery", "no image/SVG - hero artifact is CSS-drawn (role=img); fine if it shows a real state", "imagery:css-only")
         else:
             add("FAIL", "imagery", "no image, SVG or video anywhere")
     n = len(re.findall(r'href="#"', low))
@@ -1520,13 +1702,13 @@ def check_a11y_meta(p, add):
     levels = [int(n.tag[1]) for n in p.dom.iter() if re.fullmatch(r"h[1-6]", n.tag)]
     for a, b in zip(levels, levels[1:]):
         if b > a + 1:
-            add("WARN", "a11y", f"heading level skip h{a} → h{b}")
+            add("WARN", "a11y", f"heading level skip h{a} → h{b}", "a11y:heading-skip")
             break
     if len(p.dom.find_all("h1")) != 1:
-        add("WARN", "a11y", "page should have exactly one <h1>")
+        add("WARN", "a11y", "page should have exactly one <h1>", "a11y:one-h1")
     n = len(re.findall(r'\sstyle="', low))
     if n >= 3:
-        add("WARN", "code", f"{n} inline style patches")
+        add("WARN", "code", f"{n} inline style patches", "code:inline-style")
 
 
 def check_copy(p, add):
@@ -1538,9 +1720,9 @@ def check_copy(p, add):
     for pat, msg, whole in COPY_FAIL:
         if (any(re.fullmatch(r"\s*" + pat + r"\s*", b) for b in blocks) if whole else re.search(pat, vl)):
             add("FAIL", "copy", msg)
-    for pat, msg in COPY_WARN:
+    for pat, msg, key in COPY_WARN:
         if re.search(pat, vl):
-            add("WARN", "copy", msg)
+            add("WARN", "copy", msg, key)
     if not p.is_html:
         return
     h1 = p.dom.find("h1")
@@ -1555,38 +1737,38 @@ def check_copy(p, add):
                 break
     if lead:
         if re.search(r"\b\w+, \w+,? (and|or) \w+", lead) or len(re.findall(r"\b[Nn]o \w+[,.]", lead)) >= 3:
-            add("WARN", "copy", f"hero lead built on a list of three: “{lead[:70]}”")
+            add("WARN", "copy", f"hero lead built on a list of three: “{lead[:70]}”", "copy:lead-list-of-three")
         tm = re.search(r"<title>\s*([^<–|:-]+)", p.code, re.I)
         brand = tm.group(1).strip() if tm else None
         if brand and re.match(rf"\s*{re.escape(brand)}\s+(is|turns|helps|makes|lets)\b", lead, re.I):
-            add("WARN", "copy", f"hero lead opens with '{brand} is/turns/helps…'")
+            add("WARN", "copy", f"hero lead opens with '{brand} is/turns/helps…'", "copy:lead-brand-is")
     for h in p.dom.find_all("h1", "h2"):
         t = h.text()
         if re.fullmatch(r"(?:[\w'’]+\.\s+){2,}[\w'’]+\.?", t):
             add("FAIL", "copy", f"staccato 'X. Y. Z.' heading: “{t}”")
             break
         if re.search(r"\b\w+, \w+,? (and|or) \w+", t):
-            add("WARN", "copy", f"heading built on a list of three: “{t[:60]}”")
+            add("WARN", "copy", f"heading built on a list of three: “{t[:60]}”", "copy:heading-list-of-three")
             break
     n_count = sum(1 for h in p.dom.find_all("h2") if re.match(r"(one|two|three|four|five|six|seven|eight)\b", h.text().lower()))
     if n_count:
-        add("WARN", "copy", f"{n_count} count-led h2 ('Four passes…')")
+        add("WARN", "copy", f"{n_count} count-led h2 ('Four passes…')", "copy:count-led-h2")
     if re.search(r"\bwhat happens (after|in|when|next)\b", vl):
-        add("WARN", "copy", "'What happens after…' formula")
+        add("WARN", "copy", "'What happens after…' formula", "copy:what-happens")
     links = [n.text().lower() for n in p.dom.find_all("a", "button")]
     if any(re.match(r"see (the|what|where|one|how|our|a)\b", t) for t in links):
-        add("WARN", "copy", "'See …' secondary link")
+        add("WARN", "copy", "'See …' secondary link", "copy:see-link")
     if any(re.match(r"[a-z]+ your first [a-z]+", t) for t in links + blocks):
-        add("WARN", "copy", "'[Verb] your first [noun]' CTA formula")
+        add("WARN", "copy", "'[Verb] your first [noun]' CTA formula", "copy:your-first")
     if re.search(r"deploy your first app|pick a roast|book a site visit|\$17 a bag|ships within 48 hours of roasting", vl):
         add("FAIL", "copy", "copied an example from the skill verbatim")
     if re.search(r"\btry it\b", vl):
-        add("WARN", "copy", "'Try it' widget prompt")
+        add("WARN", "copy", "'Try it' widget prompt", "copy:try-it")
     n_disc = len(re.findall(r"\b(sample|illustrative|prototype|placeholder|made-up|fictional|invented)\b", vl))
     if n_disc >= 3:
-        add("WARN", "copy", f"{n_disc} sample/invented disclaimers - one caption per artifact at most")
+        add("WARN", "copy", f"{n_disc} sample/invented disclaimers - one caption per artifact at most", "copy:disclaimers")
     if re.search(r"desk[- ]lamp", vl):
-        add("WARN", "color", "'desk lamp' dark-theme narrative")
+        add("WARN", "color", "'desk lamp' dark-theme narrative", "color:desk-lamp")
     # honesty notes on the page (rule 11)
     script_strings = " ".join(re.findall(r"""(?:textContent|innerText|innerHTML)\s*=\s*([^;]+)""", " ".join(
         re.findall(r"<script[^>]*>(.*?)</script>", p.code, flags=re.S | re.I))))
@@ -1597,7 +1779,66 @@ def check_copy(p, add):
         add("FAIL", "copy", "%d visible 'not connected / pre-launch / NEEDED' notes (%s) - honesty goes in the hand-off and LAUNCH TODO"
             % (len(hits), "; ".join(sorted(set(h[:28] for h in hits))[:3])))
     elif hits:
-        add("WARN", "copy", "visible '%s' note - tell the user in the hand-off, not the visitor" % hits[0][:30])
+        add("WARN", "copy", "visible '%s' note - tell the user in the hand-off, not the visitor" % hits[0][:30], "copy:visible-note")
+
+
+VOICE_TOKENS = {"nav", "footer", "masthead", "colophon", "kicker", "eyebrow", "label", "tag"}
+
+
+def mono_voice(p):
+    """A rule that sets a mono font on nav/footer/label-like selectors. Tokens
+    are whole selector identifiers or their hyphen parts ('nav-link', '.tag'),
+    never substrings ('stage' is not 'tag')."""
+    for r in p.rules:
+        if not any(prop in ("font-family", "font") and re.search(r"mono", val) for prop, val, _ in r.decls):
+            continue
+        for ident in re.findall(r"[a-z][\w-]*", re.sub(r"\[[^\]]*\]|\([^)]*\)", " ", r.sel)):
+            if set(ident.split("-")) & VOICE_TOKENS or set(ident.split("_")) & VOICE_TOKENS:
+                return True
+    return False
+
+
+RULE_PROPS = ("border-top", "border-bottom", "border-block", "border-block-start", "border-block-end")
+
+
+def ruled_row_sections(p):
+    """Sections that use ruled rows: >= 3 repeated siblings (same tag, one
+    parent) that each carry a 1px top/bottom rule on themselves or on a child
+    up to two levels down. Tables, the footer and one timeline do not count."""
+    styles = p.styles("light", 1280)
+    groups = {}
+    for n in p.dom.iter():
+        if n.tag in ("table", "thead", "tbody", "tfoot", "tr", "td", "th", "caption", "footer", "hr") \
+                or n.in_tag("table", "footer"):
+            continue
+        st = styles.get(id(n))
+        if not st or st["hidden"]:
+            continue
+        if not any(re.match(r"\s*(1px|thin)\s+(solid|dashed|dotted)", st["get"](prop) or "") for prop in RULE_PROPS):
+            continue
+        row, depth = n, 0
+        while row is not None and depth <= 2:
+            par = row.parent
+            if par is not None and sum(1 for k in par.elems if k.tag == row.tag) >= 3:
+                groups.setdefault(id(par), (par, set()))[1].add(id(row))
+                break
+            row, depth = par, depth + 1
+    secs, timelines = [], []
+    for par, rows in groups.values():
+        if len(rows) < 3:
+            continue
+        chain = [par] + list(par.ancestors())
+        sec = next((a for a in chain if a.tag in ("section", "article", "aside", "header")
+                    or (a.parent is not None and a.parent.tag in ("main", "body"))), par)
+        names = " ".join(" ".join(a.classes) + " " + a.attrs.get("id", "") for a in chain)
+        if re.search(r"timeline|history|chronolog", names):
+            timelines.append(id(sec))
+        elif id(sec) not in secs:
+            secs.append(id(sec))
+    for t in timelines[1:]:       # one timeline is a fine use of rules; a second one counts
+        if t not in secs:
+            secs.append(t)
+    return len(secs)
 
 
 def check_second_order(p, add):
@@ -1608,27 +1849,30 @@ def check_second_order(p, add):
         if not has_code:
             add("FAIL", "type", "monospace web font loaded but the page shows no code/terminal")
         else:
-            add("WARN", "type", "monospace face loaded - keep it inside code/terminal elements only")
-    if re.search(r"(nav|footer|masthead|colophon|kicker|eyebrow|label|tag)[^{}]*\{[^}]*(mono|monospace)", css):
-        add("WARN", "type", "mono used as the voice of nav/footer/labels")
+            add("WARN", "type", "monospace face loaded - keep it inside code/terminal elements only", "type:mono-loaded")
+    if mono_voice(p):
+        add("WARN", "type", "mono used as the voice of nav/footer/labels", "type:mono-voice")
     h1 = p.dom.find("h1")
     if h1 is not None and any(c.tag in ("em", "i", "mark") or c.tag == "span" and c.classes & {"accent", "em", "hl", "highlight"}
                               for c in h1.elems):
-        add("WARN", "type", "emphasized fragment inside the h1 (the italic/coloured-word template)")
+        add("WARN", "type", "emphasized fragment inside the h1 (the italic/coloured-word template)", "type:h1-fragment")
     if len(re.findall(r"text-transform\s*:\s*uppercase", css)) >= 4:
-        add("WARN", "type", "tracked-uppercase labels used as the page's voice - one label style, used twice at most")
+        add("WARN", "type", "tracked-uppercase labels used as the page's voice - one label style, used twice at most", "type:uppercase-voice")
     if re.search(r"minmax\(\s*0\s*,\s*5fr\s*\)\s+minmax\(\s*0\s*,\s*[6-8]fr\s*\)", css):
-        add("WARN", "layout", "copy-left/artifact-right split hero (the v2 template split)")
+        add("WARN", "layout", "copy-left/artifact-right split hero (the v2 template split)", "layout:v2-split")
     if len(re.findall(r"max\(\s*(16px|1rem)\s*,\s*4vw\s*\)|clamp\(\s*(16px|1rem)\s*,\s*4vw\s*,\s*[^)]+\)", css)) >= 3:
-        add("WARN", "layout", "one fluid gutter repeated on every section - the old global wrapper in another form")
+        add("WARN", "layout", "one fluid gutter repeated on every section - the old global wrapper in another form", "layout:fluid-gutter")
     if re.search(r"repeat\(\s*auto-fit\s*,\s*minmax\(\s*1[0-2]rem\s*,\s*1fr\s*\)\s*\)", css):
-        add("WARN", "layout", "auto-fit multi-column footer grid (the v2 footer)")
-    if len(re.findall(r"border-(top|bottom)\s*:\s*1px\s+solid", css)) >= 5:
-        add("WARN", "layout", "ruled rows used as the default form across sections")
+        add("WARN", "layout", "auto-fit multi-column footer grid (the v2 footer)", "layout:v2-footer")
+    if re.search(r"border-(top|bottom|block)[\w-]*\s*:\s*(1px|thin)\s", css) and ruled_row_sections(p) >= 3 \
+            and not (p.seed and p.seed["edges"]["name"] == "hairline sharp" and
+                     not p.suppressed.append(("layout:ruled-rows", "seed edges: hairline sharp"))):
+        add("WARN", "layout", "ruled rows used as the default form across sections", "layout:ruled-rows")
     if len(set(re.findall(STATIONERY_TOK, css))) >= 3:
-        add("WARN", "color", "stationery token vocabulary (ink/paper/rule/pencil) - renamed --fg/--bg/--line")
-    if re.search(r"--[\w-]*(pencil|margin|strike|oxblood)[\w-]*\s*:\s*#", css):
-        add("WARN", "color", "pencil/margin/oxblood red accent token (the v2 accent)")
+        add("WARN", "color", "stationery token vocabulary (ink/paper/rule/pencil) - renamed --fg/--bg/--line", "color:stationery-tokens")
+    if any(c and oklch(c)[1] >= 0.08 and hue_in(oklch(c)[2], 345, 40) for c in (
+            parse_color(v.strip()) for v in re.findall(r"--[\w-]*(?:pencil|margin|strike|oxblood)[\w-]*\s*:\s*([^;}]+)", css))):
+        add("WARN", "color", "pencil/margin/oxblood red accent token (the v2 accent)", "color:oxblood-token")
     if re.search(r"\[data-theme", css) and not re.search(r"(setattribute\(\s*['\"]data-theme|dataset\.theme)", low):
         add("FAIL", "code", "[data-theme] selectors but no toggle sets data-theme")
     skeuo = [n for n, pat in (
@@ -1638,9 +1882,9 @@ def check_second_order(p, add):
         ("offset shadow", r"box-shadow\s*:\s*-?\d+px\s+-?\d+px\s+0(px)?\s"),
         ("stamp", r"\.(stamp|seal)\b")) if re.search(pat, css)]
     if len(skeuo) >= 3:
-        add("WARN", "effects", f"{len(skeuo)} skeuomorphic effects stacked ({', '.join(skeuo)}) - pick one")
+        add("WARN", "effects", f"{len(skeuo)} skeuomorphic effects stacked ({', '.join(skeuo)}) - pick one", "effects:skeuo-stack")
     if re.search(r"border-radius\s*:\s*(\d+px)\s+(\d+px)\s+\1\s+\2|border-radius\s*:\s*0\s+\d{2}px\s+\d{2}px\s+0", css):
-        add("WARN", "components", "asymmetric 'material' radius on controls (a v3 gimmick)")
+        add("WARN", "components", "asymmetric 'material' radius on controls (a v3 gimmick)", "components:material-radius")
     # placeholders and destinations
     ph = re.findall(r"\[[A-Z][A-Z0-9 ,/&'.-]* NEEDED\]", p.visible)
     if len(ph) > 2:
@@ -1650,16 +1894,19 @@ def check_second_order(p, add):
     if re.search(r'href="tel:\+?1?0{7,}', low):
         add("FAIL", "code", "fake tel: link")
     if re.search(r'href="mailto:[^"]*\?subject=(privacy|terms|legal)', low):
-        add("WARN", "code", "mailto posing as a legal page")
+        add("WARN", "code", "mailto posing as a legal page", "code:mailto-legal")
     if re.search(r'property="og:image"\s+content="(data:|[^"]*\.example)|content="(data:[^"]*)"\s+property="og:image"', low):
         add("FAIL", "code", "og:image is a data: URI or .example URL - omit it until there is a host")
     if re.search(r'id="(yr|year|y)"\s*>\s*</span>', low):
-        add("WARN", "code", "empty year span - blank without JS; put the year in as fallback")
+        add("WARN", "code", "empty year span - blank without JS; put the year in as fallback", "code:empty-year")
 
 
 # ---- category conventions and conversion (rules 3-4, 10) -------------------
 
-def infer_category(p):
+def infer_categories(p):
+    """Ranked categories. With a seed stamp, the brief's categories."""
+    if p.seed:
+        return list(p.seed["categories"])
     title = re.search(r"<title>(.*?)</title>", p.code, re.S | re.I)
     desc = re.search(r'<meta[^>]+name="description"[^>]+content="([^"]*)"', p.code, re.I) or \
         re.search(r'<meta[^>]+content="([^"]*)"[^>]+name="description"', p.code, re.I)
@@ -1673,17 +1920,28 @@ def infer_category(p):
             elif seen and n.tag == "p":
                 lede = n.text()
                 break
-    text = " ".join([title.group(1) if title else "", desc.group(1) if desc else "",
-                     h1.text() if h1 is not None else "", lede]).lower()
-    for cat, pat in CATEGORY_RULES:
-        if re.search(pat, text):
-            return cat
+    top = " ".join([title.group(1) if title else "", h1.text() if h1 is not None else ""]).lower()
+    mid = " ".join([desc.group(1) if desc else "", lede]).lower()
+    body = p.visible.lower()
+    scored, weak = [], []
+    for i, (cat, pat) in enumerate(CATEGORY_RULES):
+        t, m = len(re.findall(pat, top)), len(re.findall(pat, mid))
+        if t or t + m >= 2:
+            scored.append((3 * t + 2 * m + 0.1 * min(len(re.findall(pat, body)), 10), -i, cat))
+        elif m:
+            weak.append(cat)        # one mention in meta/lede: secondary only
+    if scored:
+        return [c for _, _, c in sorted(scored, reverse=True)] + weak
     # the page never names its category: fall back to the author's LAUNCH TODO note
     todo = " ".join(c for c in p.comments if "launch todo" in c.lower()).lower()
     for cat, pat in CATEGORY_RULES:
         if re.search(pat, todo):
-            return cat
-    return "saas"
+            return [cat] + [w for w in weak if w != cat]
+    return weak or ["saas"]
+
+
+def infer_category(p):
+    return infer_categories(p)[0]
 
 
 def leaves_page(n):
@@ -1702,7 +1960,8 @@ def leaves_page(n):
 
 
 def check_content(p, add):
-    cat = infer_category(p)
+    cats = infer_categories(p)
+    cat = cats[0]
     vis = p.visible
     body = p.dom.find("body") or p.dom
     footers = set(id(x) for f in p.dom.find_all("footer") for x in f.iter())
@@ -1721,29 +1980,29 @@ def check_content(p, add):
                       p.code, re.I)
     code = p.dom.find("pre", "code")
     tag = "[%s] " % cat
-    if cat in ("shop", "delivery"):
+    if cat in ("shop", "delivery") and not set(cats) & set(MOBILE_CATS):
         if not price:
-            add("WARN", "content", tag + "no price anywhere - a buyer of this category needs prices (draft them in <data class=\"todo\">)")
+            add("WARN", "content", tag + "no price anywhere - a buyer of this category needs prices (draft them in <data class=\"todo\">)", "content:no-price")
         if not photo:
-            add("WARN", "content", tag + "no product photo or photo slot - visitors came to see what they buy")
-    if cat == "app":
+            add("WARN", "content", tag + "no product photo or photo slot - visitors came to see what they buy", "content:no-photo")
+    if cat == "app" or ("app" in cats and cat in MOBILE_CATS):
         if not phone:
-            add("WARN", "content", tag + "no phone frame showing the app's real screen")
+            add("WARN", "content", tag + "no phone frame showing the app's real screen", "content:no-phone")
         if not store:
-            add("WARN", "content", tag + "no App Store / Google Play link (use launch constants)")
+            add("WARN", "content", tag + "no App Store / Google Play link (use launch constants)", "content:no-store-link")
     if cat == "devtool" and not code:
-        add("WARN", "content", tag + "no <pre>/<code>: a developer expects the terminal, install step or config")
+        add("WARN", "content", tag + "no <pre>/<code>: a developer expects the terminal, install step or config", "content:no-code")
     if cat == "studio" and not photo:
-        add("WARN", "content", tag + "no photographs of built work - for a studio the portfolio is the product")
+        add("WARN", "content", tag + "no photographs of built work - for a studio the portfolio is the product", "content:no-portfolio")
     # LAUNCH TODO bookkeeping (read from raw comments)
     todo = " ".join(c for c in p.comments if "launch todo" in c.lower())
     consts = sorted({v for n in launch for k in ("href", "data-href", "action")
                      for v in [n.attrs.get(k, "")] if LAUNCH_CONST.match(v)})
     if (consts or re.search(r'<data[^>]*class="[^"]*todo', p.code, re.I)) and not todo:
-        add("WARN", "code", "launch constants or <data class=\"todo\"> values but no <!-- LAUNCH TODO --> comment listing them")
+        add("WARN", "code", "launch constants or <data class=\"todo\"> values but no <!-- LAUNCH TODO --> comment listing them", "code:no-launch-todo")
     missing = [c for c in consts if todo and c not in todo]
     if missing:
-        add("WARN", "code", "launch constants not listed in LAUNCH TODO: " + ", ".join(missing[:5]))
+        add("WARN", "code", "launch constants not listed in LAUNCH TODO: " + ", ".join(missing[:5]), "code:launch-todo-missing")
     return cat
 
 
@@ -1769,8 +2028,21 @@ def hero_order(p):
     h1 = p.dom.find("h1")
     if h1 is None:
         return "no-h1"
+    body = p.dom.find("body") or p.dom
+    if main.tag == "main" and h1 not in list(main.iter()):
+        # h1 outside <main>: a header/sidebar hero. Artifact-first only if a
+        # big artifact comes before the h1 in DOM order.
+        for n in body.iter():
+            if n is h1:
+                return "h1-first"
+            if n is main:
+                return "artifact-first"
+            if is_big_artifact(n):
+                return "artifact-first"
+        return "h1-first"
     first = next((e for e in main.elems if e.tag not in ("script", "style", "a")), None)
-    if first is not None and main.tag == "main" and h1 not in list(first.iter()) and len(first.text()) > 40:
+    if first is not None and main.tag == "main" and h1 not in list(first.iter()) and len(first.text()) > 40 \
+            and not in_side_column(p, h1):
         return "artifact-first"     # the h1 is not in the first block of <main>
     for n in main.iter():
         if n is h1:
@@ -1778,6 +2050,20 @@ def hero_order(p):
         if is_big_artifact(n):
             return "artifact-first"
     return "h1-first"
+
+
+def in_side_column(p, n):
+    """Is n in a sidebar / sticky column (aside, position: sticky|fixed, or a
+    side/sidebar/sticky/index class)?"""
+    for a in [n] + list(n.ancestors()):
+        if a.tag == "aside" or re.search(r"(^|[-_])(side|sidebar|sticky|rail|index)([-_]|$)",
+                                         " ".join(a.classes) + " " + a.attrs.get("id", "")):
+            return True
+        for w in (1280,):
+            st = p.st(a, "light", w)
+            if st and (st["get"]("position") or "").strip() in ("sticky", "fixed"):
+                return True
+    return False
 
 
 PHRASING = {"span", "a", "em", "strong", "b", "i", "code", "small", "time", "data", "abbr", "mark", "kbd", "samp", "var", "sup", "sub"}
@@ -1822,9 +2108,9 @@ def check_structure(p, add):
     if stray:
         n, t = stray[0]
         add("WARN", "layout", "display:grid element `%s` has bare text nodes beside its children (“%s”) - each becomes a "
-                              "stray grid item; wrap the text (%d element(s))" % (n.describe(), t[:30], len(stray)))
+                              "stray grid item; wrap the text (%d element(s))" % (n.describe(), t[:30], len(stray)), "layout:stray-grid-text")
     if hero_order(p) == "artifact-first":
-        add("WARN", "layout", "artifact-first hero: make sure the h1 + primary CTA still sit in the first 360x740 viewport")
+        add("WARN", "layout", "artifact-first hero: make sure the h1 + primary CTA still sit in the first 360x740 viewport", "layout:artifact-first")
 
 
 # ---- contrast ----------------------------------------------------------------
@@ -1966,12 +2252,12 @@ def check_contrast(p, add):
             n, r, need = items[0]
             more = " (+%d more)" % (len(items) - 1) if len(items) > 1 else ""
             add("WARN" if svg else "FAIL", "a11y", "[%s] %stext %.2f:1 < %.1f (%s on %s) at `%s` “%s”%s"
-                % (theme, "svg " if svg else "", math.floor(r * 100) / 100, need, fg, bg, n.describe(), n.direct_text()[:24], more))
+                % (theme, "svg " if svg else "", math.floor(r * 100) / 100, need, fg, bg, n.describe(), n.direct_text()[:24], more), "a11y:svg-contrast" if svg else "a11y:contrast")
         if len(fails) > 8:
             add("FAIL", "a11y", "[%s] … and %d more low-contrast pairs (run --contrast)" % (theme, len(fails) - 8))
         if total and len(unres) / total > 0.3:
             add("WARN", "a11y", "[%s] contrast unresolved for %d/%d text elements (%s) - check them by hand"
-                % (theme, len(unres), total, ", ".join(sorted(set(x[2] for x in unres)))))
+                % (theme, len(unres), total, ", ".join(sorted(set(x[2] for x in unres)))), "a11y:contrast-unresolved")
         seen = set()
         for n, kind, col, back, r in boundary_pairs(p, theme):
             key = (kind, to_hex(col), to_hex(back))
@@ -1980,11 +2266,11 @@ def check_contrast(p, add):
             seen.add(key)
             lvl = "FAIL" if r < 1.5 and kind == "button" else "WARN"
             what = "button fill with no full border" if kind == "button" else "form-control edge"
-            add(lvl, "a11y", "[%s] %s %.2f:1 < 3 (%s on %s) at `%s`" % (theme, what, r, to_hex(col), to_hex(back), n.describe()))
+            add(lvl, "a11y", "[%s] %s %.2f:1 < 3 (%s on %s) at `%s`" % (theme, what, r, to_hex(col), to_hex(back), n.describe()), "a11y:control-boundary")
         for n, c, b, r in placeholder_pairs(p, theme):
             if r < 4.5 and ("ph", to_hex(c)) not in seen:
                 seen.add(("ph", to_hex(c)))
-                add("WARN", "a11y", "[%s] placeholder text %.2f:1 (%s on %s) at `%s`" % (theme, r, to_hex(c), to_hex(b), n.describe()))
+                add("WARN", "a11y", "[%s] placeholder text %.2f:1 (%s on %s) at `%s`" % (theme, r, to_hex(c), to_hex(b), n.describe()), "a11y:placeholder")
 
 
 # ---- template fingerprints ---------------------------------------------------
@@ -2106,24 +2392,68 @@ def template_matches(fp):
     return out
 
 
+H1_FIRST_COMPS = {"product-UI stage", "type poster", "single long-read column", "sticky index sidebar",
+                  "fixed half + scrolling half", "centred stack with an oversized artifact", "demo-in-hero",
+                  "one big number", "horizontal strata"}
+
+
+def seed_assigned_features(p, fp):
+    """Fingerprint features whose value the seed stamp assigned (so a match
+    on them is the seed's doing, not the model's default)."""
+    s = p.seed
+    if not s:
+        return set()
+    out = set()
+    short, allowed = seed_fonts(p)
+    if any(f in allowed for f in fp["families"]):
+        out.add("families")
+    cls = s["type"]["class"]
+    w = "condensed" if "condensed" in cls else "wide" if "wide" in cls else "normal"
+    if fp["width"] == w:
+        out.add("width")
+    bucket = s["color"].get("hue_bucket")
+    if fp["accent"] == bucket or (bucket == "neutral" and fp["accent"] == "neutral"):
+        out.add("accent")
+    strat = s["color"]["strategy"]
+    if bucket and bucket in fp["ground"] or fp["ground"].endswith("neutral") and strat.startswith(
+            ("Swiss", "near-black", "neon", "image-sampled", "high-chroma duotone")):
+        out.add("ground")
+    theme = s["color"]["theme"]
+    if (fp["themes"] == "2") == theme.startswith("two themes"):
+        out.add("themes")
+    comp = s["composition"]["name"]
+    if (fp["hero"] == "h1-first") == (comp in H1_FIRST_COMPS):
+        out.add("hero")
+    return out
+
+
 def check_template(p, add):
     fp = fingerprint(p)
+    assigned = seed_assigned_features(p, fp)
     for name, hit in template_matches(fp):
-        if hit:
-            add("WARN", "template", "matches the %s template on %d/9 features (%s) - change the axes that match, "
-                                    "not their values" % (name, len(hit), ", ".join(hit)))
+        own = [f for f in hit if f not in assigned]
+        if assigned and (len(own) < 5 or len(SIGNATURE & set(own)) < 2):
+            p.suppressed.append(("template:" + name.split()[0], "%s match on seed-assigned %s"
+                                 % (name, ", ".join(f for f in hit if f in assigned))))
+            continue
+        add("WARN", "template", "matches the %s template on %d/9 features (%s) - change the axes that match, "
+                                "not their values" % (name, len(hit), ", ".join(hit)), "template:" + name.split()[0])
 
 
 # =============================================================================
 # 9. Driver: one page
 # =============================================================================
 
+_LAST_PAGE = [None]
+
+
 def check(path):
     p = Page(path)
+    _LAST_PAGE[0] = p
     hits = []
 
-    def add(level, cat, msg):
-        hits.append((level, cat, msg))
+    def add(level, cat, msg, key=None):
+        hits.append([level, cat, msg, (key or cat).lower()])
 
     check_layout(p, add)
     if p.is_html:
@@ -2141,7 +2471,55 @@ def check(path):
         check_structure(p, add)
         check_contrast(p, add)
         check_template(p, add)
+        check_seed_stamp(p, add)
+    apply_slop_ok(p, hits)
     return hits
+
+
+def check_seed_stamp(p, add):
+    if p.stamp is None:
+        add("WARN", "seed", "no seed stamp - paste the last line of brief_seed.py's output "
+                            "(<!-- seed: \"<brief>\" salt=N -->) so seed-assigned values are not read as defaults",
+            "seed:none")
+    elif p.seed is None:
+        add("WARN", "seed", "seed stamp found but not usable (%s) - seed-assigned values are checked as defaults"
+            % p.seed_error, "seed:unreadable")
+    else:
+        col = p.seed["color"]
+        fills = [c for n, c in cta_fills(p) if oklch(c)[1] >= 0.06]
+        acc = fills[0] if fills else accent_by_use(p)
+        if acc is None or has_override(p, "colour", "color", "hue", "accent", "palette"):
+            return
+        if col.get("hue_range") and not seed_hue(p, acc):
+            add("WARN", "seed", "seed not followed: the accent %s (OKLCH hue %d) is outside the assigned %s - "
+                                "move it into the range, or write <!-- seed override: colour <visitor reason> -->"
+                % (to_hex(acc), round(oklch(acc)[2]), col["hue"]), "seed:hue")
+        elif not col.get("hue_range") and fills:
+            add("WARN", "seed", "seed not followed: the CTA fill %s is chromatic but the seed assigned "
+                                "'achromatic + photo' (black/white CTA)" % to_hex(acc), "seed:hue")
+
+
+def apply_slop_ok(p, hits):
+    """<!-- slop-ok: <key> <reason> --> keeps a WARN as OK* when the reason has
+    >= 4 words. A FAIL is never downgraded."""
+    oks = slop_oks(p)
+    used = set()
+    for h in hits:
+        level, cat, msg, key = h
+        if key not in oks:
+            continue
+        used.add(key)
+        reason = oks[key]
+        if level == "FAIL":
+            h[2] = msg + "  (slop-ok ignored: a FAIL cannot be kept)"
+        elif len(re.findall(r"[\w'’-]+", reason)) < 4:
+            h[2] = msg + "  (slop-ok ignored: give a reason of >= 4 words)"
+        else:
+            h[0] = "OK*"
+            h[2] = msg + "  -- kept: " + reason
+    for key in sorted(set(oks) - used):
+        hits.append(["NOTE", "slop-ok", "slop-ok '%s' matches no rule on this page (typo, or already fixed?)" % key,
+                     "slop-ok:unused"])
 
 
 def check_colour_css_only(p, add):
@@ -2203,6 +2581,9 @@ def run_contrast(paths):
     return 0
 
 
+NEUTRAL_SHARED = {("width", "normal"), ("hero", "h1-first"), ("themes", "1")}
+
+
 def run_corpus(paths):
     pages = [Page(f) for f in walk(paths) if f.endswith((".html", ".htm"))]
     if not pages:
@@ -2215,7 +2596,7 @@ def run_corpus(paths):
             "+".join(fp[f]) if f == "families" else fp[f] for f in FEATURES))
     print("\nShared values (> 30%% of pages; features: %s)" % ", ".join(FEATURES))
     limit = 0.3 * len(fps)
-    any_shared = False
+    shared = []
     for f in FEATURES:
         counts = {}
         for name, fp in fps:
@@ -2223,9 +2604,30 @@ def run_corpus(paths):
                 counts.setdefault(v, []).append(name)
         for v, names in sorted(counts.items(), key=lambda kv: -len(kv[1])):
             if len(names) > limit:
-                any_shared = True
-                print("  WARN %-13s %-28s %d/%d  (%s)" % (f, v, len(names), len(fps), ", ".join(names)))
-    if not any_shared:
+                shared.append((f, v, names))
+    # neutral conventions are only a smell when they ride along with >= 2
+    # other shared values on the same pages
+    for f, v, names in shared:
+        lvl = "WARN"
+        note = ""
+        if (f, v) in NEUTRAL_SHARED:
+            # the same pages must also share the same two other (non-neutral) values
+            others = [(g, w, set(ns)) for g, w, ns in shared if (g, w) not in NEUTRAL_SHARED and g != f]
+            best = (set(), None)
+            for i in range(len(others)):
+                for j in range(i + 1, len(others)):
+                    if others[i][0] == others[j][0]:
+                        continue
+                    common = set(names) & others[i][2] & others[j][2]
+                    if len(common) > len(best[0]):
+                        best = (common, (others[i][:2], others[j][:2]))
+            if len(best[0]) <= limit:
+                lvl, note = "ok  ", "  neutral convention (no cluster with 2 other shared values)"
+            else:
+                (g1, w1), (g2, w2) = best[1]
+                note = "  clusters with %s=%s + %s=%s on %s" % (g1, w1, g2, w2, ", ".join(sorted(best[0])))
+        print("  %s %-13s %-28s %d/%d  (%s)%s" % (lvl, f, v, len(names), len(fps), ", ".join(names), note))
+    if not shared:
         print("  none")
     print("\nKnown templates (WARN at >= 5/9 features)")
     for name, fp in fps:
@@ -2326,6 +2728,40 @@ const MEASURE = %s;
 """
 
 
+def node_module_dirs():
+    out = []
+    if os.environ.get("SLOP_PW_NODE_MODULES"):
+        out.append(os.environ["SLOP_PW_NODE_MODULES"])
+    out += [os.path.join(os.getcwd(), "node_modules"), os.path.join(os.path.dirname(HERE), "node_modules"),
+            os.path.join(HERE, "node_modules")]
+    npm = shutil.which("npm")
+    if npm:
+        try:
+            g = subprocess.run([npm, "root", "-g"], capture_output=True, text=True, timeout=20).stdout.strip()
+            if g:
+                out.append(g)
+        except Exception:
+            pass
+    out.append(PW_NODE_DIR)
+    seen = []
+    for d in out:
+        if d not in seen:
+            seen.append(d)
+    return seen
+
+
+def find_node_playwright():
+    for d in node_module_dirs():
+        if os.path.isdir(os.path.join(d, "playwright")):
+            return d
+    return None
+
+
+def chrome_path():
+    p = os.environ.get("SLOP_PW_CHROME") or PW_CHROME
+    return p if p and os.path.exists(p) else ""
+
+
 def render_measure(files):
     """Return a list of measurement dicts, or (None, reason) if unavailable."""
     files = [os.path.abspath(f) for f in files]
@@ -2333,7 +2769,7 @@ def render_measure(files):
         from playwright.sync_api import sync_playwright  # type: ignore
         res = []
         with sync_playwright() as pw:
-            kw = {"executable_path": PW_CHROME} if os.path.exists(PW_CHROME) else {}
+            kw = {"executable_path": chrome_path()} if chrome_path() else {}
             b = pw.chromium.launch(**kw)
             for f in files:
                 r = {"file": f}
@@ -2351,16 +2787,20 @@ def render_measure(files):
         return res, None
     except ImportError:
         pass
+    except Exception as e:      # python playwright without a browser: try node
+        sys.stderr.write("python playwright failed (%s); trying node\n" % str(e).splitlines()[0][:120])
     node = shutil.which("node")
-    nm = os.environ.get("SLOP_PW_NODE_MODULES", PW_NODE_DIR)
-    if not node or not os.path.isdir(os.path.join(nm, "playwright")):
-        return None, "python playwright not installed and no node playwright at %s" % nm
+    nm = find_node_playwright()
+    if not node or not nm:
+        return None, ("python playwright not installed and no node playwright found (looked in: %s). "
+                      "Install hint: npm i playwright (Chromium needed: npx playwright install chromium), "
+                      "or set SLOP_PW_NODE_MODULES=/path/to/node_modules" % ", ".join(node_module_dirs()))
     with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as t:
         t.write(NODE_RUNNER % MEASURE_JS.strip())
         script = t.name
     try:
         env = dict(os.environ, NODE_PATH=nm)
-        out = subprocess.run([node, script, json.dumps(files), PW_CHROME if os.path.exists(PW_CHROME) else ""],
+        out = subprocess.run([node, script, json.dumps(files), chrome_path()],
                              capture_output=True, text=True, env=env, timeout=60 + 40 * len(files))
         if out.returncode != 0:
             return None, "node runner failed: " + out.stderr.strip()[-300:]
@@ -2422,17 +2862,30 @@ def main(argv):
         return run_render(paths)
     as_json, strict = "--json" in flags, "--strict" in flags
     report, bad = {}, False
+    totals = [0, 0, 0, 0]
     for f in walk(paths):
         hits = check(f)
-        report[f] = [{"level": l, "category": c, "message": m} for l, c, m in hits]
+        p_seed = _LAST_PAGE[0]
+        report[f] = [{"level": l, "category": c, "key": k, "message": m} for l, c, m, k in hits]
         fails = sum(1 for h in hits if h[0] == "FAIL")
-        warns = len(hits) - fails
+        warns = sum(1 for h in hits if h[0] == "WARN")
+        kept = sum(1 for h in hits if h[0] == "OK*")
+        totals = [totals[0] + 1, totals[1] + fails, totals[2] + warns, totals[3] + kept]
         if fails or (strict and warns):
             bad = True
         if not as_json:
-            print(f"\n{f}  —  {fails} FAIL, {warns} WARN")
-            for l, c, m in sorted(hits, key=lambda h: (h[0] != "FAIL", h[1])):
-                print(f"  {l:4} [{c}] {m}")
+            print(f"\n{f}  —  {fails} FAIL, {warns} WARN, {kept} kept with reason (OK*)")
+            if p_seed is not None and p_seed.seed:
+                s = p_seed.seed
+                print("  seed: \"%s\" salt=%d -> %s / %s / %s / %s%s" % (
+                    s["brief"], s["salt"], s["type"]["shortlist"][0], s["composition"]["name"],
+                    s["color"]["strategy"], s["color"]["hue"], ("; %d WARN suppressed as seed-assigned"
+                                                                % len(p_seed.suppressed)) if p_seed.suppressed else ""))
+            order = {"FAIL": 0, "WARN": 1, "OK*": 2, "NOTE": 3}
+            for l, c, m, k in sorted(hits, key=lambda h: (order.get(h[0], 9), h[1])):
+                print(f"  {l:4} [{c if l == 'FAIL' else k}] {m}")
+    if not as_json and totals[0] > 1:
+        print("\nTotal: %d files, %d FAIL, %d WARN, %d kept with reason (OK*)" % tuple(totals))
     if as_json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     return 1 if bad else 0

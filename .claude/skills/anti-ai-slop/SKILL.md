@@ -106,7 +106,8 @@ python3 .claude/skills/anti-ai-slop/scripts/slop_check.py --contrast path/to/pag
 python3 .claude/skills/anti-ai-slop/scripts/slop_check.py --render path/to/page.html   # 360x740: h1 + CTA in view, overflow, overlaps (needs Playwright; skips otherwise)
 ```
 - Fix every FAIL.
-- Give a reason for each WARN you keep.
+- Keep a WARN only with a reason written into the page: `<!-- slop-ok: <key> <reason> -->`, using the key the checker prints (e.g. `color:tailwind-near`). The reason must name the visitor need or seed axis. FAILs cannot be kept (see conflicts C21).
+- With the seed stamp in `<head>`, the checker suppresses WARNs the seed caused and warns when the page drifts from the seed (`seed:font`, `seed:hue`).
 - **Never clear a WARN by nudging a value**; change the shape or keep the WARN with a reason.
 - Passing is necessary, not sufficient.
 
