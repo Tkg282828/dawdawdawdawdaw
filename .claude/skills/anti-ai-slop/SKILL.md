@@ -107,6 +107,7 @@ Bracketed numbers are pages out of 10 in [v1; v2; v3].
 python3 .claude/skills/anti-ai-slop/scripts/slop_check.py path/to/page.html            # one page
 python3 .claude/skills/anti-ai-slop/scripts/slop_check.py --corpus dir/                # many pages: shared-value report
 python3 .claude/skills/anti-ai-slop/scripts/slop_check.py --contrast path/to/page.html # every resolved pair + coverage
+python3 .claude/skills/anti-ai-slop/scripts/slop_check.py --render path/to/page.html   # 360x740: h1 + CTA in view, overflow, overlaps (needs Playwright; skips otherwise)
 ```
 - Fix every FAIL.
 - Give a reason for each WARN you keep.
