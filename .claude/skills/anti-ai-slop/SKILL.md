@@ -1,63 +1,123 @@
 ---
 name: anti-ai-slop
-description: Prevents generic "AI slop" frontend output. Use whenever building or restyling a landing page, marketing site, homepage, hero section, or any user-facing web UI (HTML/CSS, React, Tailwind, Vue, etc.), and when reviewing such UI for a templated, machine-made look. Gives a design-before-code workflow, a frequency-ranked DO NOT list derived from 10 real AI-generated landing pages, and a pre-ship checklist.
+description: Prevents generic "AI slop" frontend output. Use whenever building or restyling a landing page, marketing site, homepage, hero section, or any user-facing web UI (HTML/CSS, React, Tailwind, Vue, etc.), and when reviewing such UI for a templated, machine-made look. Gives a divergence-first design workflow, frequency-ranked DO NOT lists (first-order AI defaults and the second-order defaults that appear when agents try to avoid them), a static checker script, and a pre-ship checklist.
 ---
 
 # Anti AI Slop (frontend)
 
-Slop is not bad code. It is the **average default**: the choice you make when nothing about the product informed it.
-This skill comes from an experiment. Ten agents each built a "simple landing page" for a different product, from a coffee roaster to a password manager to an architecture firm. All ten came out as nearly the same page.
+Slop is not bad code. It is the **average default**: the choice made when nothing about the product informed it.
 
-**Key finding:** buzzwords like "Supercharge", "Unlock" and "Seamless" appeared on 0 of 10 pages. The slop was in the **structure and CSS**: the same skeleton, the same `.wrap` at 1040px, the same `minmax(240px,1fr)` card grid, the same `--bg/--muted/--card/--line` tokens, the same `12px 24px` buttons, no typeface choice, no real images. Avoiding a word list is not enough; avoid the template.
+The skill comes from two measured runs:
+- **v1:** 10 agents built landing pages with no guidance. All 10 converged on one template: a `.wrap` at 1040px, a `minmax(240px,1fr)` card grid, `--bg/--muted/--card` tokens, system-ui, solid + ghost buttons, "See features". Buzzwords like "Supercharge" appeared on 0/10. The slop was structural.
+- **v2:** the same 10 briefs, built with this skill. First-order slop disappeared (checker FAILs fell from 150 to 4). The pages then converged on a **new template**, "stationery editorial":
+  - sage paper background and green-black dark theme (8/10);
+  - IBM Plex Mono (8/10) and Newsreader (5/10);
+  - an italic `<em>` in a serif h1 (8/10);
+  - tracked uppercase labels (10/10);
+  - ruled rows in every section (10/10), and copy-left/artifact-right heroes (10/10);
+  - 38 `[… NEEDED]` placeholders across 8 pages.
+
+**Lesson:** a ban list alone moves the convergence point; it does not remove it. This skill therefore bans both convergence points and requires a **divergence procedure** for each major choice. Do not replace a banned default with the nearest acceptable one.
 
 ## Workflow
 
 ### 1. Before writing code: the product brief (required)
-Write these down, briefly, in your reasoning or a comment:
-- **Visitor:** who arrives and what question they must answer before acting.
-- **Product artifact:** the one real thing that proves the product (an invoice, a terminal session, a bag of beans, a floor plan, a lesson card). It goes in the hero.
-- **Material reference:** one real-world source for color and type (kraft paper, terminal theme, leaf, blueprint, bank statement). Derive tokens from it, and name them for their role in this product.
-- **Typeface:** chosen for this product, with a one-sentence reason. Not system-ui and not "Inter because it's safe".
-- **Sections:** list only the sections this visitor needs, in the order of their questions. Do not start from nav → hero → 3 cards → "Ready to…?" → footer.
+Write this in your reasoning, not in the shipped file.
+- **Visitor:** who arrives, and the one question they must answer before acting.
+- **Product artifact:** the one real thing that proves the product, shown in a **specific state**: a refusal, a failure, a total, a decision. It goes in the hero. It is generic if it still makes sense with the product name changed.
+- **Material reference:**
+  - Take it from where the visitor *uses* the product or what they *receive* (the gym floor, the bag on the doorstep, the server log, the plot of land). Never take it from stationery *about* the product. Paper, notebooks, ledgers, index cards, galley proofs, vellum, labels, tags and rubber stamps are off-limits unless the product itself is a printed object.
+  - **List three candidate materials, cross out the first one that came to mind, and pick from the other two.**
+  - Derive every color token from the chosen material, and name tokens for product roles (`--receipt`, `--zone-3`, `--hull`), not for ink and paper (`--ink`, `--paper`, `--rule`, `--pencil`).
+- **Typeface:**
+  - List three candidates from three different classifications (grotesk, slab, humanist serif, condensed, rounded, display…), and **cross out the first one you thought of**.
+  - Default to **one** family. A second family must do a job the first cannot.
+  - Use monospace only if the page shows code, a terminal, or columns of figures that must align, and only inside those elements. Never use it for nav, labels, buttons or footers.
+- **Composition:**
+  - Describe three hero compositions in words, for example: the artifact full-bleed with the headline as its caption; the headline set into the artifact; the artifact above a stacked claim; the copy to the right of the artifact.
+  - Reject "copy left, artifact right" unless the other two are worse *for this artifact*, and say why.
+- **Sections:**
+  - List only the sections this visitor needs, ordered by their questions.
+  - Name each section's data shape (sequence, comparison, single number, map, conversation, gallery) and pick its form from that shape.
+  - **No form may repeat in more than two sections.**
+- **What you don't have:** list the facts the brief did not give (price, address, legal pages, testimonials, URLs). Those sections are **cut, not stubbed** (rule 10).
 
-### 2. While building: hard bans (most frequent slop)
-Rule-by-rule details and "instead" alternatives are in [references/dont-list.md](references/dont-list.md). The bracketed numbers are how many of the 10 pages showed each pattern.
-1. No single `.wrap{max-width:1000–1080px;margin:0 auto}` for everything; choose widths per section, and use `<main>`. [10]
-2. No `repeat(auto-fit,minmax(240px,1fr))` card grid of icon + h3 + muted sentence; pick the form for the content (table, ruled rows, spec list, annotated screenshot). [10]
-3. No default typography: system-ui only, `16px/1.6`, `clamp(2.2rem,6vw,3.8rem)` h1 at `-.03em`, weight-800 logo. [10]
-4. No generic tokens `--bg/--fg/--muted/--card/--line/--accent` with a card one shade off the background, no blue-gray muted `#9aa4bd`, no raw Tailwind hexes (`#4f46e5`, `#8b5cf6`…), no `#0b1020` navy, no `accent → accent2` 135deg gradient or gradient-clipped `<em>`. [10/6/4/4/5]
-5. No solid + ghost hero buttons labeled "Get started" / "See features" / "See how it works"; use one specific action ("Deploy your first app", "Pick a roast"). [9]
-6. No hero paragraph built on a list of three, and no "[Brand] is the…" opener; write one concrete claim with a number, place or mechanism. [9/8]
-7. No two-tone split wordmark (`Task<span>flow</span>`). [8]
-8. No one-line centered footer with a hardcoded "© 2026 Brand"; give contact, address, docs and legal links, and generate the year. [9]
-9. No emoji as icons or decoration, and no giant emoji or gradient box in place of a photo. [6]
-10. No invented stats, testimonials or real-looking placeholders ("2M+ users", "Maya R.", "Northwind Studio"). If proof is missing, mark it `[TESTIMONIAL NEEDED]`. [2–5]
-11. No `href="#"` or self-linking CTAs. [6]
-12. No missing `transition`, `:focus-visible` or `prefers-reduced-motion`, and no text under 4.5:1 contrast (white on orange or coral buttons failed on 7 pages). [10/10/10/7]
-13. No "Everything you need…", "Ready to…?", "No credit card required.", or puns on the brand name. [5/4/4/5]
+### 2. While building: hard bans
+Details and "instead" alternatives are in [references/dont-list.md](references/dont-list.md). Bracketed numbers count how many of the 10 pages showed the pattern.
+
+**First-order defaults (v1, no skill):**
+1. No single wrapper (`.wrap{max-width:1000–1080px}`, or one `4vw` gutter) for every section. Give sections different widths and edges, and use `<main>`. [v1 10; v2 8]
+2. No `repeat(auto-fit,minmax(240px,1fr))` grid of icon + h3 + muted sentence. Choose the form from the data shape. [10]
+3. No default typography: system-ui only, `16px/1.6`, `clamp(2.2rem,6vw,3.8rem)` h1 at `-.03em`, a weight-800 logo. [10]
+4. No generic tokens (`--bg/--fg/--muted/--card/--line/--accent`, or the same set renamed to ink/paper). No blue-gray muted `#9aa4bd`, no raw Tailwind hexes (`#4f46e5`, `#8b5cf6`…), no `#0b1020` navy, no `accent → accent2` gradient, no gradient-clipped text. [10/6/4/4/5]
+5. One primary hero action, named for its action and object, written fresh for this product (labels quoted in this skill show shape only, not text to reuse). Default to no secondary action. If you add one, make it plain underlined body text on its own line, with no border, no box and no "See…" verb, naming the evidence it leads to. [9]
+6. No rhetorical list of three in the h1, h2s, lead or button rows: no "A, B and C", no "X. Y. Z." staccato, no "no X, no Y, no Z". Real data lists are fine. If the line works as well with two or four items, rewrite it. Do not open with "[Brand] is the…". [9/8; v2 still 4]
+7. No two-tone split wordmark (`Task<span>flow</span>`), and no tracked-uppercase wordmark unless the brand already has one. [8; v2 6]
+8. No one-line footer that is only "© Brand. All rights reserved.", and no 4-column "Product · Contact · Legal" footer with uppercase headings. Show only the footer facts that exist. [v1 9; v2 8]
+9. No emoji as icons or decoration, and no giant emoji or gradient box standing in for a photo. [6]
+10. Never invent claims about the business: stats, quotes, customers, prices, terms, address, audit results.
+    - If the brief lacks them, **cut the section**; do not leave a slot.
+    - Demo data *inside the product artifact* may be invented. It must use roles or objects rather than fake people, and is labelled **once**, in the artifact's caption.
+    - At most **2** visible `[… NEEDED]` placeholders per page, and none in the hero. List everything else in one `<!-- LAUNCH TODO: … -->` comment at the top of the file. [v1 2–5 invented; v2 38 placeholders]
+11. Every CTA must advance the visitor's action: an on-page section that does the thing (form, calculator, picker), or a URL or email the user supplied.
+    - Never invent a domain: no `.example`, `.invalid` or plausible `.app` in visible text, `href`, `mailto:` or `og:image`.
+    - No `href="#"`, no fake `tel:`, no `mailto:?subject=Privacy` posing as a legal page.
+    - With no host, omit `og:image` and add it to LAUNCH TODO. [v1 6; v2 7]
+12. No missing `transition`, `:focus-visible` or `prefers-reduced-motion`. Every text pair must reach ≥ 4.5:1, and every button boundary ≥ 3:1 against its page, **in every theme you ship**.
+    - Ship one finished theme (`<meta name="color-scheme">`, with the reason stated in the brief), or two themes with a working, persistent toggle.
+    - Never ship `[data-theme]` selectors without a toggle. [10/10/10/7; v2 5 dead theme blocks]
+13. No "Everything you need…", "Ready to…?", "No credit card required.", puns on the brand name, count-led h2s ("Four passes…"), "What happens after…", or "Try it" prompts. [5/4/4/5; v2 7/4/3]
 14. No section added "because landing pages have one": 3-tier pricing with "Most popular", 3-step circles, a stats row, a fake email form. [2–3]
 
-### 3. Before shipping: self-check (every answer must be yes)
-1. **Swap test:** if I put another product's name and copy into this layout and color scheme, would it look *wrong*? If not, it is a template; go back to step 1.
-2. Does the hero show this product's real artifact, and not an emoji, a gradient box or a generic mock?
-3. Was every color derived from the material reference, with no stock Tailwind hex, no indigo-to-violet and no stock navy?
-4. Was a typeface chosen and loaded for this product (`font-display:swap`)?
+**Second-order defaults (v2, what agents reach for when avoiding the above):**
+
+15. No stationery palette:
+    - sage or grey-green "paper" backgrounds (`#dde2db`–`#eef1e4`);
+    - green-black dark themes (`#0c1412`–`#171b1a`);
+    - green-grey muted text;
+    - a pencil or oxblood red accent that turns salmon in dark mode. [8/8/8/7]
+16. Avoid these type defaults:
+    - a serif paired with IBM Plex Mono or JetBrains Mono;
+    - Newsreader by reflex;
+    - an italic or colored `<em>` fragment in the h1;
+    - the `letter-spacing:-.012em` + `line-height:1.02–1.04` + `max-width:34ch` lede as a formula. [7/5/8/6/10/9]
+17. No tracked-uppercase micro-labels as the page's voice. Use at most one uppercase label style, in at most two places. [10]
+18. No ruled rows in every section, and no `minmax(0,5fr) minmax(0,7fr)` split hero. [10/4]
+19. No stacked skeuomorphism. Use at most one of these: a rotated artifact, a rubber stamp, an offset "press" shadow, a ruled-paper gradient, a `clip-path` shape. [up to 4 on one page]
+20. No disclaimer clutter. One "sample" caption per artifact, no "Prototype:" paragraphs, no stock artifact chrome strip (label on the left, "sample" on the right). Do not make the artifact interactive only to create a "Try it" moment; interactivity must be the product's own core action. [v2 10/8/9]
+
+### 3. Run the checker
+```bash
+python3 .claude/skills/anti-ai-slop/scripts/slop_check.py path/to/page.html   # or a directory
+```
+- Fix every **FAIL**.
+- Give a reason for each **WARN** you keep.
+- `--contrast` prints every resolved text/background pair for both themes, so contrast is measured rather than estimated.
+- The checker is static and cannot judge the swap test below; passing it is necessary, not sufficient.
+
+### 4. Before shipping: self-check (every answer must be yes)
+1. **Swap test:** if I swapped in another product's name and copy, would this layout and palette look *wrong*? If not, it is a template.
+2. **Second-order swap test:** would this page go unnoticed among the stationery-editorial pages this skill already produced (sage paper, serif h1 with an italic word, mono labels, ruled rows, red pencil, 4-column footer, `[… NEEDED]`)? If yes, go back to step 1 and take the *second* candidate for material, typeface and composition.
+3. Does the hero show the product's real artifact, in a specific state?
+4. Did the material, typeface and composition each come from a list of three, with the first idea crossed out?
 5. Does the hero copy contain one concrete fact, with no list of three and no "[Brand] is the…"?
-6. Is every stat, quote, name and company real, or clearly marked as a placeholder?
-7. Does every CTA name its action and go to a real destination?
-8. Do all text/background pairs meet 4.5:1 in both light and dark themes?
-9. Do interactive elements have hover, `:focus-visible` and transition states, with motion gated by `prefers-reduced-motion`?
-10. Does the page have `header/nav`, `main`, `footer`, a skip link, h1 → h2 → h3 order, and `aria-hidden` on decoration?
-11. Does it work at 360px, with a mobile menu if nav links are hidden?
-12. Has every section earned its place for this visitor?
+6. Is every business claim real, or cut? Are there ≤ 2 placeholders and ≤ 1 "sample" caption per artifact?
+7. Does every CTA say what happens next, and lead somewhere real without an invented domain?
+8. Does the checker report 0 FAIL, with contrast measured in every shipped theme?
+9. Is the page correct for keyboard and screen-reader users: `header/nav`, `main`, `footer`, a skip link, h1 → h2 → h3 order, `aria-hidden` on decoration?
+10. Does it work at 360px, with a mobile menu if nav links are hidden?
+11. Does each section's form differ from the section before it, with no form used more than twice?
+12. Is any label, price or phrase copied from an example in this skill? If so, replace it.
 
-If any answer is "no", fix it before presenting the work.
+## Copy the method, not the result
+The one v1 page that did not look templated (an architecture firm) worked because every choice came from its own domain's conventions: drawing sheets set its corners, its lettering and its rows. Later agents copied its *results* (a tracked uppercase logo, a weight-400 serif h1, square corners, ruled rows) onto a coffee shop, a password manager and a language app. Those results became the next template (6/10, 6/10, 10/10, 10/10).
 
-## What the good outliers did
-- **Studio Mara (architecture)** was the only page that did not look templated. It used square corners, a weight-400 serif h1 up to 5rem, services as ruled rows instead of cards, tracked uppercase as the logo, and no emoji or stats.
-- On the other pages, the distinctive parts were always **a piece of the product itself**: Brewly's tasting notes and prices, Shipyard's terminal snippet, Ledgerly's sample invoice, Greenleaf's Sprout/Bloom/Jungle plan names. Build the page outward from that piece, not around a template.
+Do what that page did: find the conventions of *this* product's world and let them set the form. Never borrow another page's form.
+
+The distinctive part of every page was a piece of the product itself, shown in a specific state. Build outward from that piece.
 
 ## Reference files
-- [references/dont-list.md](references/dont-list.md): the full DO NOT list in 8 categories with frequencies and alternatives. Read it during reviews.
-- [references/slop-notes.md](references/slop-notes.md): the raw observation tables, with exact hex, CSS and copy snippets per page.
-- `research/pages/01–10.html`: the 10 source pages (examples of what **not** to produce).
+- [references/dont-list.md](references/dont-list.md): the full DO NOT list. It has 8 first-order categories plus a "Second-order defaults" section, each with frequencies and alternatives.
+- [references/conflicts.md](references/conflicts.md): how to resolve the rules that pull against each other, such as a pre-launch product with no URLs, sample data versus invented proof, text links versus ghost buttons, and dark themes.
+- `scripts/slop_check.py`: the static checker.
+- `research/`: both runs, with the source pages (`pages/` for v1, `pages-v2/` for v2), observation notes, agent feedback and the v2 analysis. These are examples of what **not** to produce.

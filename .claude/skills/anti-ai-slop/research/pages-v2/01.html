@@ -1,0 +1,350 @@
+<!doctype html>
+<!--
+BRIEF
+Visitor: lead of a 3-12 person team drowning in a shared to-do list nobody trusts; needs to know "what is different, what does the week look like, what does it cost, how do I try it".
+Product artifact: the weekly sheet itself, a ruled list where every task has one owner and each owner holds at most five open tasks.
+Material reference: engineer's green-tint pad paper with pencil-red margin line (light); the same sheet under a desk lamp, dark green board (dark).
+Typeface: Newsreader (headings, editorial, reads like a printed memo) + JetBrains Mono (task rows, so owners/dates/checks align like a ledger).
+Sections: sheet (hero) -> the three rules that make it work (ruled rows) -> what a Friday close-out looks like -> terms -> start form -> footer.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taskflow - one sheet per week, five open tasks per person</title>
+<meta name="description" content="Taskflow is a task manager for teams of three to twelve. Every task has one owner, nobody holds more than five open tasks, and Friday closes the sheet.">
+<meta property="og:title" content="Taskflow - five open tasks per person">
+<meta property="og:description" content="A weekly sheet for small teams: one owner per task, a cap of five open tasks each, a Friday close-out.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://taskflow.example/og.png">
+<meta name="theme-color" content="#eef1e4">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231f2a22'/%3E%3Cpath d='M8 17l5 5 11-12' fill='none' stroke='%23eef1e4' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pad-paper:#eef1e4;
+  --pad-paper-deep:#e1e7d2;
+  --pad-ink:#1f2a22;
+  --pad-ink-soft:#4d5946;
+  --pad-rule:#bcc9ad;
+  --pencil-red:#b3402a;
+  --pencil-red-ink:#fff8f2;
+  --check-green:#2f6b3c;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --pad-paper:#16201a;
+    --pad-paper-deep:#1d2a22;
+    --pad-ink:#e4e9d6;
+    --pad-ink-soft:#a5b19a;
+    --pad-rule:#3a4b3f;
+    --pencil-red:#ff9c80;
+    --pencil-red-ink:#1a0f0a;
+    --check-green:#8fd19e;
+  }
+}
+:root[data-theme="dark"]{
+  --pad-paper:#16201a;--pad-paper-deep:#1d2a22;--pad-ink:#e4e9d6;--pad-ink-soft:#a5b19a;
+  --pad-rule:#3a4b3f;--pencil-red:#ff9c80;--pencil-red-ink:#1a0f0a;--check-green:#8fd19e;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--pad-paper);color:var(--pad-ink);font-family:var(--serif);font-size:1.125rem;line-height:1.5;font-optical-sizing:auto}
+img,svg{max-width:100%;display:block}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--pencil-red);outline-offset:3px}
+a{color:inherit;text-decoration-thickness:1px;text-underline-offset:.2em;transition:color .15s,text-decoration-color .15s,text-underline-offset .15s}
+a:hover{text-underline-offset:.4em;color:var(--pencil-red)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+
+.skip-link{position:absolute;left:12px;top:-60px;background:var(--pad-ink);color:var(--pad-paper);padding:8px 14px;font-family:var(--mono);font-size:.85rem;z-index:10}
+.skip-link:focus{top:12px}
+
+/* masthead */
+.masthead{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px clamp(16px,4vw,48px);border-bottom:1px solid var(--pad-rule)}
+.wordmark{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:500;font-size:1rem;letter-spacing:.02em;text-decoration:none}
+.wordmark svg{width:22px;height:22px}
+.masthead nav ul{display:flex;gap:clamp(14px,3vw,32px);margin:0;padding:0;list-style:none;font-family:var(--mono);font-size:.85rem}
+.masthead nav a{text-decoration:none;padding:6px 0;border-bottom:1px solid transparent}
+.masthead nav a:hover{border-bottom-color:var(--pencil-red)}
+.theme-flip{font-family:var(--mono);font-size:.8rem;background:none;border:1px solid var(--pad-rule);padding:6px 10px;cursor:pointer;transition:background-color .15s,border-color .15s}
+.theme-flip:hover{background:var(--pad-paper-deep);border-color:var(--pad-ink-soft)}
+.menu-toggle{display:none;font-family:var(--mono);font-size:.85rem;background:none;border:1px solid var(--pad-rule);padding:6px 10px;cursor:pointer}
+@media (max-width:640px){
+  .menu-toggle{display:inline-block}
+  .masthead{flex-wrap:wrap}
+  .masthead nav{order:3;width:100%}
+  .masthead nav ul{display:none;flex-direction:column;gap:0;padding-top:8px}
+  .masthead nav ul.open{display:flex}
+  .masthead nav a{display:block;padding:12px 0;border-top:1px solid var(--pad-rule)}
+  .masthead-tools{display:flex;gap:8px}
+}
+
+/* hero */
+.opening{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,5vw,72px);padding:clamp(36px,6vw,88px) clamp(16px,4vw,48px) clamp(40px,6vw,80px);align-items:start}
+@media (max-width:900px){.opening{grid-template-columns:1fr}}
+.opening h1{font-weight:400;font-size:clamp(2.4rem,5.2vw,4.4rem);line-height:1.04;letter-spacing:-.012em;margin:0 0 .45em}
+.opening h1 em{font-style:italic;color:var(--pencil-red)}
+.opening .lede{max-width:34ch;margin:0 0 1.4em;font-size:1.25rem;line-height:1.45}
+.start-link{display:inline-block;font-family:var(--mono);font-weight:500;font-size:.95rem;background:var(--pad-ink);color:var(--pad-paper);padding:14px 20px;text-decoration:none;border:2px solid var(--pad-ink);transition:background-color .15s,color .15s}
+.start-link:hover{background:var(--pencil-red);border-color:var(--pencil-red);color:var(--pencil-red-ink)}
+.fineprint{display:block;margin-top:14px;font-family:var(--mono);font-size:.8rem;color:var(--pad-ink-soft)}
+
+/* the weekly sheet */
+.week-sheet{background:var(--pad-paper-deep);border:1px solid var(--pad-rule);border-left:3px solid var(--pencil-red);padding:0;font-family:var(--mono);font-size:.82rem;
+  background-image:linear-gradient(var(--pad-rule) 1px,transparent 1px);background-size:100% 2.4rem;background-position:0 .6rem}
+.week-sheet caption,.sheet-head{display:flex;justify-content:space-between;gap:12px;padding:14px 18px;background:var(--pad-paper-deep);border-bottom:1px solid var(--pad-ink);font-weight:500}
+.sheet-head span:last-child{color:var(--pad-ink-soft);font-weight:400}
+.sheet-rows{list-style:none;margin:0;padding:0}
+.sheet-rows li{display:grid;grid-template-columns:5.2rem 1fr 3.6rem 2rem;gap:10px;align-items:center;min-height:2.4rem;padding:0 18px;border-bottom:1px solid var(--pad-rule)}
+.sheet-rows .owner{color:var(--pad-ink-soft)}
+.sheet-rows .due{text-align:right;color:var(--pad-ink-soft)}
+.sheet-rows .done .what{text-decoration:line-through;text-decoration-thickness:1px;color:var(--pad-ink-soft)}
+.box{width:16px;height:16px;border:1.5px solid var(--pad-ink);justify-self:end}
+.done .box{background:var(--check-green);border-color:var(--check-green);position:relative}
+.done .box::after{content:"";position:absolute;left:3px;top:0;width:5px;height:9px;border:solid var(--pad-paper);border-width:0 2px 2px 0;transform:rotate(40deg)}
+.sheet-rows .refused{background:var(--pad-paper);color:var(--pencil-red);font-weight:500}
+.sheet-rows .refused .what{grid-column:2/-1}
+.sheet-foot{padding:12px 18px;color:var(--pad-ink-soft);background:var(--pad-paper-deep)}
+@media (max-width:520px){
+  .sheet-rows li{grid-template-columns:4rem 1fr 1.6rem;padding:8px 12px;min-height:0}
+  .sheet-rows .due{display:none}
+  .sheet-rows .refused .what{grid-column:2/-1}
+  .week-sheet{font-size:.76rem}
+}
+
+.sheet-figure{margin:0}.sheet-caption{margin-top:10px}
+/* rules */
+.rulebook{padding:clamp(40px,6vw,96px) clamp(16px,4vw,48px);border-top:1px solid var(--pad-ink)}
+.rulebook-inner{max-width:68rem;margin-left:clamp(0px,8vw,9rem)}
+h2{font-weight:400;font-size:clamp(1.8rem,3.2vw,2.7rem);line-height:1.12;margin:0 0 1em;max-width:22ch}
+.rule-row{display:grid;grid-template-columns:4rem minmax(0,18rem) minmax(0,1fr);gap:8px clamp(16px,3vw,40px);padding:26px 0;border-top:1px solid var(--pad-rule)}
+.rule-row:last-child{border-bottom:1px solid var(--pad-rule)}
+.rule-row .num{font-family:var(--mono);color:var(--pencil-red);font-weight:500}
+h3{font-weight:500;font-size:1.35rem;line-height:1.2;margin:0}
+.rule-row p{margin:0;max-width:52ch}
+.rule-row code{font-family:var(--mono);font-size:.85em;background:var(--pad-paper-deep);padding:1px 6px}
+@media (max-width:760px){.rule-row{grid-template-columns:2.5rem 1fr}.rule-row p{grid-column:2}}
+
+/* friday */
+.close-out{background:var(--pad-ink);color:var(--pad-paper);padding:clamp(40px,6vw,88px) clamp(16px,4vw,48px)}
+.close-out-inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,26rem);gap:clamp(24px,5vw,72px);align-items:start}
+@media (max-width:860px){.close-out-inner{grid-template-columns:1fr}}
+.close-out h2{max-width:20ch}
+.close-out p{max-width:46ch;margin:0 0 1em}
+.carry-log{font-family:var(--mono);font-size:.82rem;line-height:1.7;border-left:3px solid var(--pencil-red-on-ink,#ff9c80);padding-left:16px;margin:0;white-space:pre-wrap}
+.carry-log b{font-weight:500;color:#ff9c80}
+:root[data-theme="dark"] .close-out,
+:root:not([data-theme="light"]) .close-out{--x:0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .close-out{background:var(--pad-paper-deep);color:var(--pad-ink)}:root:not([data-theme="light"]) .close-out .carry-log b{color:var(--pencil-red)}}
+:root[data-theme="dark"] .close-out{background:var(--pad-paper-deep);color:var(--pad-ink)}
+
+/* terms */
+.terms{padding:clamp(40px,6vw,88px) clamp(16px,4vw,48px)}
+.terms dl{display:grid;grid-template-columns:minmax(8rem,12rem) minmax(0,40rem);gap:0 32px;margin:0;font-size:1.05rem}
+.terms dt,.terms dd{padding:14px 0;border-top:1px solid var(--pad-rule);margin:0}
+.terms dt{font-family:var(--mono);font-size:.85rem;color:var(--pad-ink-soft);padding-top:18px}
+.needed{font-family:var(--mono);font-size:.85em;color:var(--pencil-red);font-weight:500}
+@media (max-width:620px){.terms dl{grid-template-columns:1fr}.terms dt{border-top:1px solid var(--pad-rule);padding-bottom:0}.terms dd{border-top:0;padding-top:4px}}
+
+/* start */
+.team-sheet{padding:clamp(40px,6vw,88px) clamp(16px,4vw,48px);background:var(--pad-paper-deep);border-top:1px solid var(--pad-ink)}
+.team-sheet form{display:grid;grid-template-columns:minmax(0,18rem) minmax(0,10rem) auto;gap:16px;align-items:end;max-width:52rem}
+.team-sheet label{display:block;font-family:var(--mono);font-size:.8rem;margin-bottom:6px;color:var(--pad-ink-soft)}
+.team-sheet input{width:100%;background:var(--pad-paper);border:1px solid var(--pad-ink);padding:12px;border-radius:0;transition:border-color .15s,box-shadow .15s}
+.team-sheet input:hover{border-color:var(--pencil-red)}
+.team-sheet button{font-family:var(--mono);font-weight:500;font-size:.95rem;background:var(--pad-ink);color:var(--pad-paper);border:2px solid var(--pad-ink);padding:12px 18px;cursor:pointer;transition:background-color .15s,color .15s}
+.team-sheet button:hover{background:var(--pencil-red);border-color:var(--pencil-red);color:var(--pencil-red-ink)}
+@media (max-width:700px){.team-sheet form{grid-template-columns:1fr}}
+.team-sheet .note{font-family:var(--mono);font-size:.8rem;color:var(--pad-ink-soft);margin:16px 0 0;max-width:52rem}
+
+/* footer */
+.colophon{padding:36px clamp(16px,4vw,48px) 48px;border-top:1px solid var(--pad-ink);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;font-family:var(--mono);font-size:.82rem}
+@media (max-width:760px){.colophon{grid-template-columns:1fr 1fr}}
+.colophon h2{font-family:var(--mono);font-size:.78rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--pad-ink-soft);margin:0 0 10px;max-width:none}
+.colophon ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.colophon address{font-style:normal;line-height:1.6}
+.legal{grid-column:1/-1;color:var(--pad-ink-soft);border-top:1px solid var(--pad-rule);padding-top:16px}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <a class="wordmark" href="#top" aria-label="Taskflow home">
+    <svg viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="1" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 11.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>
+    taskflow
+  </a>
+  <nav aria-label="Primary">
+    <ul id="primary-links">
+      <li><a href="#rules">The three rules</a></li>
+      <li><a href="#friday">Friday close-out</a></li>
+      <li><a href="#terms">Terms</a></li>
+      <li><a href="#start">Start a sheet</a></li>
+    </ul>
+  </nav>
+  <div class="masthead-tools">
+    <button class="theme-flip" type="button" id="theme-flip" aria-label="Switch between light and dark paper">paper: auto</button>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-links" id="menu-toggle">menu</button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="opening" id="top" aria-labelledby="h-open">
+    <div>
+      <h1 id="h-open">Each person holds five open tasks. The sixth <em>waits</em>.</h1>
+      <p class="lede">Taskflow is one sheet per week for teams of three to twelve: a task has exactly one owner, and the app refuses to give anyone a sixth open task until they close one.</p>
+      <a class="start-link" href="#start">Start this week's sheet</a>
+      <span class="fineprint">Takes one form below. No import step.</span>
+    </div>
+
+    <figure class="sheet-figure">
+      <div class="week-sheet" role="img" aria-label="Sample Taskflow sheet for the week of Monday 12 October. Design holds three open tasks, Support two, Dev five. A sixth task for Dev is refused.">
+        <div class="sheet-head"><span>WEEK OF MON 12 OCT</span><span>sample sheet</span></div>
+        <ul class="sheet-rows" aria-hidden="true">
+          <li class="done"><span class="owner">Design</span><span class="what">Pricing page, mobile pass</span><span class="due">Tue</span><span class="box"></span></li>
+          <li><span class="owner">Design</span><span class="what">Empty states for sheet</span><span class="due">Thu</span><span class="box"></span></li>
+          <li><span class="owner">Support</span><span class="what">Answer export-to-CSV tickets</span><span class="due">Wed</span><span class="box"></span></li>
+          <li class="done"><span class="owner">Support</span><span class="what">Refund reply macro</span><span class="due">Mon</span><span class="box"></span></li>
+          <li><span class="owner">Dev</span><span class="what">Fix timezone on due dates</span><span class="due">Wed</span><span class="box"></span></li>
+          <li><span class="owner">Dev</span><span class="what">Invite link expiry</span><span class="due">Fri</span><span class="box"></span></li>
+          <li class="refused"><span class="owner">Dev</span><span class="what">Cannot add: Dev has 5 open. Close one first.</span></li>
+        </ul>
+        <div class="sheet-foot">3 owners &middot; 9 tasks &middot; 2 done</div>
+      </div>
+      <figcaption class="fineprint sheet-caption">A sample sheet with made-up tasks. The refusal in red is the product.</figcaption>
+    </figure>
+  </section>
+
+  <section class="rulebook" id="rules" aria-labelledby="h-rules">
+    <div class="rulebook-inner">
+      <h2 id="h-rules">Three rules a shared to-do list never enforces</h2>
+      <div class="rule-row">
+        <span class="num" aria-hidden="true">01</span>
+        <h3>One owner per task</h3>
+        <p>A task cannot be assigned to "the team" or to two people. If you want two people on it, split it into two tasks with two names and two due days.</p>
+      </div>
+      <div class="rule-row">
+        <span class="num" aria-hidden="true">02</span>
+        <h3>Five open tasks, then it says no</h3>
+        <p>The cap is a setting from 3 to 9, default 5. Past it, the add button turns into <code>close one first</code>. Overload shows up on Monday, not in a retro three weeks later.</p>
+      </div>
+      <div class="rule-row">
+        <span class="num" aria-hidden="true">03</span>
+        <h3>The sheet ends on Friday</h3>
+        <p>Open tasks do not roll over silently. Each one is either closed, dropped, or carried by its owner, who has to retype the due day.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="close-out" id="friday" aria-labelledby="h-friday">
+    <div class="close-out-inner">
+      <div>
+        <h2 id="h-friday">Friday at 16:00, the sheet asks each owner one thing</h2>
+        <p>For every task still open, the owner picks <b>close</b>, <b>drop</b> or <b>carry</b>. Carried tasks go to next week's sheet under the same name, with a counter so a task carried three times is visible to everyone.</p>
+        <p>There is no rollover bucket, no "backlog" tab, and no filter that hides what you did not finish.</p>
+      </div>
+      <pre class="carry-log" aria-label="Sample close-out log">Dev      Fix timezone on due dates
+         -&gt; <b>carry</b>  (2nd time)  new day: Tue
+
+Design   Empty states for sheet
+         -&gt; <b>drop</b>   reason: waiting on copy
+
+Support  Answer export-to-CSV tickets
+         -&gt; <b>close</b></pre>
+    </div>
+  </section>
+
+  <section class="terms" id="terms" aria-labelledby="h-terms">
+    <h2 id="h-terms">What it costs and what you give up</h2>
+    <dl>
+      <dt>Price</dt>
+      <dd><span class="needed">[PRICE NEEDED]</span> per team per month. Not decided yet, so we are not guessing here.</dd>
+      <dt>Trial</dt>
+      <dd><span class="needed">[TRIAL LENGTH NEEDED]</span></dd>
+      <dt>Team size</dt>
+      <dd>Built for 3 to 12 people. Past 12 you will want projects and dependencies, which Taskflow does not have.</dd>
+      <dt>Missing</dt>
+      <dd>No Gantt chart, no subtasks, no time tracking. Comments are one line per task.</dd>
+      <dt>Your data</dt>
+      <dd>Export every sheet as CSV at any time, from the sheet menu.</dd>
+    </dl>
+  </section>
+
+  <section class="team-sheet" id="start" aria-labelledby="h-start">
+    <h2 id="h-start">Set up your first sheet</h2>
+    <form action="mailto:hello@taskflow.example" method="post" enctype="text/plain">
+      <div>
+        <label for="team-name">Team name</label>
+        <input id="team-name" name="team" type="text" required autocomplete="organization">
+      </div>
+      <div>
+        <label for="team-size">People (3-12)</label>
+        <input id="team-size" name="size" type="number" min="3" max="12" value="5" required inputmode="numeric">
+      </div>
+      <button type="submit">Create the sheet</button>
+    </form>
+    <p class="note">Prototype form: it opens your mail client addressed to us until accounts are live.</p>
+  </section>
+</main>
+
+<footer class="colophon">
+  <div>
+    <h2>Taskflow</h2>
+    <address>[POSTAL ADDRESS NEEDED]<br><a href="mailto:hello@taskflow.example">hello@taskflow.example</a></address>
+  </div>
+  <div>
+    <h2>Product</h2>
+    <ul>
+      <li><a href="#rules">The three rules</a></li>
+      <li><a href="#friday">Friday close-out</a></li>
+      <li><a href="#terms">Terms</a></li>
+    </ul>
+  </div>
+  <div>
+    <h2>Help</h2>
+    <ul>
+      <li><a href="mailto:hello@taskflow.example?subject=Docs%20request">Request docs</a></li>
+      <li><a href="mailto:hello@taskflow.example?subject=Status">Ask about status</a></li>
+    </ul>
+  </div>
+  <div>
+    <h2>Legal</h2>
+    <ul>
+      <li><a href="mailto:hello@taskflow.example?subject=Privacy">Privacy contact</a></li>
+      <li><a href="mailto:hello@taskflow.example?subject=Terms">Terms contact</a></li>
+    </ul>
+  </div>
+  <p class="legal">Taskflow, <span id="year"></span>. Sample data on this page is invented.</p>
+</footer>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+(function(){
+  var btn = document.getElementById('menu-toggle'), list = document.getElementById('primary-links');
+  btn.addEventListener('click', function(){
+    var open = list.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+  });
+  list.addEventListener('click', function(e){ if(e.target.tagName==='A'){ list.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }});
+
+  var flip = document.getElementById('theme-flip'), root = document.documentElement;
+  var order = ['auto','light','dark'], i = 0;
+  try { var saved = localStorage.getItem('tf-paper'); if(saved && order.indexOf(saved) > -1) i = order.indexOf(saved); } catch(e){}
+  function apply(){
+    var m = order[i];
+    if(m==='auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', m);
+    flip.textContent = 'paper: ' + m;
+    try { localStorage.setItem('tf-paper', m); } catch(e){}
+  }
+  flip.addEventListener('click', function(){ i = (i+1) % order.length; apply(); });
+  apply();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FitPulse</title>
+<meta name="description" content="FitPulse logs a set in two taps, starts the rest timer for you, and colors your heart rate by training zone from any Bluetooth strap.">
+<meta property="og:title" content="FitPulse: log the set, the rest timer starts itself">
+<meta property="og:description" content="Two-tap set logging, an automatic rest timer and live heart-rate zones for lifting and running.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://fitpulse.app/og.png">
+<meta name="theme-color" content="#E9EAE4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#151613" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23151613'/%3E%3Cpath d='M2 17h8l3-8 5 15 3-7h9' fill='none' stroke='%23F2C200' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/*
+ Brief
+ Visitor: someone who lifts or runs and has tried a notes app or a bloated tracker; asks "will this slow me down between sets?"
+ Artifact: the in-workout screen (set stepper, rest timer, live heart rate) drawn in CSS.
+ Material: bumper plates and rubber gym flooring. Chalk-white page, rubber-black dark theme, plate yellow as the one accent,
+           and the five IWF plate colors reused as the five heart-rate zones.
+ Typeface: Barlow Condensed (stamped plate / gym-signage numerals) for display and numbers, Barlow for reading text.
+ Sections: logging (the question) > zones > data you keep > beta contact.
+*/
+:root{
+  --chalk:#E9EAE4;
+  --chalk-deep:#DCDED5;
+  --rubber:#151613;
+  --rubber-lift:#22241F;
+  --ink:#171914;
+  --ink-soft:#4F5448;
+  --chalk-rule:#BFC2B6;
+  --plate-yellow:#F2C200;
+  --plate-green:#2F9E5B;
+  --plate-blue:#1F5FA8;
+  --plate-red:#C4271F;
+  --plate-white:#F4F5F0;
+  --page:var(--chalk);
+  --page-alt:var(--chalk-deep);
+  --text:var(--ink);
+  --text-soft:var(--ink-soft);
+  --rule:var(--chalk-rule);
+  --focus:#171914;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:"Barlow",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --page:var(--rubber);
+    --page-alt:var(--rubber-lift);
+    --text:#E9EAE4;
+    --text-soft:#A9AE9F;
+    --rule:#3A3D35;
+    --focus:var(--plate-yellow);
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--text);font:400 1.0625rem/1.55 var(--body);}
+img,svg{max-width:100%;display:block}
+button,input{font:inherit;color:inherit}
+h1,h2,h3,p,ul,dl,dd{margin:0}
+ul{padding:0;list-style:none}
+a{color:inherit;text-underline-offset:.2em;transition:color .15s,text-decoration-color .15s,background-color .15s}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.skip{position:absolute;left:12px;top:-60px;background:var(--plate-yellow);color:var(--ink);padding:.6rem .9rem;font-weight:500;z-index:10;transition:top .15s}
+.skip:focus{top:12px}
+
+/* header */
+.site-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.5rem 2rem;padding:1.1rem max(16px,4vw);border-bottom:1px solid var(--rule)}
+.wordmark{font:700 1.7rem/1 var(--display);letter-spacing:.14em;text-transform:uppercase;text-decoration:none}
+.site-nav ul{display:flex;flex-wrap:wrap;gap:.25rem 1.6rem}
+.site-nav a{font-weight:500;text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 2px no-repeat;padding-bottom:2px;transition:background-size .2s}
+.site-nav a:hover{background-size:100% 2px}
+
+/* hero */
+.opener{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:3rem 5vw;align-items:center;padding:clamp(2.5rem,6vw,5.5rem) max(16px,4vw) clamp(3rem,6vw,5rem)}
+.opener h1{font:600 clamp(3rem,9.2vw,7.6rem)/.92 var(--display);text-transform:uppercase;letter-spacing:0;max-width:11ch}
+.opener h1 .ink-mark{background:var(--plate-yellow);color:var(--ink);padding:0 .12em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.opener .lede{margin-top:1.8rem;max-width:34rem;font-size:1.25rem;line-height:1.45}
+.opener .lede-note{margin-top:.8rem;max-width:34rem;color:var(--text-soft)}
+.invite{display:flex;flex-wrap:wrap;align-items:center;gap:1rem 1.6rem;margin-top:2rem}
+.invite-btn{display:inline-block;background:var(--plate-yellow);color:var(--ink);font:600 1.25rem/1 var(--display);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;padding:1.05rem 1.5rem;border:2px solid var(--ink);border-radius:2px;box-shadow:4px 4px 0 var(--ink);transition:transform .12s,box-shadow .12s,background-color .15s}
+.invite-btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink);background:#FFD42A}
+.invite-btn:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+@media (prefers-color-scheme:dark){
+  .invite-btn{border-color:var(--plate-yellow);box-shadow:4px 4px 0 var(--plate-yellow)}
+  .invite-btn:hover{box-shadow:2px 2px 0 var(--plate-yellow)}
+  .invite-btn:active{box-shadow:0 0 0 var(--plate-yellow)}
+}
+.invite-side{color:var(--text-soft);font-size:.95rem}
+
+/* the phone: in-workout screen */
+.handset{margin:0;justify-self:center;width:100%;max-width:340px}
+.handset-body{background:#0C0D0B;border-radius:34px;padding:12px;border:2px solid #000}
+.session{background:#151613;color:#E9EAE4;border-radius:24px;padding:1.1rem 1.1rem 1.2rem;display:grid;gap:1rem}
+.session-top{display:flex;justify-content:space-between;align-items:baseline;font:500 .8rem/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:#A9AE9F}
+.lift-name{font:600 1.9rem/1 var(--display);text-transform:uppercase;letter-spacing:.02em;color:#E9EAE4}
+.stepper{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.stepper-cell{border:1px solid #3A3D35;padding:.55rem .7rem .4rem}
+.stepper-cell small{display:block;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:#A9AE9F}
+.stepper-cell b{font:600 2.6rem/1.05 var(--display)}
+.stepper-cell b span{font-size:1.2rem;color:#A9AE9F;margin-left:.2rem}
+.log-set{border:0;border-radius:2px;background:var(--plate-yellow);color:#171914;font:600 1.3rem/1 var(--display);letter-spacing:.12em;text-transform:uppercase;padding:.95rem;width:100%;cursor:pointer;transition:background-color .15s}
+.log-set:hover{background:#FFD42A}
+.rest{display:flex;align-items:center;gap:.9rem}
+.rest-clock{font:600 3.4rem/1 var(--display);font-variant-numeric:tabular-nums;min-width:4.4ch}
+.rest-meta{font-size:.82rem;line-height:1.35;color:#A9AE9F}
+.rest-bar{height:6px;background:#3A3D35;margin-top:.45rem}
+.rest-bar i{display:block;height:100%;width:62%;background:var(--plate-yellow)}
+.prior{border-top:1px solid #3A3D35;font-size:.92rem}
+.prior li{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid #3A3D35;font-variant-numeric:tabular-nums}
+.prior li span:last-child{color:#A9AE9F}
+.hr-strip{display:flex;align-items:center;gap:.7rem}
+.hr-num{font:600 2.2rem/1 var(--display);font-variant-numeric:tabular-nums}
+.hr-zone{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .5rem;background:var(--plate-yellow);color:#171914;font-weight:500}
+.hr-line{flex:1;height:34px}
+.hr-line path{fill:none;stroke:var(--plate-yellow);stroke-width:2}
+.handset-caption{margin-top:.8rem;text-align:center;font-size:.85rem;color:var(--text-soft)}
+
+/* shared section frame */
+.block{padding:clamp(3rem,7vw,6rem) max(16px,4vw)}
+.block h2{font:600 clamp(2rem,4.6vw,3.6rem)/1 var(--display);text-transform:uppercase}
+.kicker{font:500 .8rem/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--text-soft);margin-bottom:1rem}
+
+/* logging: ruled rows */
+.logging{background:var(--page-alt);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.logging-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:2rem 6vw}
+.steps{counter-reset:none;border-top:2px solid var(--text)}
+.steps li{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:.5rem 1.5rem;padding:1.2rem 0;border-bottom:1px solid var(--rule)}
+.steps h3{font:600 1.5rem/1.1 var(--display);text-transform:uppercase;letter-spacing:.03em}
+.steps p{color:var(--text-soft);max-width:38rem}
+.steps p strong{color:var(--text);font-weight:500}
+
+/* zones: full-bleed scale */
+.zones{background:var(--rubber);color:#E9EAE4;padding-left:0;padding-right:0}
+.zones-intro{padding:0 max(16px,4vw);max-width:62rem}
+.zones-intro p{margin-top:1.2rem;max-width:40rem;color:#C9CCC1}
+.zones .kicker{color:#A9AE9F}
+.scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:3rem;border-top:1px solid #3A3D35}
+.zone{padding:1.2rem max(10px,1.4vw) 1.6rem;display:flex;flex-direction:column;gap:.3rem;min-height:15rem;justify-content:flex-end}
+.zone b{font:600 clamp(2.4rem,6vw,5rem)/.9 var(--display)}
+.zone span{font-weight:500;font-size:.9rem}
+.zone small{font-size:.85rem;opacity:.95}
+.z1{background:var(--plate-white);color:#171914}
+.z2{background:var(--plate-green);color:#10130F}
+.z3{background:var(--plate-yellow);color:#171914}
+.z4{background:var(--plate-blue);color:#fff}
+.z5{background:var(--plate-red);color:#fff}
+.zones-foot{padding:1.4rem max(16px,4vw) 0;color:#A9AE9F;font-size:.95rem;max-width:62rem}
+
+/* data you keep */
+.keep-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:2rem;max-width:62rem}
+.spec{border-top:2px solid var(--text)}
+.spec div{display:grid;grid-template-columns:minmax(9rem,14rem) minmax(0,1fr);gap:.4rem 1.5rem;padding:1rem 0;border-bottom:1px solid var(--rule)}
+.spec dt{font:600 1.25rem/1.2 var(--display);text-transform:uppercase;letter-spacing:.04em}
+.spec dd{color:var(--text-soft)}
+.spec dd code{font:500 .92em ui-monospace,Menlo,Consolas,monospace;color:var(--text)}
+
+/* beta */
+.beta{background:var(--plate-yellow);color:var(--ink);border-top:2px solid var(--ink)}
+.beta-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:2rem 5vw;align-items:end}
+.beta h2{font-size:clamp(2.4rem,6vw,5rem)}
+.beta p{margin-top:1.2rem;max-width:36rem;font-size:1.1rem}
+.beta-terms{border-top:2px solid var(--ink)}
+.beta-terms div{display:flex;justify-content:space-between;gap:1rem;padding:.8rem 0;border-bottom:1px solid rgba(23,25,20,.4)}
+.beta-terms dt{font-weight:500}
+.beta .invite-btn{background:var(--ink);color:var(--plate-yellow);box-shadow:4px 4px 0 rgba(23,25,20,.35);margin-top:1.8rem}
+.beta .invite-btn:hover{background:#2B2E26;color:#FFD42A}
+.beta :focus-visible{outline-color:var(--ink)}
+
+/* footer */
+.site-foot{padding:2.5rem max(16px,4vw) 2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:2rem;border-top:1px solid var(--rule);font-size:.95rem}
+.site-foot h2{font:600 .85rem/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--text-soft);margin-bottom:.8rem}
+.site-foot li+li{margin-top:.35rem}
+.site-foot a:hover{text-decoration-color:var(--plate-yellow);text-decoration-thickness:3px}
+.site-foot .legal{grid-column:1/-1;color:var(--text-soft);padding-top:1.2rem;border-top:1px solid var(--rule)}
+
+@media (max-width:860px){
+  .opener,.logging-grid,.beta-grid{grid-template-columns:minmax(0,1fr)}
+  .scale{grid-template-columns:minmax(0,1fr)}
+  .zone{min-height:0;flex-direction:row;align-items:baseline;gap:1rem;padding:1rem 16px}
+  .zone b{min-width:2.2ch;font-size:2.6rem}
+}
+@media (max-width:480px){
+  .steps li,.spec div{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <a class="wordmark" href="#main" aria-label="FitPulse, top of page">FitPulse</a>
+  <nav class="site-nav" aria-label="Primary">
+    <ul>
+      <li><a href="#logging">Logging</a></li>
+      <li><a href="#zones">Zones</a></li>
+      <li><a href="#your-data">Your data</a></li>
+      <li><a href="#beta">Beta</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="opener" aria-labelledby="hero-title">
+    <div>
+      <h1 id="hero-title">Log the set. <span class="ink-mark">Rest timer</span> is already running.</h1>
+      <p class="lede">Enter reps and weight on the number pad and the timer starts, pre-set to the rest you actually took on this lift last session.</p>
+      <p class="lede-note">Heart rate comes from any Bluetooth strap or watch that broadcasts it, and colors itself by zone while you lift or run.</p>
+      <div class="invite">
+        <a class="invite-btn" href="mailto:beta@fitpulse.app?subject=FitPulse%20beta%20invite">Request a beta invite</a>
+        <span class="invite-side">iPhone and Android. Free during beta.</span>
+      </div>
+    </div>
+
+    <figure class="handset">
+      <div class="handset-body">
+        <div class="session" role="img" aria-label="FitPulse workout screen showing back squat, set 3 of 5, 100 kilograms for 5 reps, a rest timer at 1 minute 42 seconds, two logged sets and a heart rate of 142 beats per minute in zone 3.">
+          <div class="session-top" aria-hidden="true"><span>Set 3 of 5</span><span>Sample session</span></div>
+          <div class="lift-name" aria-hidden="true">Back squat</div>
+          <div class="stepper" aria-hidden="true">
+            <div class="stepper-cell"><small>Weight</small><b>100<span>kg</span></b></div>
+            <div class="stepper-cell"><small>Reps</small><b>5</b></div>
+          </div>
+          <button class="log-set" type="button" tabindex="-1" aria-hidden="true">Log set</button>
+          <div class="rest" aria-hidden="true">
+            <div class="rest-clock" id="rest-clock">1:42</div>
+            <div class="rest-meta">Rest, same as last Tuesday<div class="rest-bar"><i id="rest-fill"></i></div></div>
+          </div>
+          <ul class="prior" aria-hidden="true">
+            <li><span>Set 2</span><span>100 kg x 5</span></li>
+            <li><span>Set 1</span><span>90 kg x 5</span></li>
+          </ul>
+          <div class="hr-strip" aria-hidden="true">
+            <span class="hr-num">142</span>
+            <span class="hr-zone">Zone 3</span>
+            <svg class="hr-line" viewBox="0 0 120 34" preserveAspectRatio="none"><path d="M0 24 L14 22 L24 26 L38 18 L52 20 L64 12 L78 16 L92 9 L104 13 L120 6"/></svg>
+          </div>
+        </div>
+      </div>
+      <figcaption class="handset-caption">The workout screen, with sample numbers.</figcaption>
+    </figure>
+  </section>
+
+  <section class="block logging" id="logging" aria-labelledby="logging-title">
+    <div class="logging-grid">
+      <div>
+        <p class="kicker">Between sets</p>
+        <h2 id="logging-title">What happens in the 90 seconds after the bar goes down</h2>
+      </div>
+      <ol class="steps">
+        <li>
+          <h3>Tap 1</h3>
+          <p><strong>Weight and reps are pre-filled</strong> from your previous set. If you did the same thing, you change nothing.</p>
+        </li>
+        <li>
+          <h3>Tap 2</h3>
+          <p><strong>Log set.</strong> It saves offline and starts the rest countdown in the same press. The lock-screen timer keeps running with the phone in your pocket.</p>
+        </li>
+        <li>
+          <h3>Rest ends</h3>
+          <p>One haptic pulse, no sound unless you turn it on. The next set is already waiting with its target.</p>
+        </li>
+        <li>
+          <h3>Running</h3>
+          <p>Switch to a run and the same screen shows pace, distance and the heart-rate zone. Intervals use the same rest timer.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block zones" id="zones" aria-labelledby="zones-title">
+    <div class="zones-intro">
+      <p class="kicker">Heart-rate zones</p>
+      <h2 id="zones-title">Five zones, colored like the plates on the bar</h2>
+      <p>Zone edges are percentages of your max heart rate, so you can see at a glance whether the set you just finished was hard or the walk back to the rack was. Enter your own max or let FitPulse use 220 minus your age until you do.</p>
+    </div>
+    <ol class="scale" aria-label="Heart-rate zones by percent of max heart rate">
+      <li class="zone z1"><b>1</b><span>Recovery</span><small>50 to 60% of max</small></li>
+      <li class="zone z2"><b>2</b><span>Easy aerobic</span><small>60 to 70% of max</small></li>
+      <li class="zone z3"><b>3</b><span>Tempo</span><small>70 to 80% of max</small></li>
+      <li class="zone z4"><b>4</b><span>Threshold</span><small>80 to 90% of max</small></li>
+      <li class="zone z5"><b>5</b><span>Maximum</span><small>90 to 100% of max</small></li>
+    </ol>
+    <p class="zones-foot">Zones are a training guide, not medical advice.</p>
+  </section>
+
+  <section class="block" id="your-data" aria-labelledby="data-title">
+    <div class="keep-grid">
+      <div>
+        <p class="kicker">Your data</p>
+        <h2 id="data-title">Leave with every set you ever logged</h2>
+      </div>
+      <dl class="spec">
+        <div><dt>Export</dt><dd>One CSV with a row per set: <code>date, lift, weight, reps, rest_seconds, avg_hr</code>. Available from the first day, free.</dd></div>
+        <div><dt>Offline</dt><dd>Logging never waits on a connection. Sets sync when you are back online.</dd></div>
+        <div><dt>Heart-rate sensors</dt><dd>Anything that broadcasts the standard Bluetooth heart-rate profile: chest straps, most sports watches, armband sensors.</dd></div>
+        <div><dt>Accounts</dt><dd>Sign in with email. Deleting the account deletes the sets.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="block beta" id="beta" aria-labelledby="beta-title">
+    <div class="beta-grid">
+      <div>
+        <h2 id="beta-title">Beta is open to lifters who will tell us what is slow</h2>
+        <p>Send one line about what you train and which phone you carry. Invites go out in the order requests arrive, with a TestFlight link for iPhone or a Play Store test link for Android.</p>
+        <a class="invite-btn" href="mailto:beta@fitpulse.app?subject=FitPulse%20beta%20invite&amp;body=What%20I%20train%3A%0APhone%3A">Request a beta invite</a>
+      </div>
+      <dl class="beta-terms">
+        <div><dt>Price during beta</dt><dd>Free</dd></div>
+        <div><dt>Platforms</dt><dd>iOS 16+, Android 10+</dd></div>
+        <div><dt>After beta</dt><dd>Logging and export stay free</dd></div>
+      </dl>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div>
+    <h2>Product</h2>
+    <ul>
+      <li><a href="#logging">Logging</a></li>
+      <li><a href="#zones">Heart-rate zones</a></li>
+      <li><a href="#your-data">CSV export</a></li>
+    </ul>
+  </div>
+  <div>
+    <h2>Contact</h2>
+    <ul>
+      <li><a href="mailto:beta@fitpulse.app">beta@fitpulse.app</a></li>
+      <li><a href="mailto:support@fitpulse.app">support@fitpulse.app</a></li>
+    </ul>
+  </div>
+  <div>
+    <h2>Legal</h2>
+    <ul>
+      <li><a href="mailto:support@fitpulse.app?subject=Privacy%20policy%20request">Privacy policy (on request during beta)</a></li>
+      <li><a href="mailto:support@fitpulse.app?subject=Delete%20my%20account">Delete my account</a></li>
+    </ul>
+  </div>
+  <p class="legal">&copy; <span id="year"></span> FitPulse. Not a medical device.</p>
+</footer>
+
+<script>
+(function(){
+  document.getElementById('year').textContent = new Date().getFullYear();
+  // Rest timer demo: only animates when the visitor has not asked for reduced motion.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var clock = document.getElementById('rest-clock'), fill = document.getElementById('rest-fill');
+  var total = 150, left = 102;
+  setInterval(function(){
+    left = left > 0 ? left - 1 : total;
+    clock.textContent = Math.floor(left/60) + ':' + String(left%60).padStart(2,'0');
+    fill.style.width = ((total-left)/total*100) + '%';
+  }, 1000);
+})();
+</script>
+</body>
+</html>

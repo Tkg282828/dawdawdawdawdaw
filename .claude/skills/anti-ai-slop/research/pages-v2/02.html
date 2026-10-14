@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brewly Coffee Roasters</title>
+<meta name="description" content="Brewly roasts three single-origin coffees twice a week and ships them the morning after. Order whole beans by the 250 g bag.">
+<meta property="og:title" content="Brewly: roasted Monday, brewed by Wednesday">
+<meta property="og:description" content="Three single-origin coffees, roasted twice a week in small batches and shipped the next morning.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://brewly.example/og.png">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23231710'/%3E%3Cpath d='M16 5c6 3 8 9 5 15-2 4-6 6-10 6 1-4 0-8 2-12 1-3 2-6 3-9z' fill='%23f0d36b'/%3E%3Cpath d='M15 9c2 5 1 10-1 16' stroke='%23231710' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Zilla+Slab:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<!--
+BRIEF (anti-ai-slop)
+Visitor: someone who wants good beans at home and needs to know what's roasting, how it tastes, what a bag costs, how fresh it arrives.
+Product artifact: the bag label / roast ticket (origin, roast date, notes, price), CSS-drawn.
+Material reference: kraft paper bag + stencil ink + roaster's sticker label stock.
+Typeface: Zilla Slab (slab letters read like stamped bag print) + IBM Plex Mono (roast-log data).
+Sections: hero+label / this week's roasts (ruled table) / what happens after you order (a real order ticket) / visit and contact.
+NOTE: roast lineup, prices, schedule and address are SAMPLE content; confirm before launch.
+-->
+<style>
+:root{
+  --kraft:#e2c9a0; --kraft-deep:#cdae7c; --stencil:#231710; --roast-grey:#5a4126;
+  --sticker:#f0d36b; --stamp:#7a2e14; --rule:#231710;
+  --page:var(--kraft); --ink:var(--stencil); --ink-soft:var(--roast-grey); --focus:#7a2e14;
+  --btn-bg:var(--stencil); --btn-ink:#f3e4c4;
+  --bag:#d3b27f; --bag-ink:#231710;
+  --slab:"Zilla Slab",Rockwell,"Roboto Slab",serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --page:#1b1410; --ink:#ecd7ae; --ink-soft:#b9a07a; --rule:#ecd7ae; --focus:#f0d36b;
+  --btn-bg:#f0d36b; --btn-ink:#231710;
+}}
+:root[data-theme="dark"]{
+  --page:#1b1410; --ink:#ecd7ae; --ink-soft:#b9a07a; --rule:#ecd7ae; --focus:#f0d36b;
+  --btn-bg:#f0d36b; --btn-ink:#231710;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);font:400 1.125rem/1.55 var(--slab);transition:background-color .2s,color .2s}
+img,svg{max-width:100%;display:block}
+button,input,select{font:inherit;color:inherit}
+a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:1px;transition:color .15s,text-decoration-color .15s,background-color .15s}
+a:hover{text-decoration-thickness:3px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.skip{position:absolute;left:1rem;top:-4rem;background:var(--stencil);color:#f3e4c4;padding:.6rem 1rem;z-index:10;transition:top .15s}
+.skip:focus{top:1rem}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* top bar */
+.topbar{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.5rem 2rem;padding:1.1rem clamp(1rem,4vw,3rem);border-bottom:2px solid var(--rule)}
+.mark{font:700 1.15rem/1 var(--slab);letter-spacing:.34em;text-transform:uppercase;text-decoration:none}
+.topbar nav{display:flex;flex-wrap:wrap;gap:.25rem 1.6rem;font:500 .8rem/1.4 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.topbar nav a{text-decoration:none;padding:.3rem 0;border-bottom:2px solid transparent}
+.topbar nav a:hover{border-bottom-color:currentColor}
+
+/* hero */
+.opening{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,30rem);gap:clamp(2rem,6vw,6rem);align-items:center;padding:clamp(2.5rem,7vw,6rem) clamp(1rem,4vw,3rem) clamp(3rem,7vw,6rem)}
+.opening h1{font:500 clamp(2.6rem,7.4vw,6.6rem)/.96 var(--slab);letter-spacing:-.012em;margin:0 0 1.6rem}
+.opening h1 em{font-style:italic;font-weight:400}
+.lead{max-width:34rem;font-size:1.3rem;line-height:1.45;margin:0 0 2rem}
+.act{display:flex;flex-wrap:wrap;align-items:center;gap:1rem 1.8rem}
+.stamp-btn{display:inline-block;background:var(--btn-bg);color:var(--btn-ink);padding:.95rem 1.4rem;font:500 .85rem/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;border:2px solid var(--btn-bg);box-shadow:5px 5px 0 var(--ink-soft);transition:transform .15s,box-shadow .15s,background-color .15s,color .15s}
+.stamp-btn:hover{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink-soft)}
+.stamp-btn:active{transform:translate(5px,5px);box-shadow:0 0 0 var(--ink-soft)}
+
+/* bag label (product artifact) */
+.bag{position:relative;background:var(--bag);color:var(--bag-ink);padding:1.6rem 1.5rem 1.4rem;transform:rotate(1.6deg);
+  background-image:repeating-linear-gradient(0deg,rgba(35,23,16,.045) 0 1px,transparent 1px 4px);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),96% 100%,92% calc(100% - 10px),88% 100%,84% calc(100% - 10px),80% 100%,76% calc(100% - 10px),72% 100%,68% calc(100% - 10px),64% 100%,60% calc(100% - 10px),56% 100%,52% calc(100% - 10px),48% 100%,44% calc(100% - 10px),40% 100%,36% calc(100% - 10px),32% 100%,28% calc(100% - 10px),24% 100%,20% calc(100% - 10px),16% 100%,12% calc(100% - 10px),8% 100%,4% calc(100% - 10px),0 100%)}
+.bag-top{display:flex;justify-content:space-between;font:500 .72rem/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;border-bottom:2px solid var(--bag-ink);padding-bottom:.6rem}
+.bag-name{font:700 clamp(2.1rem,5vw,3rem)/.95 var(--slab);margin:1.1rem 0 .2rem;text-transform:uppercase;letter-spacing:.01em}
+.bag-sub{font:italic 400 1.1rem/1.3 var(--slab);margin:0 0 1.2rem}
+.bag dl{margin:0;font:400 .85rem/1.4 var(--mono);display:grid;grid-template-columns:7.2rem 1fr;gap:.35rem .8rem;border-top:1px dashed var(--bag-ink);padding-top:.9rem}
+.bag dt{text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;padding-top:.15em}
+.bag dd{margin:0}
+.sticker{position:absolute;right:-.8rem;top:4.3rem;width:6.6rem;height:6.6rem;border-radius:50%;background:var(--sticker);color:#231710;display:grid;place-content:center;text-align:center;font:500 .66rem/1.25 var(--mono);text-transform:uppercase;letter-spacing:.06em;transform:rotate(-9deg);box-shadow:0 2px 0 rgba(35,23,16,.35)}
+.sticker b{display:block;font:700 1.45rem/1 var(--slab);letter-spacing:0;margin:.15rem 0}
+
+/* roasts: ruled rows */
+.roasts{padding:clamp(2.5rem,6vw,5rem) clamp(1rem,4vw,3rem);border-top:2px solid var(--rule)}
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.5rem 3rem;margin-bottom:1.6rem}
+h2{font:500 clamp(1.8rem,3.6vw,2.8rem)/1.05 var(--slab);margin:0}
+.sec-head p{margin:0;font:400 .85rem/1.4 var(--mono);color:var(--ink-soft);max-width:26rem}
+.roast-row{display:grid;grid-template-columns:minmax(9rem,1.1fr) minmax(0,2.4fr) minmax(6rem,.7fr) auto;gap:.6rem 2rem;align-items:baseline;padding:1.4rem 0;border-top:1px solid var(--rule);transition:background-color .15s,padding .15s}
+.roast-row:last-child{border-bottom:1px solid var(--rule)}
+.roast-row:hover{background:color-mix(in srgb,var(--ink) 7%,transparent);padding-left:.8rem;padding-right:.8rem}
+.roast-row h3{font:700 1.5rem/1.1 var(--slab);margin:0}
+.roast-row h3 small{display:block;font:400 .78rem/1.5 var(--mono);color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase;margin-top:.3rem}
+.roast-row p{margin:0}
+.roast-row .price{font:500 1.05rem/1.2 var(--mono)}
+.roast-row .price small{display:block;color:var(--ink-soft);font-size:.75rem}
+.roast-row a.order{font:500 .8rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;padding:.7rem .9rem;border:2px solid var(--ink);text-decoration:none;white-space:nowrap}
+.roast-row a.order:hover{background:var(--ink);color:var(--page)}
+.fine{font:400 .85rem/1.5 var(--mono);color:var(--ink-soft);margin:1.4rem 0 0;max-width:46rem}
+
+/* order ticket */
+.after{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(2rem,6vw,5rem);padding:clamp(2.5rem,6vw,5rem) clamp(1rem,4vw,3rem);border-top:2px solid var(--rule)}
+.after h2{max-width:14ch}
+.ticket{background:var(--bag);color:var(--bag-ink);font:400 .88rem/1.55 var(--mono);padding:1.4rem 1.6rem;border-left:10px solid var(--stencil);max-width:44rem}
+.ticket header{display:flex;justify-content:space-between;gap:1rem;text-transform:uppercase;letter-spacing:.1em;font-size:.72rem;border-bottom:1px dashed var(--bag-ink);padding-bottom:.6rem;margin-bottom:.4rem}
+.ticket ol{list-style:none;margin:0;padding:0}
+.ticket li{display:grid;grid-template-columns:7.6rem 1fr;gap:.2rem 1rem;padding:.55rem 0;border-bottom:1px dotted rgba(35,23,16,.5)}
+.ticket li:last-child{border-bottom:0}
+.ticket time{font-weight:500}
+
+/* visit */
+.visit{background:var(--stencil);color:#ecd7ae;padding:clamp(2.5rem,6vw,5rem) clamp(1rem,4vw,3rem) 1.5rem}
+.visit a:focus-visible{outline-color:#f0d36b}
+.visit-grid{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(2,minmax(0,1fr));gap:2.5rem 3rem}
+.visit h2{font-size:clamp(1.8rem,4vw,3.2rem);max-width:13ch}
+.visit h3{font:500 .72rem/1.3 var(--mono);text-transform:uppercase;letter-spacing:.14em;margin:0 0 .6rem;color:#d1b88d}
+.visit address,.visit ul{font-style:normal;margin:0;padding:0;list-style:none;font-size:1.05rem}
+.visit a{text-decoration-color:#d1b88d}
+.visit a:hover{color:#f0d36b}
+.legal{margin:3rem 0 0;padding-top:1rem;border-top:1px solid #6b5338;display:flex;flex-wrap:wrap;gap:.4rem 1.6rem;font:400 .78rem/1.5 var(--mono);color:#d1b88d}
+
+@media (max-width:860px){
+  .opening,.after{grid-template-columns:1fr}
+  .bag{max-width:30rem;transform:rotate(1deg)}
+  .roast-row{grid-template-columns:1fr auto;gap:.5rem 1rem}
+  .roast-row h3{grid-column:1/-1}
+  .roast-row p:not(.price){grid-column:1/-1}
+  .visit-grid{grid-template-columns:1fr 1fr}
+  .visit-grid>:first-child{grid-column:1/-1}
+}
+@media (max-width:480px){
+  .visit-grid{grid-template-columns:1fr}
+  .ticket li{grid-template-columns:1fr}
+  .sticker{right:-.4rem;width:5.6rem;height:5.6rem}
+  .bag dl{grid-template-columns:6rem 1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (prefers-reduced-motion:no-preference){
+  html{scroll-behavior:smooth}
+  .bag{animation:settle .7s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes settle{from{transform:translateY(18px) rotate(4deg);opacity:0}}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <a class="mark" href="./" aria-label="Brewly home">Brewly</a>
+  <nav aria-label="Main">
+    <a href="#roasts">This week's roasts</a>
+    <a href="#after-you-order">Shipping</a>
+    <a href="#visit">Visit the roastery</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="opening" aria-labelledby="h1">
+    <div>
+      <h1 id="h1">Roasted Monday, <em>brewed by Wednesday.</em></h1>
+      <p class="lead">We roast in 12 kg batches on Monday and Thursday, bag the same afternoon and hand the parcels to the courier the next morning, so the roast date on your bag is never more than three days old.</p>
+      <div class="act">
+        <a class="stamp-btn" href="#roasts">Pick a roast</a>
+        <a href="#after-you-order">See what happens after you order</a>
+      </div>
+    </div>
+
+    <div class="bag" role="img" aria-label="Brewly bag label: Guji Hambela, washed Ethiopian coffee, roasted most recently on the date shown, tasting notes of bergamot, peach and black tea, 250 grams, 17 dollars.">
+      <div class="sticker" aria-hidden="true">Roasted<b id="stickerDay">Mon</b><span id="stickerDate">this week</span></div>
+      <div aria-hidden="true">
+        <div class="bag-top"><span>Brewly Roasters</span><span>Lot 24-11</span></div>
+        <p class="bag-name">Guji<br>Hambela</p>
+        <p class="bag-sub">Washed, Ethiopia</p>
+        <dl>
+          <dt>Tastes of</dt><dd>bergamot, peach, black tea</dd>
+          <dt>Roast</dt><dd>Light. 9 min 40 s, dropped at 204 °C</dd>
+          <dt>Grown at</dt><dd>1,950 to 2,200 m</dd>
+          <dt>Roasted</dt><dd id="labelDate">Monday</dd>
+          <dt>Net</dt><dd>250 g whole bean, $17</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="roasts" id="roasts" aria-labelledby="h-roasts">
+    <div class="sec-head">
+      <h2 id="h-roasts">On the shelf this week</h2>
+      <p>Three coffees at a time. When a lot sells out we swap it on the next roast day.</p>
+    </div>
+    <div>
+      <article class="roast-row">
+        <h3>Guji Hambela<small>Ethiopia / washed / light</small></h3>
+        <p>Bergamot and peach up front, black tea in the finish. Brews cleanly in a paper-filter cone.</p>
+        <p class="price">$17<small>250 g</small></p>
+        <a class="order" href="mailto:orders@brewly.example?subject=Order%3A%20Guji%20Hambela%20250%20g">Order this bag</a>
+      </article>
+      <article class="roast-row">
+        <h3>Huila Las Flores<small>Colombia / honey / medium</small></h3>
+        <p>Red apple, panela and milk chocolate. The one to pull as espresso or press in a moka pot.</p>
+        <p class="price">$15<small>250 g</small></p>
+        <a class="order" href="mailto:orders@brewly.example?subject=Order%3A%20Huila%20Las%20Flores%20250%20g">Order this bag</a>
+      </article>
+      <article class="roast-row">
+        <h3>Cerrado Dark Drum<small>Brazil / natural / dark</small></h3>
+        <p>Toasted hazelnut, cocoa nib, a little smoke. Holds up to milk and to a French press left too long.</p>
+        <p class="price">$14<small>250 g</small></p>
+        <a class="order" href="mailto:orders@brewly.example?subject=Order%3A%20Cerrado%20Dark%20Drum%20250%20g">Order this bag</a>
+      </article>
+    </div>
+    <p class="fine">Prototype: orders open a pre-filled email to the roastery until the online checkout is wired up. Whole bean only; tell us the grinder you own and we will tell you the dial setting.</p>
+  </section>
+
+  <section class="after" id="after-you-order" aria-labelledby="h-after">
+    <h2 id="h-after">Your bag is packed the day it is roasted.</h2>
+    <div class="ticket">
+      <header><span>Order ticket / sample</span><span>1 x Guji Hambela</span></header>
+      <ol>
+        <li><time>Mon, 06:30</time><span>Green coffee goes into the drum.</span></li>
+        <li><time>Mon, 14:00</time><span>Bagged, valve sealed, roast date stamped by hand.</span></li>
+        <li><time>Tue, 09:00</time><span>Handed to the courier. You get a tracking email.</span></li>
+        <li><time>Wed</time><span>On your doorstep. Rest the beans two days if you can; they open up by Friday.</span></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer class="visit" id="visit">
+  <div class="visit-grid">
+    <div>
+      <h2>Come smell the roaster.</h2>
+    </div>
+    <div>
+      <h3>Roastery and pickup</h3>
+      <address>[ADDRESS NEEDED]<br>Pickup: Tue and Fri, 10:00 to 16:00</address>
+    </div>
+    <div>
+      <h3>Contact</h3>
+      <ul>
+        <li><a href="mailto:orders@brewly.example">orders@brewly.example</a></li>
+        <li><a href="tel:+10000000000">[PHONE NEEDED]</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="legal">
+    <span>&copy; <span id="yr"></span> Brewly Coffee Roasters</span>
+    <a href="mailto:orders@brewly.example?subject=Shipping%20and%20returns">Shipping and returns</a>
+    <a href="mailto:orders@brewly.example?subject=Privacy">Privacy</a>
+  </p>
+</footer>
+
+<script>
+(function(){
+  document.getElementById('yr').textContent=new Date().getFullYear();
+  // Most recent roast day (Monday or Thursday), including today.
+  var d=new Date(), days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  for(var i=0;i<7;i++){var c=new Date(d);c.setDate(d.getDate()-i);if(c.getDay()===1||c.getDay()===4){d=c;break;}}
+  var full=d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+  document.getElementById('labelDate').textContent=full;
+  document.getElementById('stickerDay').textContent=days[d.getDay()].slice(0,3);
+  document.getElementById('stickerDate').textContent=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio Mara</title>
+<meta name="description" content="Studio Mara is an independent architecture practice that draws every house at 1:20 before a brick is ordered. Book a site visit.">
+<meta property="og:title" content="Studio Mara, independent architecture">
+<meta property="og:description" content="Every house drawn at 1:20 before a brick is ordered.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2317201b'/%3E%3Cpath d='M7 25V7h4l5 9 5-9h4v18' fill='none' stroke='%23e4e8df' stroke-width='2.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+/* Brief
+   Visitor: someone about to commission a house or extension; asks "how do they work, and can I see it before I trust it?"
+   Artifact: a 1:50 floor plan sheet with dimension chains and one red-pencil markup.
+   Material: drafting vellum + graphite (light); self-healing cutting mat green + chalk (dark); red checking pencil as the only accent.
+   Type: Newsreader (a text serif drawn for reading at size, calm at weight 400) with IBM Plex Mono for drawing-sheet lettering. */
+:root{
+  --vellum:#e6e9e0;
+  --vellum-deep:#d6dacd;
+  --graphite:#1c211c;
+  --graphite-soft:#454c43;
+  --pencil-red:#a3261c;
+  --on-pencil:#f6f3ee;
+  --sheet-rule:#9ba296;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --vellum:#16201a;
+    --vellum-deep:#1f2c24;
+    --graphite:#e3e8dd;
+    --graphite-soft:#a8b3a5;
+    --pencil-red:#ff8f7e;
+    --on-pencil:#16201a;
+    --sheet-rule:#4b5c50;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --vellum:#16201a;
+  --vellum-deep:#1f2c24;
+  --graphite:#e3e8dd;
+  --graphite-soft:#a8b3a5;
+  --pencil-red:#ff8f7e;
+  --on-pencil:#16201a;
+  --sheet-rule:#4b5c50;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--vellum);color:var(--graphite);font-family:"Newsreader",Georgia,serif;font-size:1.125rem;line-height:1.5;font-optical-sizing:auto}
+img,svg{display:block;max-width:100%}
+button,input{font:inherit;color:inherit}
+h1,h2,h3,p,ol,ul,dl,dd,figure,table{margin:0;padding:0}
+ul,ol{list-style:none}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--pencil-red);outline-offset:3px}
+.skip{position:absolute;left:1rem;top:-4rem;background:var(--graphite);color:var(--vellum);padding:.6rem 1rem;z-index:10;font-family:"IBM Plex Mono",monospace;font-size:.8rem}
+.skip:focus{top:1rem}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}
+
+/* masthead */
+.masthead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.75rem 2rem;padding:1.25rem clamp(1rem,4vw,3rem);border-bottom:1px solid var(--sheet-rule)}
+.studio-name{font-weight:400;font-size:1.05rem;letter-spacing:.34em;text-transform:uppercase;text-decoration:none}
+.masthead nav ul{display:flex;flex-wrap:wrap;gap:.25rem 1.75rem;align-items:baseline}
+.masthead a:not(.studio-name),.theme-switch{font-family:"IBM Plex Mono",monospace;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;background:none;border:0;padding:.35rem 0;cursor:pointer;border-bottom:1px solid transparent;transition:border-color .15s,color .15s}
+.masthead a:not(.studio-name):hover,.theme-switch:hover{border-bottom-color:var(--pencil-red);color:var(--pencil-red)}
+
+/* hero */
+.opening{display:grid;grid-template-columns:minmax(0,25rem) minmax(0,1fr);gap:clamp(2rem,5vw,5rem);padding:clamp(2.5rem,6vw,5.5rem) clamp(1rem,4vw,3rem) clamp(2.5rem,5vw,4.5rem);align-items:start}
+.opening h1{font-weight:400;font-size:clamp(2.7rem,1.4rem + 4.6vw,5rem);line-height:1.02;letter-spacing:-.012em}
+.opening h1 em{font-style:italic}
+.opening .claim{margin-top:1.5rem;max-width:34ch;color:var(--graphite)}
+.book{display:inline-block;margin-top:2rem;padding:1rem 1.6rem;background:var(--graphite);color:var(--vellum);border:1px solid var(--graphite);border-radius:0;font-family:"IBM Plex Mono",monospace;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;transition:background-color .15s,color .15s,border-color .15s}
+.book:hover{background:var(--pencil-red);border-color:var(--pencil-red);color:var(--on-pencil)}
+
+.sheet{border:1px solid var(--graphite);background:var(--vellum-deep)}
+.sheet-scroll{overflow-x:auto;padding:1rem}
+.sheet-scroll svg{min-width:600px;width:100%;height:auto}
+.sheet figcaption{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.25rem 1.5rem;padding:.7rem 1rem;border-top:1px solid var(--graphite);color:var(--graphite-soft)}
+.plan *{vector-effect:non-scaling-stroke}
+.plan .wall{fill:none;stroke:var(--graphite);stroke-width:9;stroke-linejoin:miter}
+.plan .part{fill:none;stroke:var(--graphite);stroke-width:5}
+.plan .leaf{stroke:var(--graphite);stroke-width:2;fill:none}
+.plan .gap{stroke:var(--vellum-deep);stroke-width:13;fill:none}
+.plan .glass{stroke:var(--graphite);stroke-width:1.5;fill:none}
+.plan .swing{stroke:var(--graphite);stroke-width:1;fill:none;stroke-dasharray:3 3}
+.plan .dim{stroke:var(--graphite-soft);stroke-width:1;fill:none}
+.plan text{fill:var(--graphite);font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.06em}
+.plan .room{font-family:"Newsreader",serif;font-size:19px;letter-spacing:0;font-style:italic}
+.plan .small{fill:var(--graphite-soft);font-size:11px}
+.plan .red{stroke:var(--pencil-red);fill:none;stroke-width:1.75}
+.plan .red-note{fill:var(--pencil-red);font-size:12px}
+@media (prefers-reduced-motion:no-preference){
+  .plan .wall{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.6s ease-out .2s forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+}
+
+/* sheet set */
+.sheet-set{padding:clamp(2.5rem,5vw,4.5rem) clamp(1rem,4vw,3rem);border-top:1px solid var(--sheet-rule)}
+.sheet-set-inner{max-width:72rem;margin-left:auto;margin-right:clamp(0rem,6vw,6rem)}
+.sheet-set h2,.work h2,.contact h2{font-weight:400;font-size:clamp(1.9rem,1.2rem + 2.2vw,3rem);line-height:1.1;max-width:20ch}
+.sheet-set .lede{margin-top:1rem;max-width:58ch;color:var(--graphite)}
+.scales{margin-top:2.5rem;width:100%;border-collapse:collapse;text-align:left}
+.scales caption{position:absolute;left:-999px}
+.scales th,.scales td{vertical-align:baseline;padding:1.25rem 1.5rem 1.25rem 0;border-top:1px solid var(--graphite)}
+.scales tr:last-child th,.scales tr:last-child td{border-bottom:1px solid var(--graphite)}
+.scales thead th{padding:.6rem 1.5rem .6rem 0;border-top:0;color:var(--graphite-soft);font-weight:400}
+.scales tbody th{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:1.05rem;white-space:nowrap;width:6.5rem}
+.scales td:nth-child(2){font-size:1.35rem;line-height:1.2;width:30%}
+.scales td:last-child{color:var(--graphite);max-width:44ch}
+@media (max-width:44rem){
+  .scales thead{position:absolute;left:-999px}
+  .scales,.scales tbody,.scales tr,.scales th,.scales td{display:block}
+  .scales tr{padding:1.1rem 0;border-top:1px solid var(--graphite)}
+  .scales tr:last-child{border-bottom:1px solid var(--graphite)}
+  .scales th,.scales td,.scales tr:last-child th,.scales tr:last-child td{border:0;padding:.15rem 0;width:auto}
+  .scales td:nth-child(2){width:auto}
+}
+
+/* work */
+.work{padding:clamp(2.5rem,5vw,4.5rem) clamp(1rem,4vw,3rem);background:var(--vellum-deep);border-top:1px solid var(--sheet-rule);border-bottom:1px solid var(--sheet-rule)}
+.work-inner{max-width:64rem}
+.project-row{display:grid;grid-template-columns:4rem minmax(0,1fr) minmax(0,16rem);gap:.5rem 2rem;align-items:baseline;padding:1.4rem 0;border-top:1px solid var(--graphite)}
+.project-list{margin-top:2.25rem}
+.project-list li:last-child .project-row{border-bottom:1px solid var(--graphite)}
+.project-row .no{color:var(--graphite-soft)}
+.project-row h3{font-weight:400;font-size:1.5rem;line-height:1.2}
+.project-row p{color:var(--graphite-soft)}
+.placeholder{color:var(--pencil-red)}
+.work .note{margin-top:1.5rem;max-width:56ch;color:var(--graphite-soft)}
+@media (max-width:44rem){.project-row{grid-template-columns:3rem minmax(0,1fr)}.project-row p{grid-column:2}}
+
+/* contact */
+.contact{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,26rem);gap:clamp(2rem,5vw,5rem);padding:clamp(2.5rem,5vw,4.5rem) clamp(1rem,4vw,3rem)}
+.contact .lede{margin-top:1rem;max-width:46ch}
+.contact-lines{margin-top:.25rem}
+.contact-lines div{padding:1rem 0;border-top:1px solid var(--graphite)}
+.contact-lines div:last-child{border-bottom:1px solid var(--graphite)}
+.contact-lines dt{color:var(--graphite-soft);margin-bottom:.2rem}
+.contact-lines a{text-decoration:underline;text-underline-offset:.2em;text-decoration-thickness:1px;transition:color .15s,text-underline-offset .15s}
+.contact-lines a:hover{color:var(--pencil-red);text-underline-offset:.35em}
+@media (max-width:56rem){.opening,.contact{grid-template-columns:minmax(0,1fr)}}
+
+footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem 3rem;padding:1.5rem clamp(1rem,4vw,3rem) 2.5rem;border-top:1px solid var(--graphite);color:var(--graphite-soft)}
+footer ul{display:flex;flex-wrap:wrap;gap:.25rem 1.5rem}
+footer a{transition:color .15s}
+footer a:hover{color:var(--pencil-red)}
+</style>
+</head>
+<body id="top">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <a class="studio-name" href="#top" aria-label="Studio Mara, top of page">Studio Mara</a>
+  <nav aria-label="Primary">
+    <ul>
+      <li><a href="#sheets">Drawings</a></li>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#contact">Site visit</a></li>
+      <li><button class="theme-switch" type="button" id="theme" aria-label="Switch colour theme">Dark</button></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="opening" aria-labelledby="h-open">
+    <div>
+      <h1 id="h-open">Drawn at <em>1:20</em> before a brick is ordered.</h1>
+      <p class="claim">Most builders price from 1:100 sketches. We resolve every wall, sill and stair at 1:20 first, so the quote you sign describes the house you get.</p>
+      <a class="book" href="#contact">Book a site visit</a>
+    </div>
+
+    <figure class="sheet">
+      <div class="sheet-scroll" tabindex="0" role="region" aria-label="Sample floor plan, scrolls sideways on narrow screens">
+        <svg class="plan" viewBox="0 0 700 490" role="img" aria-labelledby="plan-t plan-d">
+          <title id="plan-t">Sample floor plan, sheet A-101, scale 1:50</title>
+          <desc id="plan-d">A 10.4 by 7.2 metre single-storey house: a 6 metre kitchen and living room on the left, a bedroom and bathroom on the right, with a red pencil note asking for the kitchen window sill to be lowered.</desc>
+
+          <!-- dimension chains -->
+          <g class="dim" aria-hidden="true">
+            <path d="M100 40H620M100 33V47M620 33V47M400 33V47"/>
+            <path d="M68 70V430M61 70H75M61 430H75"/>
+            <path d="M100 458H620M100 451V465M400 451V465M620 451V465"/>
+          </g>
+          <g aria-hidden="true">
+            <text x="360" y="30" text-anchor="middle">10.40</text>
+            <text x="250" y="478" text-anchor="middle" class="small">6.00</text>
+            <text x="510" y="478" text-anchor="middle" class="small">4.40</text>
+            <text transform="translate(50 250) rotate(-90)" text-anchor="middle">7.20</text>
+          </g>
+
+          <!-- walls -->
+          <rect class="wall" x="100" y="70" width="520" height="360" pathLength="1"/>
+          <path class="part" d="M400 70V430M400 300H620" aria-hidden="true"/>
+
+          <!-- openings: door gaps, glazing, swing arcs -->
+          <g aria-hidden="true">
+            <path class="gap" d="M400 332V388"/>
+            <path class="swing" d="M400 332A56 56 0 0 1 456 388"/>
+            <path class="leaf" d="M400 332L456 332"/>
+            <path class="gap" d="M150 430H280"/>
+            <path class="glass" d="M150 427H280M150 433H280"/>
+            <path class="gap" d="M100 150V260"/>
+            <path class="glass" d="M97 150V260M103 150V260"/>
+            <path class="gap" d="M470 70H570"/>
+            <path class="glass" d="M470 67H570M470 73H570"/>
+            <path class="gap" d="M400 140V196"/>
+            <path class="swing" d="M400 140A56 56 0 0 0 344 196"/>
+            <path class="gap" d="M500 300H548"/>
+            <path class="swing" d="M500 300A48 48 0 0 1 548 348"/>
+          </g>
+
+          <!-- labels -->
+          <text class="room" x="140" y="110">Kitchen</text>
+          <text class="room" x="240" y="270">Living</text>
+          <text class="room" x="430" y="110">Bedroom</text>
+          <text class="room" x="430" y="340">Bath</text>
+          <text class="small" x="140" y="132">6.00 x 7.20</text>
+          <text class="small" x="430" y="132">4.40 x 4.60</text>
+          <text class="small" x="430" y="362">4.40 x 2.60</text>
+          <g aria-hidden="true">
+            <circle cx="650" cy="390" r="20" class="dim"/>
+            <path d="M650 410V371M650 371l-6 12M650 371l6 12" class="dim"/>
+            <text x="650" y="436" text-anchor="middle" class="small">N</text>
+          </g>
+
+          <!-- red pencil markup -->
+          <g>
+            <path class="red" d="M141 424C146 410 286 412 289 427C290 441 146 443 141 424Z"/>
+            <path class="red" d="M215 442C215 456 232 466 262 468"/>
+            <text class="red-note" x="266" y="472">R1  Sill to 900. See detail 3 at 1:5</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption class="mono"><span>Sheet A-101 / Plan</span><span>1:50 / Sample sheet, not a built project</span></figcaption>
+    </figure>
+  </section>
+
+  <section class="sheet-set" id="sheets" aria-labelledby="h-sheets">
+    <div class="sheet-set-inner">
+      <h2 id="h-sheets">Four scales, four decisions you make with us.</h2>
+      <p class="lede">The set grows as the house does. You sign off one scale before we start the next, so a change on paper costs a rubbed-out line instead of a re-poured slab.</p>
+      <table class="scales">
+        <caption>Drawing scales and the decision each one settles</caption>
+        <thead class="mono"><tr><th scope="col">Scale</th><th scope="col">Drawing</th><th scope="col">What it settles</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">1:200</th><td>Site plan</td><td>Where the house sits, which way it faces, what the neighbours will see from their windows.</td></tr>
+          <tr><th scope="row">1:50</th><td>Floor plans and sections</td><td>Room sizes, stair rise, ceiling heights, where every door swings.</td></tr>
+          <tr><th scope="row">1:20</th><td>Wall sections and joinery</td><td>How the wall is built from slab to roof, so a builder can price it without guessing.</td></tr>
+          <tr><th scope="row">1:5</th><td>Details</td><td>Sills, thresholds, eaves and handrails: the places where a house leaks or looks cheap.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="work" id="work" aria-labelledby="h-work">
+    <div class="work-inner">
+      <h2 id="h-work">Built work, with drawings beside the photographs.</h2>
+      <ol class="project-list">
+        <li><div class="project-row"><span class="no mono">01</span><h3 class="placeholder">[PROJECT NAME NEEDED]</h3><p class="mono">[LOCATION, YEAR, PHOTO NEEDED]</p></div></li>
+        <li><div class="project-row"><span class="no mono">02</span><h3 class="placeholder">[PROJECT NAME NEEDED]</h3><p class="mono">[LOCATION, YEAR, PHOTO NEEDED]</p></div></li>
+        <li><div class="project-row"><span class="no mono">03</span><h3 class="placeholder">[PROJECT NAME NEEDED]</h3><p class="mono">[LOCATION, YEAR, PHOTO NEEDED]</p></div></li>
+      </ol>
+      <p class="note">Each entry will show the finished building next to its 1:50 plan, so you can see what was drawn and what was built. Client names are published only with permission.</p>
+    </div>
+  </section>
+
+  <section class="contact" id="contact" aria-labelledby="h-contact">
+    <div>
+      <h2 id="h-contact">A site visit comes before a fee proposal.</h2>
+      <p class="lede">We walk the plot or the existing house with you, measure what matters, and write up what we saw. Send the address and what you hope to build: a new house, an extension or a conversion.</p>
+    </div>
+    <dl class="contact-lines">
+      <div><dt class="mono">Write to</dt><dd><a href="mailto:hello@studiomara.example">[STUDIO EMAIL NEEDED]</a></dd></div>
+      <div><dt class="mono">Studio</dt><dd class="placeholder">[STUDIO ADDRESS NEEDED]</dd></div>
+      <div><dt class="mono">Hours</dt><dd class="placeholder">[OFFICE HOURS NEEDED]</dd></div>
+    </dl>
+  </section>
+</main>
+
+<footer>
+  <p class="mono">Studio Mara / Architects / <span id="year"></span></p>
+  <ul class="mono">
+    <li><a href="#sheets">Drawings</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#contact">Site visit</a></li>
+    <li><a href="#top">Back to top</a></li>
+  </ul>
+  <p class="mono placeholder">[REGISTRATION NUMBER AND INSURANCE DETAILS NEEDED]</p>
+</footer>
+
+<script>
+(function(){
+  document.getElementById('year').textContent = new Date().getFullYear();
+  var root = document.documentElement, btn = document.getElementById('theme');
+  function current(){
+    var t = root.getAttribute('data-theme');
+    if (t) return t;
+    return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function label(){ btn.textContent = current() === 'dark' ? 'Light' : 'Dark'; }
+  try { var s = localStorage.getItem('mara-theme'); if (s) root.setAttribute('data-theme', s); } catch(e){}
+  label();
+  btn.addEventListener('click', function(){
+    var next = current() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('mara-theme', next); } catch(e){}
+    label();
+  });
+})();
+</script>
+</body>
+</html>

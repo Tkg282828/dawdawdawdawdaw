@@ -1,0 +1,312 @@
+<!doctype html>
+<!--
+BRIEF
+Visitor: someone who has killed a houseplant and wants to know "will I know when to water it?" before subscribing.
+Product artifact: the nursery stake tag that is pushed into every pot, working (enter last-watered date, it prints the next water window).
+Material reference: a white polypropylene nursery label stake, black injection-moulded nursery pot, pencil/marker writing, new-leaf chartreuse.
+Typeface: Newsreader (botanical-book serif; italic for Latin binomials, as in field guides) + IBM Plex Mono (the stamped data on the tag).
+Sections: hero tag -> plants with real care specs -> plans (ruled rows) -> email us your window -> footer.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Greenleaf plant delivery and care</title>
+<meta name="description" content="Potted plants delivered with a care tag that names the day to water. Pothos, snake plant, ZZ, peperomia and spider plant, on a plan with repotting.">
+<meta property="og:title" content="Greenleaf: plants that arrive with the watering day written on them">
+<meta property="og:description" content="Every pot comes with a stake that tells you the light, the water window and whether it is safe for cats.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23141A15'/%3E%3Cpath d='M16 27C7 22 6 11 8 6c8 0 17 4 17 12 0 4-3 8-9 9z' fill='%23B5D56A'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --potting-soil:#E6EADA;
+  --label-ink:#17241A;
+  --pencil-grey:#46564A;
+  --stake-white:#F8F9F2;
+  --stake-edge:#C3CBB6;
+  --leaf-deep:#2B5A3A;
+  --new-leaf:#C4DE6B;
+  --pot-black:#141A15;
+  --serif:"Newsreader",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --potting-soil:#141A15;
+    --label-ink:#E4EAD8;
+    --pencil-grey:#A9B6A5;
+    --stake-edge:#34402F;
+    --leaf-deep:#B5D56A;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--potting-soil);color:var(--label-ink);font:400 1.125rem/1.55 var(--serif);font-optical-sizing:auto}
+img,svg{display:block;max-width:100%}
+button,input{font:inherit;color:inherit}
+h1,h2,h3,p,dl,dd,ul{margin:0}
+ul{padding:0;list-style:none}
+a{color:var(--leaf-deep);text-underline-offset:.22em;text-decoration-thickness:1px;transition:color .15s,text-decoration-thickness .15s}
+a:hover{text-decoration-thickness:3px}
+:focus-visible{outline:3px solid var(--leaf-deep);outline-offset:3px}
+.tag :focus-visible{outline-color:var(--pot-black)}
+.skip{position:absolute;left:12px;top:-60px;background:var(--pot-black);color:var(--new-leaf);padding:10px 14px;font:500 .8rem var(--mono);z-index:9;transition:top .15s}
+.skip:focus{top:12px}
+
+/* masthead */
+.masthead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:10px 28px;padding:20px clamp(16px,4vw,48px)}
+.mark{display:inline-flex;align-items:center;gap:9px;font:italic 500 1.6rem/1 var(--serif);color:var(--label-ink);text-decoration:none}
+.mark svg{width:20px;height:20px;color:var(--leaf-deep)}
+.masthead nav ul{display:flex;gap:6px 26px;flex-wrap:wrap}
+.masthead nav a{font:500 .8rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--label-ink);text-decoration:none;padding:8px 0;border-bottom:2px solid transparent;transition:border-color .15s,color .15s}
+.masthead nav a:hover{border-color:var(--leaf-deep);color:var(--leaf-deep)}
+
+/* hero */
+.opening{display:grid;grid-template-columns:minmax(0,7fr) minmax(300px,5fr);gap:clamp(32px,6vw,96px);align-items:start;padding:clamp(28px,6vw,72px) clamp(16px,4vw,48px) clamp(56px,9vw,120px)}
+.opening h1{font:400 clamp(2.5rem,1.2rem + 5.2vw,5rem)/1.02 var(--serif);letter-spacing:-.012em;max-width:13ch}
+.opening h1 em{font-style:italic}
+.opening .lede{margin-top:28px;max-width:34em;font-size:1.25rem;line-height:1.5}
+.opening .lede b{font-weight:500}
+.cta{display:inline-block;margin-top:34px;background:var(--pot-black);color:var(--new-leaf);font:500 .85rem/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;text-decoration:none;padding:17px 22px 16px;border-radius:2px;box-shadow:inset 0 -3px 0 var(--leaf-deep);transition:background-color .15s,color .15s,box-shadow .15s}
+.cta:hover{background:var(--new-leaf);color:var(--pot-black);box-shadow:inset 0 -3px 0 var(--pot-black)}
+.cta-note{margin-top:14px;font:400 .8rem/1.4 var(--mono);color:var(--pencil-grey)}
+
+/* the stake tag */
+.tag{--ink:#17241A;--faded:#46564A;position:relative;justify-self:center;width:min(100%,360px);background:var(--stake-white);color:var(--ink);border:1px solid #C3CBB6;border-radius:6px 6px 0 0;padding:26px 24px 70px;font-family:var(--mono);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 64px),50% 100%,0 calc(100% - 64px));border:0}
+.tag::before{content:"";position:absolute;inset:0 0 auto 0;height:10px;background:var(--new-leaf)}
+.tag-hole{width:14px;height:14px;border-radius:50%;background:var(--potting-soil);margin:0 auto 18px;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)}
+.tag-latin{font:italic 500 1.55rem/1.1 var(--serif)}
+.tag-common{margin-top:2px;font:400 .8rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--faded)}
+.tag dl{margin-top:18px;border-top:1px solid #C3CBB6}
+.tag dl div{display:grid;grid-template-columns:76px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid #C3CBB6;font-size:.8rem;line-height:1.35}
+.tag dt{color:var(--faded);text-transform:uppercase;letter-spacing:.08em;font-size:.7rem;padding-top:1px}
+.tag dd{font-weight:500}
+.tag-next{margin-top:18px}
+.tag-next label{display:block;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faded)}
+.tag-next input{margin-top:6px;width:100%;background:transparent;border:1px solid var(--ink);border-radius:2px;padding:8px 10px;font:500 .9rem var(--mono);color:var(--ink);color-scheme:light;transition:background-color .15s}
+.tag-next input:hover{background:#ECEFE0}
+.tag-window{margin-top:12px;font:500 1.05rem/1.25 var(--mono);background:var(--new-leaf);padding:8px 10px;border-radius:2px}
+.strip{display:grid;grid-template-columns:repeat(14,1fr);gap:3px;margin-top:12px}
+.strip span{height:26px;border:1px solid #C3CBB6;font-size:.6rem;display:grid;place-items:center;color:var(--faded)}
+.strip span[data-on]{background:var(--new-leaf);border-color:var(--ink);color:var(--ink);font-weight:500}
+.strip-key{margin-top:6px;font-size:.65rem;color:var(--faded)}
+
+/* shared section frame */
+.band{padding:clamp(56px,9vw,112px) clamp(16px,4vw,48px)}
+.band-head{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:16px clamp(24px,6vw,96px);margin-bottom:clamp(28px,5vw,56px)}
+.band h2{font:400 clamp(1.9rem,1.1rem + 2.6vw,3.2rem)/1.08 var(--serif);max-width:16ch}
+.band-head p{max-width:36em;align-self:end;color:var(--label-ink)}
+.band-shelf{background:var(--pot-black);color:#E4EAD8;--rule:#34402F;--quiet:#A9B6A5}
+.band-shelf a{color:var(--new-leaf)}
+
+/* plants table */
+.shelf{width:100%;border-collapse:collapse;font-size:1rem}
+.shelf caption{text-align:left;font:400 .8rem var(--mono);color:var(--quiet);padding-bottom:14px}
+.shelf th,.shelf td{text-align:left;vertical-align:top;padding:18px 18px 18px 0;border-top:1px solid var(--rule)}
+.shelf thead th{font:500 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--quiet);border-top:0;padding-top:0;padding-bottom:10px}
+.shelf tbody th{font-weight:500;font-size:1.25rem;line-height:1.15}
+.shelf tbody th i{display:block;font-weight:400;font-size:1rem;color:var(--quiet);margin-top:3px}
+.shelf td{font:400 .9rem/1.4 var(--mono)}
+.shelf tbody tr{transition:background-color .15s}
+.shelf tbody tr:hover{background:#1C241D}
+.pets-no{color:#F0C27A}
+.pets-yes{color:var(--new-leaf)}
+
+/* plans */
+.plans li{display:grid;grid-template-columns:minmax(140px,2fr) minmax(0,5fr) minmax(120px,2fr);gap:8px 32px;align-items:baseline;padding:26px 0;border-top:1px solid var(--stake-edge)}
+.plans li:last-child{border-bottom:1px solid var(--stake-edge)}
+.plans h3{font:italic 400 clamp(1.8rem,1.2rem + 2vw,2.6rem)/1 var(--serif)}
+.plans p{max-width:38em}
+.plans .figure{font:500 .85rem/1.3 var(--mono);text-align:right}
+.plans-draft{margin-top:18px;font:400 .8rem/1.4 var(--mono);color:var(--pencil-grey)}
+.placeholder{background:var(--new-leaf);color:#17241A;padding:1px 6px;border-radius:2px}
+
+/* window */
+.window{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,4fr);gap:32px clamp(24px,6vw,96px);border-top:1px solid var(--stake-edge)}
+.window h2{max-width:14ch}
+.window p{max-width:34em;margin-top:18px}
+.window ol{padding-left:1.2em;margin:0;align-self:end;font:400 .9rem/1.6 var(--mono)}
+.window li{padding-left:6px;margin-bottom:6px}
+
+/* footer */
+.colophon{background:var(--pot-black);color:#E4EAD8;padding:56px clamp(16px,4vw,48px) 36px;display:grid;grid-template-columns:minmax(0,4fr) repeat(3,minmax(0,2fr));gap:36px 32px;font-size:.95rem}
+.colophon a{color:var(--new-leaf)}
+.colophon h2{font:500 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#A9B6A5;margin-bottom:10px}
+.colophon p,.colophon li{line-height:1.6}
+.colophon .mark{color:#E4EAD8}
+.colophon .mark svg{color:var(--new-leaf)}
+.colophon-line{margin-top:12px;max-width:26em}
+.colophon .fine{grid-column:1/-1;border-top:1px solid #34402F;padding-top:20px;font:400 .78rem/1.5 var(--mono);color:#A9B6A5}
+
+@media (max-width:860px){
+  .opening,.band-head,.window{grid-template-columns:1fr}
+  .opening h1{max-width:none}
+  .colophon{grid-template-columns:1fr 1fr}
+  .colophon>div:first-child{grid-column:1/-1}
+  .plans li{grid-template-columns:1fr}
+  .plans .figure{text-align:left}
+  .shelf thead{position:absolute;left:-9999px}
+  .shelf,.shelf tbody,.shelf tr,.shelf th,.shelf td{display:block}
+  .shelf tr{padding:16px 0;border-top:1px solid var(--rule)}
+  .shelf th,.shelf td{border:0;padding:3px 0}
+  .shelf td::before{content:attr(data-k) "  ";color:var(--quiet);text-transform:uppercase;font-size:.7rem;letter-spacing:.08em}
+}
+@media (max-width:420px){.colophon{grid-template-columns:1fr}.strip span{height:22px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <a class="mark" href="#top" aria-label="Greenleaf home">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 22C4 18 3 8 5 3c7 0 16 3 16 10 0 4-3 8-9 9z"/></svg>
+    Greenleaf
+  </a>
+  <nav aria-label="Main">
+    <ul>
+      <li><a href="#plants">Plants</a></li>
+      <li><a href="#plans">Plans</a></li>
+      <li><a href="#window">Your window</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="opening" id="top" aria-labelledby="hero-title">
+    <div>
+      <h1 id="hero-title">The tag in the pot says which day to water.</h1>
+      <p class="lede">A golden pothos wants water once the top 5 cm of soil has dried, which is usually every 7 to 10 days. <b>Every Greenleaf plant arrives on a stake like this one</b>, and your delivery calendar follows the same schedule.</p>
+      <a class="cta" href="#plants">Pick your first plant</a>
+      <p class="cta-note">Try the tag: set the date you last watered.</p>
+    </div>
+
+    <aside class="tag" aria-label="Sample care tag for a golden pothos">
+      <div class="tag-hole" aria-hidden="true"></div>
+      <p class="tag-latin">Epipremnum aureum</p>
+      <p class="tag-common">Golden pothos</p>
+      <dl>
+        <div><dt>Light</dt><dd>Low to bright, indirect</dd></div>
+        <div><dt>Water</dt><dd>Every 7-10 days, when top 5 cm is dry</dd></div>
+        <div><dt>Pets</dt><dd>Toxic to cats and dogs</dd></div>
+      </dl>
+      <div class="tag-next">
+        <label for="last-watered">Last watered</label>
+        <input type="date" id="last-watered">
+        <p class="tag-window" id="next-window" aria-live="polite">Water between Thu 16 Oct and Sun 19 Oct</p>
+        <div class="strip" id="strip" aria-hidden="true"></div>
+        <p class="strip-key" aria-hidden="true">14 days from last watering. Green = water window.</p>
+      </div>
+    </aside>
+  </section>
+
+  <section class="band band-shelf" id="plants" aria-labelledby="plants-title">
+    <div class="band-head">
+      <h2 id="plants-title">Five plants that forgive a missed Thursday</h2>
+      <p>These are the species on the first shelf. Each is a slow-drying or low-light plant, so a late watering costs you a leaf at worst. Light and water ranges below are what the tag prints.</p>
+    </div>
+    <table class="shelf">
+      <caption>Care specs as printed on the stake</caption>
+      <thead><tr><th scope="col">Plant</th><th scope="col">Light</th><th scope="col">Water</th><th scope="col">Cats and dogs</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Golden pothos<i>Epipremnum aureum</i></th><td data-k="Light">Low to bright, indirect</td><td data-k="Water">Every 7-10 days</td><td data-k="Pets" class="pets-no">Toxic</td></tr>
+        <tr><th scope="row">Snake plant<i>Dracaena trifasciata</i></th><td data-k="Light">Low to bright</td><td data-k="Water">Every 2-4 weeks</td><td data-k="Pets" class="pets-no">Toxic</td></tr>
+        <tr><th scope="row">ZZ plant<i>Zamioculcas zamiifolia</i></th><td data-k="Light">Low to medium</td><td data-k="Water">Every 3-4 weeks</td><td data-k="Pets" class="pets-no">Toxic</td></tr>
+        <tr><th scope="row">Baby rubber plant<i>Peperomia obtusifolia</i></th><td data-k="Light">Medium to bright, indirect</td><td data-k="Water">Every 1-2 weeks</td><td data-k="Pets" class="pets-yes">Non-toxic</td></tr>
+        <tr><th scope="row">Spider plant<i>Chlorophytum comosum</i></th><td data-k="Light">Medium to bright, indirect</td><td data-k="Water">About weekly</td><td data-k="Pets" class="pets-yes">Non-toxic</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="band" id="plans" aria-labelledby="plans-title">
+    <div class="band-head">
+      <h2 id="plans-title">Choose how many pots you want to keep alive</h2>
+      <p>Each plan is a number of plants and the tags that go with them. Pick the one that matches the windowsills you have.</p>
+    </div>
+    <ul class="plans">
+      <li>
+        <h3>Sprout</h3>
+        <p>One plant and its tag. A good first pot for a single desk or shelf.</p>
+        <p class="figure"><span class="placeholder">[PRICE NEEDED]</span></p>
+      </li>
+      <li>
+        <h3>Bloom</h3>
+        <p>Three plants chosen to share a watering day, so one tag-check covers a whole windowsill.</p>
+        <p class="figure"><span class="placeholder">[PRICE NEEDED]</span></p>
+      </li>
+      <li>
+        <h3>Jungle</h3>
+        <p>Six plants across light levels, with a printed rota that groups them by water day.</p>
+        <p class="figure"><span class="placeholder">[PRICE NEEDED]</span></p>
+      </li>
+    </ul>
+    <p class="plans-draft">Draft plan structure. Delivery cadence, repotting terms and cancellation policy: <span class="placeholder">[TERMS NEEDED]</span></p>
+  </section>
+
+  <section class="band window" id="window" aria-labelledby="window-title">
+    <div>
+      <h2 id="window-title">Tell us which way your window faces</h2>
+      <p>A north-facing sill and a south-facing sill need different plants. Email the direction and a photo, and we will reply with the pots that suit it.</p>
+      <a class="cta" href="mailto:hello@greenleaf.example?subject=My%20window&amp;body=Direction%20it%20faces%3A%0APets%20at%20home%3A%0A(attach%20a%20photo)">Email a photo of your window</a>
+    </div>
+    <ol>
+      <li>Say which compass direction the glass faces.</li>
+      <li>Say whether a cat or dog can reach the pot.</li>
+      <li>Attach one photo, taken at noon.</li>
+    </ol>
+  </section>
+</main>
+
+<footer class="colophon">
+  <div>
+    <a class="mark" href="#top" aria-label="Greenleaf home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 22C4 18 3 8 5 3c7 0 16 3 16 10 0 4-3 8-9 9z"/></svg>
+      Greenleaf
+    </a>
+    <p class="colophon-line">Potted plants and the schedule to keep them alive.</p>
+  </div>
+  <div>
+    <h2>Contact</h2>
+    <p><a href="mailto:hello@greenleaf.example">hello@greenleaf.example</a><br>[PHONE NEEDED]</p>
+  </div>
+  <div>
+    <h2>Nursery</h2>
+    <p>[ADDRESS NEEDED]<br>[HOURS NEEDED]</p>
+  </div>
+  <div>
+    <h2>Browse</h2>
+    <ul>
+      <li><a href="#plants">Plant care specs</a></li>
+      <li><a href="#plans">Plans</a></li>
+      <li><a href="#window">Window check</a></li>
+    </ul>
+  </div>
+  <p class="fine">&copy; <span id="year">2026</span> Greenleaf. [TERMS AND PRIVACY LINKS NEEDED]</p>
+</footer>
+
+<script>
+(function(){
+  document.getElementById('year').textContent=new Date().getFullYear();
+  var input=document.getElementById('last-watered'),out=document.getElementById('next-window'),strip=document.getElementById('strip');
+  var fmt=new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  function iso(d){var m=d.getMonth()+1,day=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(day<10?'0':'')+day}
+  function draw(){
+    var v=input.value; if(!v) return;
+    var p=v.split('-'),start=new Date(+p[0],+p[1]-1,+p[2]);
+    if(isNaN(start)) return;
+    var a=new Date(start),b=new Date(start);a.setDate(a.getDate()+7);b.setDate(b.getDate()+10);
+    out.textContent='Water between '+fmt.format(a)+' and '+fmt.format(b);
+    strip.textContent='';
+    for(var i=1;i<=14;i++){var s=document.createElement('span');s.textContent=i;if(i>=7&&i<=10)s.setAttribute('data-on','');strip.appendChild(s)}
+  }
+  input.value=iso(new Date());
+  input.addEventListener('input',draw);
+  draw();
+})();
+</script>
+</body>
+</html>

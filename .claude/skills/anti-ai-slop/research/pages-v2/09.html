@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vaultix – a vault the server cannot open</title>
+<meta name="description" content="Vaultix encrypts your passwords on your device with a key stretched by Argon2id. The server stores ciphertext only. See exactly what it can and cannot read.">
+<meta property="og:title" content="Vaultix – a vault the server cannot open">
+<meta property="og:description" content="The server stores ciphertext only. See exactly what it can and cannot read.">
+<meta property="og:image" content="https://vaultix.example/og.png">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231c2421'/%3E%3Ccircle cx='12' cy='16' r='5' fill='none' stroke='%23d4aa4f' stroke-width='3'/%3E%3Cpath d='M17 16h10v5M23 16v4' stroke='%23d4aa4f' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/*
+ Brief
+ Visitor: a person deciding whether to move their passwords; must answer "what can your server read?"
+ Artifact: one vault entry shown twice, as you see it vs. as the server stores it.
+ Material: safe-deposit box, painted steel door, brass key tag, stamped serials.
+ Type: IBM Plex Sans Condensed (stamped-label feel) + Plex Mono for data; Plex grew out of hardware labelling.
+*/
+:root{
+  --steel:#dde2db;        /* unpainted door steel */
+  --steel-deep:#cdd3cb;
+  --stamp:#151c19;        /* stamped ink */
+  --stamp-soft:#445049;
+  --locker:#1c2421;       /* painted interior */
+  --locker-ink:#e4e8df;
+  --locker-dim:#a9b4ab;
+  --brass:#c79a2e;
+  --brass-bright:#d9b25a;
+  --brass-ink:#6f5009;    /* brass as text on steel */
+  --rule:#9aa59c;
+  --warn:#8a2f1f;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --steel:#141917; --steel-deep:#1a211e; --stamp:#e4e8df; --stamp-soft:#a3aea6;
+    --locker:#0c100e; --locker-ink:#e4e8df; --locker-dim:#9aa59d;
+    --brass-ink:#d9b25a; --rule:#3c4741; --warn:#f0917c;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--steel);color:var(--stamp);font:400 1.0625rem/1.55 "IBM Plex Sans",sans-serif;font-optical-sizing:auto}
+img,svg{display:block;max-width:100%}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
+.skip{position:absolute;left:-999px;top:0;background:var(--brass);color:#151c19;padding:.6rem 1rem;z-index:9}
+.skip:focus{left:0}
+h1,h2,h3{font-family:"IBM Plex Sans Condensed",sans-serif;margin:0}
+.mono{font-family:"IBM Plex Mono",monospace}
+
+/* top bar */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem clamp(1rem,4vw,3rem);border-bottom:1px solid var(--rule)}
+.mark{display:flex;align-items:center;gap:.6rem;text-decoration:none;font:600 1.05rem/1 "IBM Plex Sans Condensed",sans-serif;letter-spacing:.28em}
+.mark svg{width:26px;height:26px}
+.bar nav ul{display:flex;gap:2rem;list-style:none;margin:0;padding:0}
+.bar nav a{text-decoration:none;font:500 .95rem "IBM Plex Sans Condensed",sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:.3rem 0;background:linear-gradient(var(--brass),var(--brass)) 0 100%/0 2px no-repeat;transition:background-size .18s ease,color .18s}
+.bar nav a:hover{background-size:100% 2px}
+.menu{display:none}
+.menu summary{list-style:none;cursor:pointer;font:500 .95rem "IBM Plex Sans Condensed",sans-serif;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--stamp);padding:.45rem .8rem}
+.menu summary::-webkit-details-marker{display:none}
+.menu ul{position:absolute;right:1rem;margin:.4rem 0 0;padding:.5rem 1rem;list-style:none;background:var(--steel);border:1px solid var(--stamp);z-index:5}
+.menu li a{display:block;padding:.6rem 0;text-decoration:none}
+
+/* hero */
+.door{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(2rem,5vw,5rem);padding:clamp(2.5rem,6vw,5.5rem) clamp(1rem,4vw,3rem) clamp(3rem,6vw,5rem);align-items:start}
+.serial{font:500 .8rem "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--stamp-soft);margin:0 0 1.2rem}
+h1{font-weight:500;font-size:clamp(2.2rem,4.4vw,3.6rem);line-height:1.04;letter-spacing:-.005em;max-width:15ch}
+.lead{margin:1.6rem 0 2rem;max-width:34rem;font-size:1.15rem;line-height:1.5}
+.key-btn{display:inline-flex;align-items:center;gap:.8rem;background:var(--brass);color:#151c19;text-decoration:none;font:600 1rem "IBM Plex Sans Condensed",sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:.95rem 1.3rem;border:0;border-radius:0;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%);padding-right:2.2rem;transition:background-color .15s,transform .15s}
+.key-btn:hover{background:var(--brass-bright)}
+.key-btn:active{transform:translateX(2px)}
+.quiet{display:inline-block;margin-left:1.5rem;font-size:.95rem;text-underline-offset:.25em;transition:color .15s}
+.quiet:hover{color:var(--brass-ink)}
+
+/* the artifact */
+.pair{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--stamp)}
+.pane{background:var(--locker);color:var(--locker-ink);padding:1.1rem 1.2rem 1.3rem;min-width:0}
+.pane+.pane{border-left:2px solid var(--stamp);background:#121816}
+.pane h2{font:500 .75rem "IBM Plex Mono",monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--brass-bright);margin-bottom:1rem}
+.field{margin:0 0 .9rem}
+.field dt{font:400 .72rem "IBM Plex Mono",monospace;color:var(--locker-dim);letter-spacing:.08em;text-transform:uppercase}
+.field dd{margin:.15rem 0 0;font:400 .95rem "IBM Plex Mono",monospace;overflow-wrap:anywhere}
+.reveal{margin-top:.4rem;background:none;border:1px solid var(--locker-dim);color:var(--locker-ink);padding:.35rem .7rem;cursor:pointer;font:500 .75rem "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;transition:background-color .15s,color .15s,border-color .15s}
+.reveal:hover{background:var(--brass-bright);color:#151c19;border-color:var(--brass-bright)}
+.blob{margin:0;font:400 .78rem/1.65 "IBM Plex Mono",monospace;color:var(--locker-dim);overflow-wrap:anywhere;word-break:break-all}
+.blob b{font-weight:500;color:var(--locker-ink)}
+.caption{grid-column:1/-1;margin:0;padding:.7rem 1.2rem;background:var(--steel-deep);border-top:2px solid var(--stamp);font:400 .85rem "IBM Plex Mono",monospace;color:var(--stamp-soft)}
+
+/* sections */
+section{padding:clamp(3rem,6vw,5.5rem) clamp(1rem,4vw,3rem)}
+section+section{border-top:1px solid var(--rule)}
+.sec-head{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(2rem,5vw,5rem);margin-bottom:2.5rem}
+h2.title{font-weight:500;font-size:clamp(1.7rem,3vw,2.5rem);line-height:1.1;max-width:18ch}
+.sec-head p{margin:0;max-width:38rem}
+
+table{width:100%;border-collapse:collapse}
+caption{text-align:left;font:500 .8rem "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--stamp-soft);padding-bottom:.8rem}
+th,td{text-align:left;vertical-align:top;padding:1rem 1.5rem 1rem 0;border-top:1px solid var(--rule)}
+th{font:500 1.1rem "IBM Plex Sans Condensed",sans-serif;width:22%}
+td{width:39%}
+td.no{color:var(--stamp-soft)}
+.tag{display:block;font:500 .72rem "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--brass-ink);margin-bottom:.2rem}
+
+.recovery{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(2rem,5vw,5rem);align-items:center}
+.tagcard{background:var(--brass);color:#151c19;padding:1.5rem 1.6rem 1.6rem 3.2rem;position:relative;max-width:26rem;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,0 58%,22px 50%,0 42%)}
+.tagcard::before{content:"";position:absolute;left:1.05rem;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;background:var(--steel);box-shadow:inset 0 0 0 2px #151c19}
+.tagcard p{margin:0;font:500 .72rem "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase}
+.tagcard code{display:block;margin:.6rem 0;font:500 1.2rem/1.35 "IBM Plex Mono",monospace;letter-spacing:.04em}
+.rec-copy h2{margin-bottom:1rem}
+.rec-copy p{margin:0 0 1rem;max-width:36rem}
+.warn{color:var(--warn);font-weight:500}
+
+.threats{list-style:none;margin:0;padding:0;border-bottom:1px solid var(--rule)}
+.threats li{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(1rem,4vw,5rem);padding:1.2rem 0;border-top:1px solid var(--rule)}
+.threats h3{font-weight:500;font-size:1.25rem}
+.threats p{margin:0;max-width:40rem}
+.verdict{font:500 .72rem "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:.25rem}
+.verdict.ok{color:var(--brass-ink)}
+.verdict.bad{color:var(--warn)}
+
+.contact{background:var(--locker);color:var(--locker-ink);border-top:0}
+.contact h2{font-weight:500;font-size:clamp(1.7rem,3vw,2.5rem);max-width:20ch;line-height:1.1}
+.contact p{max-width:38rem}
+.contact .key-btn{margin-top:.5rem}
+.contact a:not(.key-btn){text-underline-offset:.25em;transition:color .15s}
+.contact a:not(.key-btn):hover{color:var(--brass-bright)}
+.contact-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(2rem,5vw,5rem)}
+.contact dl{margin:0;font:400 .9rem/1.7 "IBM Plex Mono",monospace}
+.contact dt{color:var(--locker-dim);margin-top:.8rem}
+.contact dd{margin:0}
+
+footer{background:var(--locker);color:var(--locker-dim);border-top:1px solid #38423d;padding:2rem clamp(1rem,4vw,3rem) 2.5rem;display:flex;flex-wrap:wrap;gap:1.5rem 3rem;justify-content:space-between;font-size:.9rem}
+footer ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.5rem 1.5rem}
+footer a{transition:color .15s}
+footer a:hover{color:var(--brass-bright)}
+footer p{margin:0;max-width:34rem}
+
+@media (max-width:900px){
+  .bar nav{display:none}
+  .menu{display:block}
+  .door,.sec-head,.recovery,.contact-grid,.threats li{grid-template-columns:1fr}
+  th{width:auto}
+  .quiet{margin:1rem 0 0 0;display:block}
+}
+@media (max-width:640px){
+  .pair{grid-template-columns:1fr}
+  .pane+.pane{border-left:0;border-top:2px solid var(--stamp)}
+  table,thead,tbody,tr,th,td{display:block;width:100%}
+  thead{position:absolute;left:-999px}
+  tr{border-top:1px solid var(--rule);padding:1rem 0}
+  th,td{border:0;padding:.2rem 0;width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar">
+  <a class="mark" href="#top" aria-label="Vaultix home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="11" cy="16" r="6" fill="none" stroke="currentColor" stroke-width="3"/><path d="M17 16h12v6M24 16v4" fill="none" stroke="currentColor" stroke-width="3"/></svg>
+    VAULTIX
+  </a>
+  <nav aria-label="Primary">
+    <ul>
+      <li><a href="#server-view">Server view</a></li>
+      <li><a href="#recovery">Recovery</a></li>
+      <li><a href="#threats">Threat model</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+  <details class="menu">
+    <summary>Menu</summary>
+    <ul>
+      <li><a href="#server-view">Server view</a></li>
+      <li><a href="#recovery">Recovery</a></li>
+      <li><a href="#threats">Threat model</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </details>
+</header>
+
+<main id="main">
+  <div class="door" id="top">
+    <div>
+      <p class="serial">Vault no. 0001 · client-side keys</p>
+      <h1>Our servers hold your vault as ciphertext only.</h1>
+      <p class="lead">Your master password is stretched with Argon2id, using 64 MiB of memory per guess, on your device before anything is encrypted or uploaded. We never receive the key, so we cannot be made to hand it over.</p>
+      <a class="key-btn" href="#server-view">See what we store</a>
+      <a class="quiet" href="#threats">Read the threat model</a>
+    </div>
+
+    <div class="pair" role="group" aria-label="One vault entry, shown as you see it and as the server stores it">
+      <div class="pane">
+        <h2>On your device</h2>
+        <dl>
+          <div class="field"><dt>Site</dt><dd>bank.example.org</dd></div>
+          <div class="field"><dt>Username</dt><dd>j.harlan</dd></div>
+          <div class="field"><dt>Password</dt><dd id="pw" aria-live="polite">••••••••••••••••</dd>
+            <button class="reveal" type="button" id="reveal" aria-pressed="false">Reveal</button></div>
+        </dl>
+      </div>
+      <div class="pane">
+        <h2>On our server</h2>
+        <p class="blob" aria-label="Ciphertext, unreadable by design"><b>item_id</b> 7c1e90a4<br><b>nonce</b> 4f09b2e81ac3d57f<br><b>blob</b> 9d3a e7b1 05c8 f26e 71a4 0b9d c3e8 5a17 b64f 28d0 e9a3 1c75 ...<br><b>tag</b> a81f4c0e</p>
+      </div>
+      <p class="caption">Same entry. The right-hand side is all we can read.</p>
+    </div>
+  </div>
+
+  <section id="server-view" aria-labelledby="sv-h">
+    <div class="sec-head">
+      <h2 class="title" id="sv-h">What the server can read, field by field</h2>
+      <p>Encryption uses XChaCha20-Poly1305 with a per-item nonce. Site names are encrypted too, so a breach of our database does not reveal which banks you use.</p>
+    </div>
+    <table>
+      <caption>Stored per vault item</caption>
+      <thead><tr><th scope="col">Field</th><th scope="col">Server stores</th><th scope="col">Server cannot see</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Site and username</th><td><span class="tag">Stored</span>Inside the encrypted blob</td><td class="no">The domain, the login name</td></tr>
+        <tr><th scope="row">Password</th><td><span class="tag">Stored</span>Inside the encrypted blob</td><td class="no">The password, its length, its strength</td></tr>
+        <tr><th scope="row">Master password</th><td><span class="tag">Not stored</span>Only a salt and a login proof</td><td class="no">The password, and the key derived from it</td></tr>
+        <tr><th scope="row">Metadata</th><td><span class="tag">Stored</span>Item count, last-modified time, sync device IDs</td><td class="no">Nothing here is hidden; we list it so you can judge it</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="recovery" aria-labelledby="rec-h">
+    <div class="recovery">
+      <div class="rec-copy">
+        <h2 class="title" id="rec-h">If you forget the master password, we cannot reset it</h2>
+        <p>At setup you get a recovery key, printed once. It decrypts a second copy of your vault key, so you can set a new master password without us.</p>
+        <p class="warn">Lose the master password and the recovery key, and the vault is gone. That is the cost of us not holding a key.</p>
+      </div>
+      <div class="tagcard" role="img" aria-label="Example of a recovery key format">
+        <p>Recovery key · example format</p>
+        <code>VX1-K7QM-4TRD-92HB-W6NE</code>
+        <p>Print it. Do not photograph it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="threats" aria-labelledby="th-h">
+    <div class="sec-head">
+      <h2 class="title" id="th-h">What Vaultix stops, and what it does not</h2>
+      <p>A password manager is one layer. These are the cases we have designed for, and the one we cannot fix.</p>
+    </div>
+    <ul class="threats">
+      <li><h3>Our database is stolen</h3><p><span class="verdict ok">Protected</span>The attacker gets ciphertext. Each guess at your master password costs 64 MiB and about a second of compute, so a long passphrase holds.</p></li>
+      <li><h3>A fake login page asks for your master password</h3><p><span class="verdict ok">Partly protected</span>Autofill matches the exact domain, so it stays silent on a lookalike. Typing the password by hand still defeats this.</p></li>
+      <li><h3>Malware on your computer</h3><p><span class="verdict bad">Not protected</span>If something can read memory or the keyboard while the vault is unlocked, it sees what you see. Keep the OS patched.</p></li>
+    </ul>
+  </section>
+
+  <section class="contact" id="contact" aria-labelledby="ct-h">
+    <div class="contact-grid">
+      <div>
+        <h2 id="ct-h">Vaultix is in early access. Ask for a seat.</h2>
+        <p>Tell us which browser and phone you use. We will reply with a setup link and the audit status as it stands that day.</p>
+        <a class="key-btn" href="mailto:access@vaultix.example?subject=Early%20access%20request">Email for early access</a>
+      </div>
+      <dl>
+        <dt>Report a vulnerability</dt><dd><a href="mailto:security@vaultix.example">security@vaultix.example</a></dd>
+        <dt>Postal address</dt><dd>[ADDRESS NEEDED]</dd>
+        <dt>Independent audit</dt><dd>[AUDIT REPORT NEEDED]</dd>
+      </dl>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Prototype page. Specifications shown are the design targets for the product, not audited results.</p>
+  <ul>
+    <li><a href="mailto:security@vaultix.example">Security contact</a></li>
+    <li><a href="#threats">Threat model</a></li>
+    <li><a href="#recovery">Recovery policy</a></li>
+    <li><span>&copy; <span id="yr">Vaultix</span> Vaultix</span></li>
+  </ul>
+</footer>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+(function(){
+  var b=document.getElementById('reveal'), p=document.getElementById('pw'), on=false;
+  b.addEventListener('click',function(){
+    on=!on;
+    p.textContent = on ? 'tN7-quill-ferry-04' : '•'.repeat(16);
+    b.textContent = on ? 'Hide' : 'Reveal';
+    b.setAttribute('aria-pressed', on);
+  });
+})();
+</script>
+</body>
+</html>

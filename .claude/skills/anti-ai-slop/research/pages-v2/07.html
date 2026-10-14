@@ -1,0 +1,307 @@
+<!doctype html>
+<!--
+BRIEF
+Visitor: a developer with a working repo who must answer "what exactly happens after I push, and can I undo it?"
+Product artifact: a real deploy session in the terminal (push -> build -> release -> traffic swap -> rollback).
+Material reference: stencilled marine paint on a steel hull. Hull-black green, stencil off-white, plimsoll-line yellow; light theme is sea-fog paper with hull ink and brass.
+Typeface: Big Shoulders Stencil Display for headings (hull stencils are cut from stencil plates), IBM Plex Mono for everything a developer types.
+Sections: hero + session, phases (ruled rows), shipyard.toml, install, footer.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shipyard - git push to a live URL</title>
+<meta name="description" content="Shipyard builds every git push into an immutable image, swaps traffic only after the health check passes, and rolls back by re-pointing to the previous image.">
+<meta property="og:title" content="Shipyard - git push to a live URL">
+<meta property="og:description" content="Immutable images per push, health-checked traffic swap, rollback by re-pointing to the previous image.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23101a18'/%3E%3Cpath d='M8 38h48l-8 12H16z' fill='%23e2b93b'/%3E%3Cpath d='M30 12v22M30 12l14 18H30' fill='none' stroke='%23e6e8df' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23101a18'/%3E%3Cpath d='M8 38h48l-8 12H16z' fill='%23e2b93b'/%3E%3Cpath d='M30 12v22M30 12l14 18H30' fill='none' stroke='%23e6e8df' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@700;900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sea-fog:#e4e8e1;
+  --hull-ink:#14201c;
+  --hull-ink-soft:#44524d;
+  --brass:#6b4f00;
+  --plate-line:#14201c;
+  --button-fill:#14201c;
+  --button-text:#e4e8e1;
+  --button-hover:#6b4f00;
+  --pane:#101a18;
+  --pane-bar:#1b2a26;
+  --stencil:#e6e8df;
+  --pane-soft:#9fb0a8;
+  --plimsoll:#e2b93b;
+  --pass:#8fd19a;
+  --fail:#ff9a8a;
+  --font-stencil:"Big Shoulders Stencil Display","Arial Narrow",sans-serif;
+  --font-type:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --font-read:"IBM Plex Sans",Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --sea-fog:#0c1412;
+    --hull-ink:#e6e8df;
+    --hull-ink-soft:#a3b3ab;
+    --brass:#e2b93b;
+    --plate-line:#3a4a45;
+    --button-fill:#e2b93b;
+    --button-text:#101a18;
+    --button-hover:#f3d36f;
+    --pane:#101a18;
+    --pane-bar:#1b2a26;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--sea-fog);color:var(--hull-ink);font:400 1.0625rem/1.55 var(--font-read)}
+img,svg{max-width:100%;display:block}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
+.skip{position:absolute;left:12px;top:-60px;background:var(--button-fill);color:var(--button-text);padding:8px 12px;z-index:9;font-family:var(--font-type)}
+.skip:focus{top:12px}
+
+/* masthead */
+.masthead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 32px;padding:16px max(16px,4vw);border-bottom:2px solid var(--plate-line)}
+.stencil-mark{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--font-stencil);font-weight:900;font-size:1.75rem;letter-spacing:.08em;text-transform:uppercase;line-height:1}
+.stencil-mark svg{width:30px;height:30px}
+.masthead nav ul{display:flex;flex-wrap:wrap;gap:4px 24px;margin:0;padding:0;list-style:none;font-family:var(--font-type);font-size:.875rem}
+.masthead nav a{text-decoration:none;padding:6px 0;background:linear-gradient(var(--brass),var(--brass)) 0 100%/0 2px no-repeat;transition:background-size .18s ease,color .18s}
+.masthead nav a:hover{background-size:100% 2px;color:var(--brass)}
+
+/* hero */
+.bow{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,8fr);gap:40px 56px;padding:56px max(16px,4vw) 72px;align-items:start}
+.bow h1{font-family:var(--font-stencil);font-weight:900;font-size:clamp(3rem,7.4vw,6.4rem);line-height:.92;letter-spacing:.01em;text-transform:uppercase;margin:0 0 24px}
+.bow h1 span{color:var(--brass)}
+.lead{font-size:1.1875rem;line-height:1.5;max-width:34ch;margin:0 0 32px}
+.lead code{font-family:var(--font-type);font-size:.92em}
+.launch{display:inline-block;font-family:var(--font-type);font-weight:500;font-size:.9375rem;text-decoration:none;background:var(--button-fill);color:var(--button-text);padding:14px 20px 14px 18px;border-radius:2px;box-shadow:4px 4px 0 var(--plate-line);transition:background-color .15s,transform .15s,box-shadow .15s}
+.launch:hover{background:var(--button-hover);transform:translate(2px,2px);box-shadow:2px 2px 0 var(--plate-line)}
+.launch:hover{color:var(--button-text)}
+@media (prefers-color-scheme:light){.launch:hover{color:#fff}}
+.side-link{display:block;margin-top:20px;font-family:var(--font-type);font-size:.875rem;color:var(--hull-ink-soft);text-underline-offset:4px;transition:color .15s}
+.side-link:hover{color:var(--brass)}
+
+/* the deploy session */
+.session{background:var(--pane);color:var(--stencil);border:2px solid var(--plate-line);border-radius:2px;font-family:var(--font-type);font-size:.8125rem;line-height:1.65;min-width:0}
+.session-bar{display:flex;justify-content:space-between;gap:12px;background:var(--pane-bar);padding:8px 14px;color:var(--pane-soft);font-size:.75rem}
+.session pre{margin:0;padding:16px 16px 20px;overflow-x:auto;white-space:pre;tab-size:2}
+.session .p{color:var(--plimsoll)}
+.session .dim{color:var(--pane-soft)}
+.session .ok{color:var(--pass)}
+.session .bad{color:var(--fail)}
+.session .u{color:var(--plimsoll);text-decoration:underline;text-underline-offset:3px}
+.session-note{font-family:var(--font-type);font-size:.75rem;color:var(--hull-ink-soft);margin:10px 0 0}
+
+/* phases: ruled rows */
+.waterline{border-top:2px solid var(--plate-line);padding:64px max(16px,4vw)}
+.waterline h2,.config h2,.install h2{font-family:var(--font-stencil);font-weight:700;font-size:clamp(2rem,4vw,3rem);line-height:1;letter-spacing:.03em;text-transform:uppercase;margin:0 0 8px}
+.waterline>p.intro{max-width:56ch;margin:0 0 40px;color:var(--hull-ink-soft)}
+.phase{display:grid;grid-template-columns:7.5rem minmax(0,1fr) minmax(0,1.2fr);gap:8px 32px;padding:22px 0;border-top:1px solid var(--plate-line);align-items:baseline}
+.phase:last-child{border-bottom:1px solid var(--plate-line)}
+.phase h3{margin:0;font-family:var(--font-type);font-weight:500;font-size:.9375rem;color:var(--brass);letter-spacing:.02em}
+.phase p{margin:0}
+.phase .what{font-weight:500}
+.phase code{font-family:var(--font-type);font-size:.875rem;background:none;border-bottom:1px dotted var(--hull-ink-soft)}
+
+/* config */
+.config{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:32px 64px;padding:64px max(16px,4vw);background:var(--pane);color:var(--stencil)}
+.config h2{color:var(--stencil)}
+.config p{color:var(--pane-soft);max-width:44ch;margin:12px 0 0}
+.config .session{border-color:#3a4a45}
+.config .brass{color:var(--plimsoll)}
+
+/* install */
+.install{padding:64px max(16px,4vw) 80px;max-width:60rem}
+.install ol{list-style:none;margin:28px 0 0;padding:0;counter-reset:s}
+.install li{counter-increment:s;display:grid;grid-template-columns:2.25rem minmax(0,1fr);gap:4px 8px;margin-bottom:20px}
+.install li::before{content:counter(s) ".";font-family:var(--font-type);color:var(--brass);font-weight:500}
+.install li>p{margin:0 0 6px;grid-column:2}
+.install .session{grid-column:2}
+.install .session pre{padding:12px 16px}
+
+/* footer */
+.keel{border-top:2px solid var(--plate-line);padding:32px max(16px,4vw) 40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:28px;font-size:.9375rem}
+.keel h2{font-family:var(--font-type);font-size:.75rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--hull-ink-soft);margin:0 0 10px}
+.keel ul{list-style:none;margin:0;padding:0}
+.keel li{margin-bottom:6px}
+.keel a{text-underline-offset:4px;transition:color .15s}
+.keel a:hover{color:var(--brass)}
+.keel .tagline{margin:0}
+.keel .legal{font-family:var(--font-type);font-size:.75rem;color:var(--hull-ink-soft)}
+
+@media (max-width:900px){
+  .bow,.config{grid-template-columns:minmax(0,1fr)}
+  .phase{grid-template-columns:minmax(0,1fr)}
+  .phase h3{margin-bottom:2px}
+}
+@media (max-width:420px){
+  .session{font-size:.75rem}
+  .masthead nav ul{gap:0 18px}
+}
+@media (prefers-reduced-motion:no-preference){
+  html{scroll-behavior:smooth}
+  .cursor{display:inline-block;width:.6em;height:1.05em;background:var(--plimsoll);vertical-align:text-bottom;animation:blink 1.1s steps(2,start) infinite}
+  @keyframes blink{to{visibility:hidden}}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+  .cursor{display:inline-block;width:.6em;height:1.05em;background:var(--plimsoll);vertical-align:text-bottom}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <a class="stencil-mark" href="#main" aria-label="Shipyard, top of page">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M4 40h56l-9 14H13z" fill="var(--brass)"/><path d="M30 8v28M30 8l16 20H30" fill="none" stroke="currentColor" stroke-width="4"/></svg>
+    SHIPYARD
+  </a>
+  <nav aria-label="Primary">
+    <ul>
+      <li><a href="#phases">What a push does</a></li>
+      <li><a href="#config">shipyard.toml</a></li>
+      <li><a href="#install">Install</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="bow" aria-labelledby="h1">
+    <div>
+      <h1 id="h1">Push. <span>Build.</span> Float.</h1>
+      <p class="lead">Each <code>git push</code> becomes an immutable image. Traffic moves to it only after <code>/healthz</code> answers 200, and rollback points traffic back at the previous image.</p>
+      <a class="launch" href="#install">Deploy your first app &rarr;</a>
+      <a class="side-link" href="#config">Read the shipyard.toml reference</a>
+    </div>
+    <div>
+      <div class="session" role="figure" aria-label="Sample terminal output of a Shipyard deploy followed by a rollback">
+        <div class="session-bar"><span>~/orders-api</span><span>sample session</span></div>
+<pre><span class="p">$</span> git push shipyard main
+<span class="dim">remote:</span> detected  Node 22, npm, port 3000
+<span class="dim">remote:</span> build     <span class="ok">ok</span>   image orders-api@a41f9c2
+<span class="dim">remote:</span> release   <span class="ok">ok</span>   ran migrate, 1 of 1
+<span class="dim">remote:</span> health    <span class="ok">ok</span>   GET /healthz 200 (2 of 2 replicas)
+<span class="dim">remote:</span> swap      <span class="ok">ok</span>   v18 serving, v17 kept warm
+<span class="dim">remote:</span>
+<span class="dim">remote:</span> live at <span class="u">https://orders-api.shipyard.app</span>
+
+<span class="p">$</span> git push shipyard main
+<span class="dim">remote:</span> build     <span class="ok">ok</span>   image orders-api@7be03d1
+<span class="dim">remote:</span> health    <span class="bad">fail</span> GET /healthz 500
+<span class="dim">remote:</span> swap      skipped, v18 still serving
+
+<span class="p">$</span> shipyard rollback v17
+<span class="dim">pointing</span> orders-api at orders-api@3c90e57 ... done
+<span class="p">$</span> <span class="cursor" aria-hidden="true"></span></pre>
+      </div>
+      <p class="session-note">Sample output. Hashes and the app name are illustrative.</p>
+    </div>
+  </section>
+
+  <section class="waterline" id="phases" aria-labelledby="h-phases">
+    <h2 id="h-phases">What happens after you push</h2>
+    <p class="intro">Four phases, always in this order. A failure in any one of them stops the deploy and leaves the running version untouched.</p>
+    <div class="phase">
+      <h3>1 / build</h3>
+      <p class="what">Detects the runtime from your lockfile and builds one image.</p>
+      <p>The image is tagged with the commit hash and never modified afterwards, so v17 is byte-for-byte what it was last week.</p>
+    </div>
+    <div class="phase">
+      <h3>2 / release</h3>
+      <p class="what">Runs the <code>release</code> command once, before any replica starts.</p>
+      <p>Put database migrations here. If it exits non-zero, nothing is swapped.</p>
+    </div>
+    <div class="phase">
+      <h3>3 / health</h3>
+      <p class="what">Starts new replicas and polls the path you configured.</p>
+      <p>Traffic stays on the old version until every new replica returns a 2xx, or the timeout in <code>shipyard.toml</code> runs out.</p>
+    </div>
+    <div class="phase">
+      <h3>4 / swap</h3>
+      <p class="what">Moves the router to the new replicas and keeps the old ones running.</p>
+      <p><code>shipyard rollback</code> re-points the router at those warm replicas, so nothing has to rebuild.</p>
+    </div>
+  </section>
+
+  <section class="config" id="config" aria-labelledby="h-config">
+    <div>
+      <h2 id="h-config">One file, in the repo</h2>
+      <p>Everything the phases above need is in <span class="brass">shipyard.toml</span>. Leave it out and Shipyard falls back to what it detected, as in the session at the top.</p>
+    </div>
+    <div class="session">
+      <div class="session-bar"><span>shipyard.toml</span><span>example</span></div>
+<pre><span class="dim"># which port your app listens on</span>
+[app]
+port = 3000
+
+[release]
+command = "npm run migrate"
+
+[health]
+path    = "/healthz"
+timeout = "60s"
+
+[scale]
+replicas = 2</pre>
+    </div>
+  </section>
+
+  <section class="install" id="install" aria-labelledby="h-install">
+    <h2 id="h-install">Your first deploy</h2>
+    <p>Run these inside a git repo that already starts locally.</p>
+    <ol>
+      <li>
+        <p>Install the CLI and sign in.</p>
+        <div class="session"><pre><span class="p">$</span> npm install -g shipyard-cli
+<span class="p">$</span> shipyard login</pre></div>
+      </li>
+      <li>
+        <p>Create the app. This adds a <code>shipyard</code> git remote.</p>
+        <div class="session"><pre><span class="p">$</span> shipyard create orders-api</pre></div>
+      </li>
+      <li>
+        <p>Push.</p>
+        <div class="session"><pre><span class="p">$</span> git push shipyard main</pre></div>
+      </li>
+    </ol>
+  </section>
+</main>
+
+<footer class="keel">
+  <div>
+    <h2>Shipyard</h2>
+    <p class="tagline">Deploys for web apps, from a git remote.</p>
+  </div>
+  <div>
+    <h2>Read</h2>
+    <ul>
+      <li><a href="#phases">What a push does</a></li>
+      <li><a href="#config">shipyard.toml</a></li>
+      <li><a href="#install">Your first deploy</a></li>
+    </ul>
+  </div>
+  <div>
+    <h2>Contact</h2>
+    <ul>
+      <li>[SUPPORT EMAIL NEEDED]</li>
+      <li>[STATUS PAGE URL NEEDED]</li>
+    </ul>
+  </div>
+  <div>
+    <h2>Legal</h2>
+    <ul>
+      <li>[TERMS LINK NEEDED]</li>
+      <li class="legal">&copy; <span id="yr"></span> Shipyard</li>
+    </ul>
+  </div>
+</footer>
+<script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+</body>
+</html>

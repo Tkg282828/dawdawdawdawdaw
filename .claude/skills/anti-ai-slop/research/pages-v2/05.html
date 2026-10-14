@@ -1,0 +1,318 @@
+<!doctype html>
+<!--
+BRIEF
+Visitor: a freelancer (designer, developer, translator) who invoices 3-10 clients a month from a spreadsheet and fears the tax bill. Must answer: will this keep my tax money separate and get me paid?
+Product artifact: a Ledgerly invoice with its paid stamp and tax set-aside line, then the month ledger it feeds.
+Material reference: a green-ruled paper ledger book: pale green stock, blue-black ink, oxblood margin rule and stamp.
+Typeface: Spectral (headings/body, book serif of the ledger era) + IBM Plex Mono (figures: slashed zeros, fixed columns so sums align).
+Sections: hero invoice -> the month ledger -> draft one now (working calculator) -> terms/contact footer.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ledgerly</title>
+<meta name="description" content="Invoicing and bookkeeping for freelancers. When a client pays, Ledgerly moves your tax share into a separate pot and shows it in your monthly ledger.">
+<meta property="og:title" content="Ledgerly: paid invoices set aside their own tax">
+<meta property="og:description" content="Invoicing and bookkeeping for freelancers, with the tax share separated the moment a client pays.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://ledgerly.example/og.png">
+<meta name="theme-color" content="#e9eee0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23e9eee0'/%3E%3Cpath d='M9 0v32' stroke='%23a3302b' stroke-width='2'/%3E%3Cpath d='M0 11h32M0 19h32M0 27h32' stroke='%231f4d3a' stroke-width='1.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#e9eee0; --paper-shade:#dde5d1; --ink:#17251f; --pencil:#46564b;
+  --rule:#b9c7ae; --margin-red:#9c2a24; --ink-green:#1f4d3a; --on-ink-green:#f1f5ea;
+  --stamp:#9c2a24;
+}
+:root[data-theme="dark"]{
+  --paper:#121c17; --paper-shade:#1a2720; --ink:#e4ecdc; --pencil:#a3b4a6;
+  --rule:#34463b; --margin-red:#e68b81; --ink-green:#c9e0bd; --on-ink-green:#10201a;
+  --stamp:#e68b81;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#121c17; --paper-shade:#1a2720; --ink:#e4ecdc; --pencil:#a3b4a6;
+    --rule:#34463b; --margin-red:#e68b81; --ink-green:#c9e0bd; --on-ink-green:#10201a;
+    --stamp:#e68b81;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Spectral",Georgia,serif;font-size:1.125rem;line-height:1.55;
+  background-image:linear-gradient(to right,transparent 0,transparent calc(2.5rem - 1px),var(--margin-red) calc(2.5rem - 1px),var(--margin-red) 2.5rem,transparent 2.5rem);
+  background-repeat:no-repeat;background-attachment:scroll}
+img,svg{max-width:100%;display:block}
+button,input,select{font:inherit;color:inherit}
+a{color:inherit;text-decoration-thickness:1px;text-underline-offset:.2em;transition:color .15s,text-decoration-color .15s}
+a:hover{color:var(--margin-red)}
+:focus-visible{outline:2px solid var(--margin-red);outline-offset:3px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.skip{position:absolute;left:3rem;top:-4rem;background:var(--ink-green);color:var(--on-ink-green);padding:.5rem .8rem;z-index:9}
+.skip:focus{top:.5rem}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* masthead */
+.masthead{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 2rem;padding:1.1rem 1rem 1.1rem 3.5rem;border-bottom:2px solid var(--ink)}
+.mark{display:flex;align-items:center;gap:.6rem;text-decoration:none;font-style:italic;font-size:1.7rem;font-weight:500;letter-spacing:.01em}
+.mark svg{width:26px;height:26px;flex:none}
+.masthead nav{margin-left:auto}
+.masthead ul{display:flex;flex-wrap:wrap;gap:.3rem 1.6rem;list-style:none;margin:0;padding:0;font-size:1rem}
+.theme-btn{border:1px solid var(--ink);background:transparent;padding:.25rem .7rem;cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:.8rem;transition:background-color .15s,color .15s}
+.theme-btn:hover{background:var(--ink);color:var(--paper)}
+
+main{display:block}
+section{padding-left:3.5rem;padding-right:1rem}
+
+/* hero */
+.front{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:3rem;padding-top:4rem;padding-bottom:5rem;align-items:start}
+.front h1{font-weight:400;font-size:clamp(2.4rem,4.6vw,4.4rem);line-height:1.04;margin:0 0 1.5rem}
+.front h1 em{font-style:italic;color:var(--margin-red)}
+.lead{max-width:34ch;margin:0 0 2rem}
+.cta{display:inline-block;background:var(--ink-green);color:var(--on-ink-green);padding:.8rem 1.3rem;text-decoration:none;font-family:"IBM Plex Mono",monospace;font-size:.9rem;font-weight:500;letter-spacing:.04em;text-transform:uppercase;border:0;border-radius:2px;cursor:pointer;transition:background-color .15s,color .15s,transform .15s}
+.cta:hover{background:var(--margin-red);color:#fff}
+:root[data-theme="dark"] .cta:hover{background:var(--margin-red);color:#10201a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cta:hover{color:#10201a}}
+.aside-link{display:block;margin-top:1.1rem;font-size:1rem}
+
+/* invoice artifact */
+.invoice{position:relative;background:var(--paper-shade);border:1px solid var(--ink);padding:1.6rem 1.6rem 1.4rem;box-shadow:6px 6px 0 var(--rule);transform:rotate(.4deg)}
+.invoice header{display:flex;justify-content:space-between;gap:1rem;border-bottom:2px solid var(--ink);padding-bottom:.8rem;margin-bottom:1rem}
+.invoice h2{margin:0;font-size:1.3rem;font-weight:500;font-style:italic}
+.inv-no{font-size:.82rem;text-align:right;color:var(--pencil)}
+.inv-meta{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 1.5rem;font-size:.95rem;margin:0 0 1.2rem}
+.inv-meta dt{font-family:"IBM Plex Mono",monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--pencil)}
+.inv-meta dd{margin:0}
+.lines{width:100%;border-collapse:collapse;font-size:.95rem}
+.lines th{font-family:"IBM Plex Mono",monospace;font-size:.72rem;font-weight:400;text-transform:uppercase;letter-spacing:.08em;color:var(--pencil);text-align:left;padding:.3rem 0;border-bottom:1px solid var(--ink)}
+.lines td{padding:.55rem 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.lines .n{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:.88rem;white-space:nowrap;padding-left:.8rem}
+.lines th.n{text-align:right}
+.lines tfoot td{border-bottom:0;padding:.35rem 0}
+.lines tfoot tr.total td{border-top:2px solid var(--ink);padding-top:.7rem;font-weight:500}
+.lines tfoot tr.pot td{color:var(--ink-green);font-style:italic}
+.stamp{position:absolute;right:1.4rem;bottom:5.4rem;border:3px solid var(--stamp);color:var(--stamp);padding:.15rem .8rem;font-family:"IBM Plex Mono",monospace;font-weight:500;letter-spacing:.14em;font-size:1.25rem;transform:rotate(-9deg);background:var(--paper-shade);opacity:.96}
+.sample-note{font-size:.82rem;color:var(--pencil);margin:1rem 0 0;font-family:"IBM Plex Mono",monospace}
+
+/* ledger */
+.month{padding-top:4.5rem;padding-bottom:4.5rem;border-top:2px solid var(--ink)}
+.month-inner{max-width:62rem}
+.month h2,.draft h2{font-weight:400;font-size:clamp(1.8rem,3vw,2.6rem);line-height:1.12;margin:0 0 1rem;max-width:22ch}
+.month p.intro{max-width:56ch;margin:0 0 2rem}
+.ledger{width:100%;border-collapse:collapse;font-size:1rem}
+.ledger caption{text-align:left;font-family:"IBM Plex Mono",monospace;font-size:.8rem;color:var(--pencil);padding-bottom:.6rem}
+.ledger th{font-family:"IBM Plex Mono",monospace;font-weight:400;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;text-align:left;padding:.4rem .6rem .4rem 0;border-bottom:2px solid var(--ink);color:var(--pencil)}
+.ledger td{padding:.7rem .6rem .7rem 0;border-bottom:1px solid var(--rule);vertical-align:baseline;transition:background-color .15s}
+.ledger tbody tr:hover td{background:var(--paper-shade)}
+.ledger .n{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:.9rem;white-space:nowrap}
+.ledger th.n{text-align:right}
+.ledger .pot{color:var(--ink-green)}
+.ledger .out{color:var(--margin-red)}
+.ledger tfoot td{border-bottom:0;border-top:2px solid var(--ink);font-weight:500;padding-top:.8rem}
+.scroll{overflow-x:auto}
+
+/* draft */
+.draft{padding-top:4.5rem;padding-bottom:4.5rem;border-top:2px solid var(--ink);background:var(--paper-shade);background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,var(--rule) 31px,var(--rule) 32px)}
+.draft-inner{display:grid;grid-template-columns:minmax(0,22rem) minmax(0,1fr);gap:3rem;max-width:56rem;margin-left:0}
+.draft p{margin:0 0 1rem;max-width:36ch}
+.fields{display:grid;gap:1rem}
+.field label{display:block;font-family:"IBM Plex Mono",monospace;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--pencil);margin-bottom:.25rem}
+.field input,.field select{width:100%;background:var(--paper);border:0;border-bottom:2px solid var(--ink);border-radius:0;padding:.5rem .3rem;font-family:"IBM Plex Mono",monospace;font-size:1rem;transition:border-color .15s,background-color .15s}
+.field input:hover,.field select:hover{border-color:var(--margin-red)}
+.readout{margin:0;background:var(--paper);border:1px solid var(--ink);padding:1.2rem 1.4rem;align-self:start}
+.readout div{display:flex;justify-content:space-between;gap:1rem;padding:.45rem 0;border-bottom:1px solid var(--rule)}
+.readout div:last-child{border-bottom:0}
+.readout dt{font-size:1rem}
+.readout dd{margin:0;font-family:"IBM Plex Mono",monospace;font-size:1rem}
+.readout .big dd{font-size:1.5rem;font-weight:500;color:var(--ink-green)}
+
+/* footer */
+.foot{padding:3rem 1rem 2rem 3.5rem;border-top:2px solid var(--ink);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2rem;font-size:.95rem}
+.foot h2{font-family:"IBM Plex Mono",monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;font-weight:500;color:var(--pencil);margin:0 0 .6rem}
+.foot ul{list-style:none;margin:0;padding:0}
+.foot li{margin-bottom:.3rem}
+.foot address{font-style:normal}
+.fine{grid-column:1/-1;border-top:1px solid var(--rule);padding-top:1rem;color:var(--pencil);font-size:.85rem}
+
+@media (max-width:860px){
+  .front{grid-template-columns:1fr;gap:2.5rem;padding-top:2.5rem}
+  .draft-inner{grid-template-columns:1fr;gap:2rem}
+  .foot{grid-template-columns:1fr 1fr}
+  .masthead nav{margin-left:0;width:100%}
+}
+@media (max-width:480px){
+  body{font-size:1.05rem;background-image:linear-gradient(to right,transparent 0,transparent calc(1.1rem - 1px),var(--margin-red) calc(1.1rem - 1px),var(--margin-red) 1.1rem,transparent 1.1rem)}
+  section,.masthead,.foot{padding-left:1.8rem}
+  .skip{left:1.8rem}
+  .invoice{padding:1.1rem;transform:none}
+  .stamp{bottom:6.2rem;right:.8rem;font-size:1rem}
+  .foot{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:no-preference){
+  .stamp{animation:thud .5s .3s cubic-bezier(.2,.8,.3,1) both}
+  @keyframes thud{from{opacity:0;transform:rotate(-9deg) scale(1.7)}to{opacity:.96;transform:rotate(-9deg) scale(1)}}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <a class="mark" href="#top" aria-label="Ledgerly home">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 0v26" stroke="#9c2a24" stroke-width="2"/><path d="M7 9h19M7 17h19" stroke="currentColor" stroke-width="1.2"/></svg>
+    Ledgerly
+  </a>
+  <nav aria-label="Primary">
+    <ul>
+      <li><a href="#month">The month ledger</a></li>
+      <li><a href="#draft">Draft an invoice</a></li>
+      <li><a href="#terms">Terms</a></li>
+      <li><button class="theme-btn" id="theme" type="button" aria-label="Switch between light and dark paper">Paper: light</button></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="front" id="top" aria-labelledby="h-hero">
+    <div>
+      <h1 id="h-hero">A paid invoice sets aside <em>its own tax.</em></h1>
+      <p class="lead">When a client pays INV-0007, Ledgerly moves your chosen share, 27% by default, into a separate tax pot and writes both lines into the same month's ledger.</p>
+      <a class="cta" href="#draft">Draft your first invoice</a>
+      <a class="aside-link" href="#month">See where the money goes in a month</a>
+    </div>
+
+    <article class="invoice" aria-label="Sample Ledgerly invoice">
+      <header>
+        <h2>Invoice</h2>
+        <div class="inv-no mono">INV-0007<br>Due in 14 days</div>
+      </header>
+      <dl class="inv-meta">
+        <div><dt>From</dt><dd>[YOUR NAME], illustrator</dd></div>
+        <div><dt>To</dt><dd>[CLIENT NAME]</dd></div>
+      </dl>
+      <table class="lines">
+        <thead><tr><th scope="col">Work</th><th scope="col" class="n">Hrs</th><th scope="col" class="n">Amount</th></tr></thead>
+        <tbody>
+          <tr><td>Cookbook spot illustrations, 6 pieces</td><td class="n">18</td><td class="n">1,350.00</td></tr>
+          <tr><td>Two rounds of revisions</td><td class="n">3</td><td class="n">225.00</td></tr>
+        </tbody>
+        <tfoot>
+          <tr class="total"><td colspan="2">Total due</td><td class="n">1,575.00</td></tr>
+          <tr class="pot"><td colspan="2">Moved to tax pot on payment (27%)</td><td class="n">425.25</td></tr>
+          <tr class="pot"><td colspan="2">Yours to spend</td><td class="n">1,149.75</td></tr>
+        </tfoot>
+      </table>
+      <div class="stamp" aria-label="Status: paid">PAID</div>
+      <p class="sample-note">Sample figures at $75/hr. Currency and rate are yours to set.</p>
+    </article>
+  </section>
+
+  <section class="month" id="month" aria-labelledby="h-month">
+    <div class="month-inner">
+      <h2 id="h-month">Every invoice becomes two lines in the month</h2>
+      <p class="intro">One line for what came in, one for what you owe later. The running balance at the bottom is what you can spend today without borrowing from April.</p>
+      <div class="scroll">
+      <table class="ledger">
+        <caption>Sample month, figures illustrative</caption>
+        <thead><tr><th scope="col">Day</th><th scope="col">Entry</th><th scope="col" class="n">In</th><th scope="col" class="n">Out</th><th scope="col" class="n">Tax pot</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">03</td><td>INV-0005 paid, [CLIENT NAME]</td><td class="n">900.00</td><td class="n"></td><td class="n pot">+243.00</td></tr>
+          <tr><td class="mono">08</td><td>Font licence (receipt photo attached)</td><td class="n"></td><td class="n out">-64.00</td><td class="n pot">-17.28</td></tr>
+          <tr><td class="mono">12</td><td>INV-0006 paid, [CLIENT NAME]</td><td class="n">2,400.00</td><td class="n"></td><td class="n pot">+648.00</td></tr>
+          <tr><td class="mono">19</td><td>Co-working desk, month</td><td class="n"></td><td class="n out">-180.00</td><td class="n pot">-48.60</td></tr>
+          <tr><td class="mono">27</td><td>INV-0007 paid, [CLIENT NAME]</td><td class="n">1,575.00</td><td class="n"></td><td class="n pot">+425.25</td></tr>
+        </tbody>
+        <tfoot><tr><td></td><td>Month end</td><td class="n">4,875.00</td><td class="n out">-244.00</td><td class="n pot">1,250.37</td></tr></tfoot>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="draft" id="draft" aria-labelledby="h-draft">
+    <div class="draft-inner">
+      <div>
+        <h2 id="h-draft">Price a job and see the tax share first</h2>
+        <p>Enter the hours and your rate. The readout is what Ledgerly would put on the invoice and what it would set aside once paid. Nothing is saved from this page.</p>
+        <div class="fields">
+          <div class="field"><label for="hrs">Hours</label><input id="hrs" type="number" min="0" step="0.5" value="12" inputmode="decimal"></div>
+          <div class="field"><label for="rate">Hourly rate</label><input id="rate" type="number" min="0" step="1" value="60" inputmode="decimal"></div>
+          <div class="field"><label for="share">Tax share, percent</label><input id="share" type="number" min="0" max="60" step="0.5" value="27" inputmode="decimal"></div>
+        </div>
+      </div>
+      <dl class="readout" aria-live="polite">
+        <div><dt>Invoice total</dt><dd id="o-total">720.00</dd></div>
+        <div><dt>Into the tax pot</dt><dd id="o-pot">194.40</dd></div>
+        <div class="big"><dt>Yours to spend</dt><dd id="o-net">525.60</dd></div>
+        <div><dt>Hours to take home $5,000 at this rate</dt><dd id="o-goal">&nbsp;</dd></div>
+      </dl>
+    </div>
+  </section>
+</main>
+
+<footer class="foot" id="terms">
+  <div>
+    <h2>Terms</h2>
+    <p>[PRICING AND TRIAL TERMS NEEDED]. Ledgerly will state the monthly price, trial length and cancellation policy here in plain words.</p>
+  </div>
+  <div>
+    <h2>Contact</h2>
+    <address>[POSTAL ADDRESS NEEDED]<br><a href="mailto:hello@ledgerly.example">hello@ledgerly.example</a></address>
+  </div>
+  <div>
+    <h2>Pages</h2>
+    <ul>
+      <li><a href="#month">The month ledger</a></li>
+      <li><a href="#draft">Draft an invoice</a></li>
+      <li><a href="#top">Back to top</a></li>
+    </ul>
+  </div>
+  <div>
+    <h2>Legal</h2>
+    <ul>
+      <li><a href="mailto:hello@ledgerly.example?subject=Privacy%20policy%20request">Privacy policy (on request)</a></li>
+      <li><a href="mailto:hello@ledgerly.example?subject=Terms%20of%20service%20request">Terms of service (on request)</a></li>
+    </ul>
+  </div>
+  <p class="fine">Ledgerly records and estimates; it is not tax advice. Check your set-aside rate with an accountant. <span id="yr"></span> Ledgerly.</p>
+</footer>
+
+<script>
+(function(){
+  var root=document.documentElement, btn=document.getElementById('theme');
+  function label(){
+    var dark = root.getAttribute('data-theme')==='dark' || (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    btn.textContent = 'Paper: ' + (dark?'dark':'light');
+    return dark;
+  }
+  try{var t=localStorage.getItem('ledgerly-theme'); if(t) root.setAttribute('data-theme',t);}catch(e){}
+  label();
+  btn.addEventListener('click',function(){
+    var next = label() ? 'light' : 'dark';
+    root.setAttribute('data-theme',next);
+    try{localStorage.setItem('ledgerly-theme',next);}catch(e){}
+    label();
+  });
+
+  document.getElementById('yr').textContent='© '+new Date().getFullYear();
+
+  var h=document.getElementById('hrs'), r=document.getElementById('rate'), s=document.getElementById('share');
+  function money(n){return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  function calc(){
+    var hv=Math.max(0,parseFloat(h.value)||0), rv=Math.max(0,parseFloat(r.value)||0), sv=Math.min(60,Math.max(0,parseFloat(s.value)||0));
+    var total=hv*rv, pot=total*sv/100;
+    document.getElementById('o-total').textContent=money(total);
+    document.getElementById('o-pot').textContent=money(pot);
+    document.getElementById('o-net').textContent=money(total-pot);
+    var net=rv*(1-sv/100);
+    document.getElementById('o-goal').textContent = net>0 ? (Math.ceil(5000/net*10)/10).toFixed(1)+' h of work' : 'n/a';
+  }
+  [h,r,s].forEach(function(el){el.addEventListener('input',calc);});
+  calc();
+})();
+</script>
+</body>
+</html>
