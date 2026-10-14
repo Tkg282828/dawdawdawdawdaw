@@ -1,0 +1,201 @@
+<!doctype html>
+<!-- LAUNCH TODO: signup/docs URL, install instructions, contact email, pricing, legal pages, og:image (needs hosted absolute https URL), real release timings -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Shipyard</title>
+<meta name="description" content="Shipyard keeps traffic on your previous release until the new one passes its health check, then rolls back on its own if it does not.">
+<meta property="og:title" content="Shipyard">
+<meta property="og:description" content="A failed health check stops the release. Traffic never leaves the last good one.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231d1f22'/%3E%3Crect x='5' y='9' width='22' height='14' fill='%23f08a3c'/%3E%3Cpath d='M10 9v14M16 9v14M22 9v14' stroke='%231d1f22' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --galvanized:#eeece9;
+  --container-steel:#1d1f22;
+  --container-steel-soft:#4a4d52;
+  --lashing-orange:#f08a3c;
+  --hold:#16181b;
+  --hold-text:#dcdad4;
+  --hold-dim:#a3a29c;
+  --hold-ok:#86d9a6;
+  --hold-fail:#ff8a6b;
+  --plate-edge:#c9c9c4;
+  --font:"Barlow Semi Condensed",ui-sans-serif,"Arial Narrow",sans-serif;
+  --terminal:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--galvanized);color:var(--container-steel);font-family:var(--font);font-size:1.125rem;line-height:1.5;font-weight:400}
+img,svg{max-width:100%;display:block}
+button,input{font:inherit;color:inherit}
+a{color:inherit;text-underline-offset:.2em;transition:color .15s,text-decoration-color .15s,background-color .15s}
+a:hover{text-decoration-color:var(--lashing-orange);text-decoration-thickness:.15em}
+:focus-visible{outline:3px solid var(--container-steel);outline-offset:3px}
+.log :focus-visible,.hold :focus-visible{outline-color:var(--lashing-orange)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+.skip{position:absolute;left:-999px;top:0;background:var(--container-steel);color:var(--galvanized);padding:.5rem 1rem;z-index:10}
+.skip:focus{left:0}
+
+.masthead{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.9rem clamp(1rem,3vw,2.5rem)}
+.mark{display:inline-flex;align-items:center;gap:.6rem;text-decoration:none;font-size:1.5rem;font-weight:500;letter-spacing:0}
+.mark svg{width:30px;height:30px}
+.masthead nav{display:flex;gap:1.5rem;font-size:1.05rem}
+
+/* hero: the log is the page's first object, the claim sits under it as caption */
+.hold{background:var(--hold);color:var(--hold-text);padding:2rem 0 2.25rem}
+.log{margin:0;padding:0 clamp(1rem,3vw,2.5rem);font-family:var(--terminal);font-size:clamp(.78rem,1.6vw,1.05rem);line-height:1.7;overflow-x:auto}
+.log ol{list-style:none;margin:0;padding:0;min-width:34rem}
+.log li{display:grid;grid-template-columns:7.5ch 1fr;gap:1.5ch;white-space:pre}
+.log .src{color:var(--hold-dim)}
+.log .ok{color:var(--hold-ok)}
+.log .fail{color:var(--hold-fail)}
+.log .cmd{color:#fff}
+.log .gap{height:.8em}
+.log-caption{margin:1.1rem 0 0;padding:0;font-size:.95rem;color:var(--hold-dim)}
+
+.claim{padding:clamp(2rem,5vw,4rem) clamp(1rem,3vw,2.5rem) clamp(2.5rem,6vw,5rem);max-width:78rem}
+h1{font-weight:700;font-size:clamp(2rem,5.6vw,4.4rem);line-height:1.02;margin:0;max-width:17em;letter-spacing:0}
+.lede{max-width:41rem;margin:1.4rem 0 0;font-size:1.3rem;line-height:1.4}
+.act{margin-top:2rem;display:flex;flex-wrap:wrap;align-items:center;gap:1rem}
+.copy-cmd{display:inline-flex;align-items:center;gap:.9rem;background:var(--lashing-orange);color:var(--container-steel);border:2px solid var(--container-steel);border-radius:2px;padding:.7rem 1.1rem;font-weight:700;font-size:1.15rem;cursor:pointer;transition:background-color .15s,color .15s}
+.copy-cmd code{font-family:var(--terminal);font-weight:400;font-size:.95rem;background:var(--container-steel);color:var(--galvanized);padding:.15rem .5rem}
+.copy-cmd:hover{background:var(--container-steel);color:var(--galvanized)}
+.copy-cmd:hover code{background:var(--lashing-orange);color:var(--container-steel)}
+.copied{min-height:1.5rem;font-size:1rem;color:var(--container-steel-soft)}
+
+/* release path: a single track, read left to right */
+.path{padding:clamp(2rem,5vw,4rem) 0 clamp(2.5rem,6vw,5rem);border-top:2px solid var(--container-steel)}
+.path-head{padding:0 clamp(1rem,3vw,2.5rem);max-width:46rem}
+h2{font-size:clamp(1.6rem,3.4vw,2.5rem);line-height:1.08;margin:0;font-weight:700;letter-spacing:0}
+.path-head p{margin:1rem 0 0}
+.track{list-style:none;margin:2.5rem 0 0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);border-top:2px solid var(--container-steel);border-bottom:2px solid var(--container-steel)}
+.track li{padding:1.1rem clamp(.8rem,1.6vw,1.5rem) 1.4rem;border-left:2px solid var(--container-steel);position:relative}
+.track li:first-child{border-left:0;padding-left:clamp(1rem,3vw,2.5rem)}
+.track li.gate{background:var(--lashing-orange)}
+.track h3{margin:0 0 .4rem;font-size:1.35rem;line-height:1.15;font-weight:700}
+.track p{margin:0;font-size:1rem;line-height:1.4}
+.track .dur{display:block;font-family:var(--terminal);font-size:.85rem;margin-bottom:.6rem}
+
+/* config: code left-offset, reasons beside it */
+.config{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:clamp(1.5rem,4vw,4rem);padding:clamp(2rem,5vw,4rem) clamp(1rem,3vw,2.5rem) clamp(3rem,7vw,6rem) clamp(1rem,8vw,9rem);align-items:start}
+.config-copy p{margin:1rem 0 0;max-width:30rem}
+.toml{margin:0;background:var(--hold);color:var(--hold-text);font-family:var(--terminal);font-size:clamp(.8rem,1.5vw,1rem);line-height:1.75;padding:1.4rem 1.6rem;overflow-x:auto;border-radius:2px}
+.toml .k{color:var(--hold-dim)}
+.toml .v{color:var(--hold-ok)}
+.toml .sec{color:#fff}
+.toml .note{color:var(--hold-dim)}
+
+.dock{padding:1.6rem clamp(1rem,3vw,2.5rem) 2rem;border-top:2px solid var(--container-steel);display:flex;flex-wrap:wrap;gap:.5rem 2rem;justify-content:space-between;font-size:1rem}
+.dock p{margin:0}
+
+@media (max-width:860px){
+  .track{grid-template-columns:1fr}
+  .track li{border-left:0;border-top:2px solid var(--container-steel);padding-left:clamp(1rem,3vw,2.5rem)}
+  .track li:first-child{border-top:0}
+  .config{grid-template-columns:1fr;padding-left:clamp(1rem,3vw,2.5rem)}
+}
+@media (max-width:420px){
+  .masthead nav{gap:1rem;font-size:1rem}
+  .copy-cmd{width:100%;justify-content:space-between}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <a class="mark" href="#top" aria-label="Shipyard home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" fill="#1d1f22"/><rect x="5" y="9" width="22" height="14" fill="#f08a3c"/><path d="M10 9v14M16 9v14M22 9v14" stroke="#1d1f22" stroke-width="2"/></svg>
+    <span>Shipyard</span>
+  </a>
+  <nav aria-label="Primary">
+    <a href="#release-path">Release path</a>
+    <a href="#config">shipyard.toml</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="hold" id="top" aria-label="A failed deploy log">
+    <figure class="log" role="group" aria-labelledby="logcap">
+      <ol aria-label="Terminal output of shipyard deploy">
+        <li><span class="src">local</span><span class="cmd">$ shipyard deploy</span></li>
+        <li><span class="src">build</span><span class="ok">ok</span> r-0412 built in 41s</li>
+        <li><span class="src">start</span>r-0412 up on 2 instances, no traffic yet</li>
+        <li><span class="src">health</span>GET /healthz  <span class="fail">503</span>  attempt 1 of 6</li>
+        <li><span class="src">health</span>GET /healthz  <span class="fail">503</span>  attempt 3 of 6</li>
+        <li><span class="src">health</span>GET /healthz  <span class="fail">503</span>  attempt 6 of 6</li>
+        <li><span class="src">gate</span><span class="fail">r-0412 failed its health window (30s)</span></li>
+        <li><span class="src">traffic</span><span class="ok">still on r-0411</span>, 0 requests dropped</li>
+        <li><span class="src">stop</span>r-0412 stopped, logs kept for 7 days</li>
+        <li><span class="src">exit</span><span class="fail">1</span></li>
+      </ol>
+      <figcaption class="log-caption" id="logcap">Sample output from a demo service; release numbers and timings are invented.</figcaption>
+    </figure>
+  </section>
+
+  <section class="claim" aria-labelledby="claim-h">
+    <h1 id="claim-h">The release that failed its health check never got a single request.</h1>
+    <p class="lede">Shipyard starts the new build next to the live one, sends it nothing, and moves traffic only after the health route answers 200 inside the window you set.</p>
+    <div class="act">
+      <button type="button" class="copy-cmd" id="copy" data-cmd="shipyard deploy">Copy the deploy command <code>shipyard deploy</code></button>
+      <span class="copied" id="copied" role="status" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <section class="path" id="release-path" aria-labelledby="path-h">
+    <div class="path-head">
+      <h2 id="path-h">Traffic moves at step four and not before.</h2>
+      <p>Every release walks the same five steps. Only one of them can send a user to new code, and it sits behind the health gate.</p>
+    </div>
+    <ol class="track">
+      <li><span class="dur">r-0412 / 41s</span><h3>Build</h3><p>The artifact is made once and reused for every instance.</p></li>
+      <li><span class="dur">r-0412 / 6s</span><h3>Start beside</h3><p>New instances boot while the old release keeps serving.</p></li>
+      <li class="gate"><span class="dur">r-0412 / window 30s</span><h3>Health gate</h3><p>Your route must return 200. A 503 here ends the run.</p></li>
+      <li><span class="dur">r-0412 / 2s</span><h3>Shift traffic</h3><p>The load balancer points at the new release.</p></li>
+      <li><span class="dur">r-0411 / 60s</span><h3>Drain old</h3><p>The previous release finishes open requests, then stops.</p></li>
+    </ol>
+  </section>
+
+  <section class="config" id="config" aria-labelledby="cfg-h">
+    <div class="config-copy">
+      <h2 id="cfg-h">The gate is four lines in a file you commit.</h2>
+      <p>The window, the path and the number of old releases to keep live next to the code they protect, so a change to the gate goes through review like any other change.</p>
+    </div>
+    <pre class="toml" aria-label="Example shipyard.toml"><code><span class="sec">[service]</span>
+<span class="k">name</span>     = <span class="v">"api"</span>
+
+<span class="sec">[health]</span>
+<span class="k">path</span>     = <span class="v">"/healthz"</span>
+<span class="k">window</span>   = <span class="v">"30s"</span>
+<span class="k">attempts</span> = <span class="v">6</span>
+
+<span class="sec">[releases]</span>
+<span class="k">keep</span>     = <span class="v">3</span>   <span class="note"># older ones are removed after drain</span></code></pre>
+  </section>
+</main>
+
+<footer class="dock">
+  <p>Shipyard, a deploy tool for web apps.</p>
+  <p>&copy; <span id="y">2026</span> Shipyard</p>
+</footer>
+
+<script>
+(function(){
+  try{document.getElementById('y').textContent=new Date().getFullYear()}catch(e){}
+  var b=document.getElementById('copy'),s=document.getElementById('copied');
+  b.addEventListener('click',function(){
+    var t=b.getAttribute('data-cmd');
+    function done(ok){s.textContent=ok?'Copied. Run it in the folder that holds shipyard.toml.':'Copy failed. Select the command and copy it by hand.'}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){done(true)},function(){done(false)})}
+    else{done(false)}
+  });
+})();
+</script>
+</body>
+</html>

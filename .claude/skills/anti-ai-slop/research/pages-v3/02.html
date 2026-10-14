@@ -1,0 +1,251 @@
+<!doctype html>
+<!-- LAUNCH TODO: order endpoint or checkout URL (the form only builds a summary now), contact email, postal address and pickup hours, bean names and prices, legal pages, og:image (absolute https URL), photos of the roaster -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- dark only: the page is set in the roast room, where the drum and the glow of the cooling tray are the light sources -->
+<meta name="color-scheme" content="dark">
+<title>Brewly - whole bean coffee from a local roastery</title>
+<meta name="description" content="Brewly is a local specialty coffee roastery. Choose a roast level and grind, and order whole beans online.">
+<meta property="og:title" content="Brewly - whole bean coffee from a local roastery">
+<meta property="og:description" content="Choose a roast level and grind, and order whole beans from a local specialty roastery.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231c1917'/%3E%3Cpath d='M4 24 C10 24 12 10 18 10 S26 8 28 8' fill='none' stroke='%23ff8a3d' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --drum:#1c1917;
+  --cooling-tray:#12100e;
+  --chaff:#f1e8dc;
+  --smoke:#b8aa9b;
+  --hot-bean:#ff8a3d;
+  --hot-bean-deep:#c9560f;
+  --first-crack:#e5b25d;
+  --tray-edge:#4a413a;
+  --on-ember:#1c1917;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--drum);color:var(--chaff);font-family:'Archivo',sans-serif;font-stretch:100%;font-size:1.0625rem;line-height:1.55;font-weight:400}
+img,svg{max-width:100%;display:block}
+button,input,select{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--first-crack);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.skip-link{position:absolute;left:12px;top:-60px;background:var(--hot-bean);color:var(--on-ember);padding:.6em 1em;z-index:10;transition:top .15s}
+.skip-link:focus{top:12px}
+
+.top-bar{display:flex;justify-content:space-between;align-items:baseline;gap:1.5rem;padding:18px 20px 14px 28px}
+.mark{font-size:1.6rem;font-weight:300;font-stretch:62%;text-decoration:none;letter-spacing:.01em;transition:color .15s}
+.mark:hover{color:var(--hot-bean)}
+.top-bar nav{display:flex;gap:1.6rem}
+.top-bar nav a{text-underline-offset:.3em;text-decoration-thickness:1px;transition:color .15s,text-decoration-color .15s;text-decoration-color:var(--tray-edge)}
+.top-bar nav a:hover{color:var(--hot-bean);text-decoration-color:var(--hot-bean)}
+
+/* hero: the roast log runs edge to edge, the headline is its caption */
+.roast-log{background:var(--cooling-tray);border-block:1px solid var(--tray-edge);padding:28px 0 0}
+.roast-log svg{width:100%;height:auto}
+.curve{fill:none;stroke:var(--chaff);stroke-width:3.5;stroke-linecap:round}
+.dev-band{fill:var(--hot-bean);opacity:.22}
+.grid-line{stroke:var(--tray-edge);stroke-width:1;stroke-dasharray:2 7}
+.event-dot{fill:var(--hot-bean)}
+.event-dot.cracks{fill:var(--first-crack)}
+.event-stem{stroke:var(--smoke);stroke-width:1}
+.log-readout{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0;padding:0 28px 0;border-top:1px solid var(--tray-edge)}
+.log-readout div{padding:16px 16px 20px 0}
+.log-readout dt{color:var(--smoke);font-size:.9rem}
+.log-readout dd{margin:2px 0 0;font-size:1.9rem;font-weight:300;font-stretch:70%;line-height:1.1}
+.log-readout .final dd{color:var(--hot-bean);font-weight:600}
+.log-caption{margin:0;padding:0 28px 18px;color:var(--smoke);font-size:.9rem}
+
+.pitch{padding:48px 28px 72px;display:grid;grid-template-columns:minmax(0,1fr);gap:28px;max-width:62rem}
+.pitch h1{margin:0;font-size:clamp(2.6rem,9vw,6.2rem);font-weight:600;font-stretch:62%;line-height:.96;max-width:11em;text-wrap:balance}
+.pitch p{margin:0;max-width:37rem}
+.order-link{display:inline-block;justify-self:start;background:var(--hot-bean);color:var(--on-ember);text-decoration:none;font-weight:600;padding:.95em 1.4em;border-radius:2px;border-bottom:4px solid var(--hot-bean-deep);transition:background-color .15s,transform .15s}
+.order-link:hover{background:var(--first-crack)}
+.order-link:active{transform:translateY(2px)}
+
+/* levels: one comparison, set as a table that starts at the right edge */
+.levels{padding:0 0 88px 28px}
+.levels h2,.order h2{margin:0 0 .5em;font-size:clamp(1.9rem,4.5vw,3.1rem);font-weight:600;font-stretch:68%;line-height:1.05;max-width:18em}
+.levels-intro{max-width:38rem;margin:0 0 32px;padding-right:28px}
+.level-table-scroll{overflow-x:auto;margin-left:min(14vw,9rem)}
+.level-table{border-collapse:collapse;min-width:640px;width:100%}
+.level-table caption{text-align:left;color:var(--smoke);padding:0 0 10px;font-size:.95rem}
+.level-table th,.level-table td{text-align:left;vertical-align:top;padding:14px 20px 14px 0;border-bottom:1px solid var(--tray-edge)}
+.level-table thead th{font-size:1.35rem;font-weight:600;font-stretch:70%;border-bottom:2px solid var(--hot-bean)}
+.level-table tbody th{color:var(--smoke);font-weight:400;width:9.5rem}
+
+/* order: the bag is described in a form, then summarised */
+.order{background:var(--cooling-tray);border-top:1px solid var(--tray-edge);padding:64px 28px 80px}
+.order-grid{max-width:60rem;margin-left:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,22rem);gap:56px}
+.order-form{display:grid;gap:26px}
+.order-form fieldset{border:0;margin:0;padding:0}
+.order-form legend,.order-form label.field-name{display:block;padding:0;margin-bottom:8px;color:var(--smoke)}
+.level-pick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.level-pick input{position:absolute;opacity:0;pointer-events:none}
+.level-pick label{display:block;text-align:center;padding:14px 8px;border:1px solid var(--tray-edge);margin-left:-1px;cursor:pointer;transition:background-color .15s,color .15s,border-color .15s}
+.level-pick label:hover{border-color:var(--hot-bean)}
+.level-pick input:checked + label{background:var(--hot-bean);color:var(--on-ember);border-color:var(--hot-bean);font-weight:600}
+.level-pick input:focus-visible + label{outline:3px solid var(--first-crack);outline-offset:3px}
+.order-form select,.order-form input[type=number]{width:100%;background:var(--drum);border:1px solid var(--smoke);border-radius:2px;padding:.7em .8em;transition:border-color .15s}
+.order-form select:hover,.order-form input[type=number]:hover{border-color:var(--hot-bean)}
+.order-form button{justify-self:start;background:var(--hot-bean);color:var(--on-ember);border:0;border-bottom:4px solid var(--hot-bean-deep);border-radius:2px;font-weight:600;padding:.95em 1.4em;cursor:pointer;transition:background-color .15s}
+.order-form button:hover{background:var(--first-crack)}
+.bag-tag{align-self:start;border:1px solid var(--tray-edge);padding:22px;min-height:12rem}
+.bag-tag h3{margin:0 0 12px;font-size:1.3rem;font-weight:600;font-stretch:70%}
+.bag-tag dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 18px}
+.bag-tag dt{color:var(--smoke)}
+.bag-tag dd{margin:0}
+.bag-tag p{margin:16px 0 0;color:var(--smoke);font-size:.95rem}
+
+.site-foot{padding:32px 28px 40px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 32px;color:var(--smoke)}
+.site-foot a{transition:color .15s}
+.site-foot a:hover{color:var(--hot-bean)}
+
+@media (max-width:760px){
+  .top-bar{padding:14px 16px}
+  .top-bar nav{gap:1.1rem}
+  .log-readout{grid-template-columns:repeat(2,minmax(0,1fr));padding:0 16px}
+  .log-caption{padding:0 16px 16px}
+  .pitch{padding:36px 16px 56px}
+  .levels{padding-left:16px}
+  .levels-intro{padding-right:16px}
+  .level-table-scroll{margin-left:0}
+  .order{padding:48px 16px 56px}
+  .order-grid{grid-template-columns:minmax(0,1fr);gap:32px}
+  .site-foot{padding:28px 16px 36px}
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="top-bar">
+  <a class="mark" href="#main" aria-label="Brewly, back to top">Brewly</a>
+  <nav aria-label="Main">
+    <a href="#roast-levels">Roast levels</a>
+    <a href="#order">Order beans</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="roast-log" aria-labelledby="log-title">
+    <h2 id="log-title" class="visually-hidden" hidden>Roast log</h2>
+    <svg viewBox="0 0 1200 420" role="img" aria-label="Roast log: bean temperature against time. It falls to 88 degrees Celsius at 1:30, climbs through 150 at 4:10 and 196 at 8:30, and the batch drops at 208 degrees at 10:50, after 2 minutes 20 seconds of development.">
+      <g aria-hidden="true">
+        <line class="grid-line" x1="50" x2="1150" y1="80" y2="80"/>
+        <line class="grid-line" x1="50" x2="1150" y1="190" y2="190"/>
+        <line class="grid-line" x1="50" x2="1150" y1="300" y2="300"/>
+        <rect class="dev-band" x="829" y="40" width="214" height="340"/>
+        <path class="curve" d="M50 91 C90 250 140 322 187 322 C260 322 330 240 432 194 C560 140 700 120 829 99 C900 90 980 80 1043 75"/>
+        <line class="event-stem" x1="187" x2="187" y1="322" y2="380"/>
+        <line class="event-stem" x1="432" x2="432" y1="194" y2="380"/>
+        <line class="event-stem" x1="829" x2="829" y1="99" y2="380"/>
+        <line class="event-stem" x1="1043" x2="1043" y1="75" y2="380"/>
+        <circle class="event-dot" cx="187" cy="322" r="7"/>
+        <circle class="event-dot" cx="432" cy="194" r="7"/>
+        <circle class="event-dot cracks" cx="829" cy="99" r="7"/>
+        <circle class="event-dot" cx="1043" cy="75" r="10"/>
+      </g>
+    </svg>
+    <dl class="log-readout">
+      <div><dt>Turnaround</dt><dd>1:30 at 88&deg;C</dd></div>
+      <div><dt>Dry end</dt><dd>4:10 at 150&deg;C</dd></div>
+      <div><dt>First crack</dt><dd>8:30 at 196&deg;C</dd></div>
+      <div class="final"><dt>Drop</dt><dd>10:50 at 208&deg;C</dd></div>
+    </dl>
+    <p class="log-caption">A roast log from a sample batch, with the 2:20 after first crack shaded. Numbers are illustrative.</p>
+  </section>
+
+  <section class="pitch" aria-labelledby="pitch-title">
+    <h1 id="pitch-title">A local roastery that ships whole beans to your door</h1>
+    <p>The line above is how a roast is written down: bean temperature against time, with the drop point marked. The roast level you pick below decides where that line ends, and what ends up in your cup.</p>
+    <a class="order-link" href="#order">Choose a roast level and grind</a>
+  </section>
+
+  <section class="levels" id="roast-levels" aria-labelledby="levels-title">
+    <h2 id="levels-title">The drop point sets the taste</h2>
+    <p class="levels-intro">Roasters stop the drum at different points around first crack and second crack. Typical bean temperatures are given here; every roast profile shifts them a little.</p>
+    <div class="level-table-scroll" tabindex="0" role="region" aria-label="Roast level comparison, scrolls sideways on small screens">
+      <table class="level-table">
+        <caption>Light, medium and dark compared</caption>
+        <thead>
+          <tr><th scope="col"><span class="visually-hidden" hidden>Property</span></th><th scope="col">Light</th><th scope="col">Medium</th><th scope="col">Dark</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Drop point</th><td>Just after first crack, about 196&ndash;205&deg;C</td><td>Several minutes past first crack, about 210&ndash;220&deg;C</td><td>At or into second crack, about 225&deg;C and up</td></tr>
+          <tr><th scope="row">In the cup</th><td>Acidity and fruit, floral top notes</td><td>Sweetness and body in balance with acidity</td><td>Bittersweet, roasty, low acidity</td></tr>
+          <tr><th scope="row">Brews well as</th><td>Pour-over, filter</td><td>Drip, press, filter</td><td>Espresso, moka pot</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="order" id="order" aria-labelledby="order-title">
+    <div class="order-grid">
+      <form class="order-form" id="order-form">
+        <h2 id="order-title">Build your bag</h2>
+        <fieldset>
+          <legend>Roast level</legend>
+          <div class="level-pick">
+            <input type="radio" name="level" id="lvl-light" value="Light" checked><label for="lvl-light">Light</label>
+            <input type="radio" name="level" id="lvl-medium" value="Medium"><label for="lvl-medium">Medium</label>
+            <input type="radio" name="level" id="lvl-dark" value="Dark"><label for="lvl-dark">Dark</label>
+          </div>
+        </fieldset>
+        <div>
+          <label class="field-name" for="grind">Grind</label>
+          <select id="grind" name="grind">
+            <option>Whole bean</option>
+            <option>Espresso</option>
+            <option>Moka pot</option>
+            <option>Filter / pour-over</option>
+            <option>Press</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-name" for="bags">Bags</label>
+          <input type="number" id="bags" name="bags" min="1" max="12" value="1" inputmode="numeric">
+        </div>
+        <button type="submit">Write up my order</button>
+      </form>
+      <aside class="bag-tag" aria-live="polite" aria-labelledby="tag-title">
+        <h3 id="tag-title">Your order</h3>
+        <dl>
+          <dt>Roast</dt><dd id="out-level">Light</dd>
+          <dt>Grind</dt><dd id="out-grind">Whole bean</dd>
+          <dt>Bags</dt><dd id="out-bags">1</dd>
+        </dl>
+        <p id="out-note">Press the button to write up the order. Online checkout is not connected yet.</p>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <p>Brewly, a local specialty coffee roastery &copy; <span id="y">2026</span></p>
+  <a href="#main">Back to the roast log</a>
+</footer>
+
+<script>
+(function(){
+  var y=document.getElementById('y');if(y)y.textContent=new Date().getFullYear();
+  var form=document.getElementById('order-form');
+  function level(){return form.querySelector('input[name=level]:checked').value}
+  function fill(final){
+    var n=Math.max(1,Math.min(12,parseInt(form.bags.value,10)||1));
+    document.getElementById('out-level').textContent=level();
+    document.getElementById('out-grind').textContent=form.grind.value;
+    document.getElementById('out-bags').textContent=n;
+    if(final)document.getElementById('out-note').textContent=n+' bag'+(n>1?'s':'')+' of '+level().toLowerCase()+' roast, '+form.grind.value.toLowerCase()+'. Online checkout is not connected yet, so nothing has been sent.';
+  }
+  form.addEventListener('input',function(){fill(false)});
+  form.addEventListener('submit',function(e){e.preventDefault();fill(true)});
+})();
+</script>
+</body>
+</html>

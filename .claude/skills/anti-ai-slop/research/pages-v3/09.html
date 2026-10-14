@@ -1,0 +1,236 @@
+<!doctype html>
+<!--
+LAUNCH TODO: signup URL, pricing, supported platforms, security audit report, contact email, legal pages, og:image (absolute https URL), favicon file.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Vaultix</title>
+<meta name="description" content="Vaultix encrypts your vault on your device before anything is uploaded, so a request to our servers returns ciphertext and nothing else.">
+<meta property="og:title" content="Vaultix: a password vault our servers cannot open">
+<meta property="og:description" content="Encryption happens on your device. Our servers store ciphertext and never see your master password.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2314181a'/%3E%3Ccircle cx='16' cy='13' r='5' fill='%23d9a93f'/%3E%3Crect x='14' y='15' width='4' height='11' fill='%23d9a93f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --steel-door:#cfd4d6;
+  --box-face:#dde1e3;
+  --lock-slot:#14181a;
+  --lock-text:#e6e9ea;
+  --lock-dim:#aab2b6;
+  --engraving:#1b2023;
+  --scratch:#454e53;
+  --key-brass:#b88a2e;
+  --key-brass-lit:#d9a93f;
+  --refused:#ff9d8a;
+  --hinge:#8d979c;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--steel-door);color:var(--engraving);font-family:"Barlow Semi Condensed",system-ui,sans-serif;font-size:1.125rem;line-height:1.5;font-weight:400}
+img,svg{max-width:100%;display:block}
+button,input{font:inherit;color:inherit}
+a{color:inherit;text-underline-offset:.18em;transition:color .15s,text-decoration-color .15s}
+a:hover{color:#6b4f12}
+:focus-visible{outline:3px solid var(--engraving);outline-offset:3px}
+.slot :focus-visible,.lock-panel :focus-visible{outline-color:var(--key-brass-lit)}
+.skip{position:absolute;left:-999px;top:0;background:var(--engraving);color:var(--lock-text);padding:.6rem 1rem;z-index:10}
+.skip:focus{left:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+
+.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem 2rem;padding:1rem 1.25rem}
+.mark{display:flex;align-items:center;gap:.6rem;text-decoration:none;font-size:1.5rem;font-weight:500;letter-spacing:.01em}
+.bar nav{display:flex;flex-wrap:wrap;gap:.25rem 1.5rem}
+.bar nav a{text-decoration:none;padding:.25rem 0;border-bottom:2px solid transparent}
+.bar nav a:hover{border-bottom-color:var(--key-brass)}
+
+/* hero: artifact first, claim stacked under it */
+.lock-panel{background:var(--lock-slot);color:var(--lock-text);margin:0 1.25rem;border-radius:2px 2px 0 0;padding:1.25rem 1.25rem 1.5rem;box-shadow:inset 0 0 0 1px #2b3236}
+.lock-panel figcaption{color:var(--lock-dim);font-size:.95rem;margin-top:1.1rem}
+.request{display:grid;grid-template-columns:1fr;gap:1rem 3rem}
+.request h2{margin:0;font-size:1rem;font-weight:500;color:var(--lock-dim)}
+.log{margin:.4rem 0 0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.95rem;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.log b{font-weight:400;color:var(--key-brass-lit)}
+.log .no{color:var(--refused)}
+.verdict{font-size:clamp(1.5rem,3.4vw,2.4rem);font-weight:500;line-height:1.15;margin:0;color:var(--refused)}
+.verdict small{display:block;color:var(--lock-text);font-size:1rem;font-weight:400;margin-top:.5rem}
+@media(min-width:760px){.request{grid-template-columns:1.2fr 1fr}}
+
+.claim{padding:2.5rem 1.25rem 3.5rem;display:grid;gap:1.5rem 4rem}
+h1{margin:0;font-size:clamp(2rem,5.2vw,3.6rem);line-height:1.08;font-weight:700;max-width:19ch}
+.claim p{margin:0;max-width:44ch}
+.hero-act{display:flex;flex-direction:column;align-items:flex-start;gap:.9rem}
+.key{display:inline-block;background:var(--key-brass);color:var(--engraving);border:2px solid var(--engraving);border-radius:0 18px 18px 0;padding:.7rem 1.6rem .7rem 1.2rem;font-weight:700;font-size:1.1rem;cursor:pointer;text-decoration:none;transition:background-color .15s,color .15s}
+.key:hover{background:var(--engraving);color:var(--key-brass-lit)}
+.evidence{font-size:1rem}
+@media(min-width:900px){.claim{grid-template-columns:auto 1fr;align-items:end}}
+
+/* sequence: diagram */
+.path{background:var(--box-face);padding:3rem 1.25rem;border-top:1px solid var(--hinge);border-bottom:1px solid var(--hinge)}
+.path-inner{max-width:76rem;margin:0 auto}
+h2{font-size:clamp(1.6rem,3vw,2.2rem);line-height:1.15;font-weight:700;margin:0 0 1rem;max-width:26ch}
+.path p.lead{max-width:60ch;margin:0 0 2rem}
+.flow{width:100%;height:auto;min-width:0}
+.flow text{font-family:"Barlow Semi Condensed",system-ui,sans-serif;fill:var(--engraving)}
+.flow text.lt{fill:var(--lock-text)}
+.flow text.br{fill:var(--key-brass-lit)}
+
+/* comparison table */
+.split{padding:3.5rem 1.25rem;max-width:60rem;margin-left:auto;margin-right:max(1.25rem,8vw)}
+table{width:100%;border-collapse:collapse;margin-top:1.5rem}
+caption{text-align:left;color:var(--scratch);padding-bottom:.5rem}
+th,td{text-align:left;vertical-align:top;padding:.8rem .8rem .8rem 0;border-bottom:1px solid var(--hinge)}
+thead th{font-weight:700;border-bottom:2px solid var(--engraving)}
+tbody th{font-weight:500;width:34%}
+td.cant{font-weight:500}
+@media(max-width:560px){th,td{font-size:1rem;padding-right:.5rem}}
+
+/* generator: the product's own action */
+.pass{background:var(--lock-slot);color:var(--lock-text);padding:3.5rem 1.25rem 4rem}
+.pass-inner{max-width:52rem;margin-left:max(1.25rem,6vw)}
+.pass h2{color:var(--lock-text)}
+.pass p{max-width:56ch;margin:0 0 1.5rem}
+.phrase{display:block;min-height:3.2em;font-size:clamp(1.5rem,4vw,2.5rem);font-weight:500;line-height:1.2;color:var(--key-brass-lit);overflow-wrap:anywhere;margin:0 0 .75rem}
+.bits{color:var(--lock-dim);margin:0 0 1.5rem}
+.pass .key{background:var(--key-brass-lit);border-color:var(--lock-text)}
+.pass .key:hover{background:var(--lock-text);color:var(--lock-slot)}
+.pass .again{margin-left:1rem;background:none;border:0;color:var(--lock-text);text-decoration:underline;text-underline-offset:.2em;cursor:pointer;padding:.4rem 0;transition:color .15s}
+.pass .again:hover{color:var(--key-brass-lit)}
+
+footer{padding:1.5rem 1.25rem 2.5rem;display:flex;flex-wrap:wrap;gap:.5rem 2rem;justify-content:space-between;color:var(--scratch);font-size:1rem}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar">
+  <a class="mark" href="#main" aria-label="Vaultix home">
+    <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" fill="#14181a"/><circle cx="16" cy="13" r="5" fill="#d9a93f"/><rect x="14" y="15" width="4" height="11" fill="#d9a93f"/></svg>
+    Vaultix
+  </a>
+  <nav aria-label="Primary">
+    <a href="#path">Where the key lives</a>
+    <a href="#server">What we can read</a>
+    <a href="#passphrase">Master passphrase</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section aria-labelledby="h1">
+    <figure class="lock-panel">
+      <div class="request" role="img" aria-label="Server response to a data request for vault 7f2a: 0 readable items, 412 kilobytes of ciphertext, no master key on the server.">
+        <div aria-hidden="true">
+          <h2>Data request on vault 7f2a</h2>
+          <pre class="log"><b>request</b>   export all items for vault 7f2a
+<b>lookup</b>    vault 7f2a ........ found
+<b>stored</b>    412 KB  AES-256-GCM ciphertext
+<b>key</b>       master key ........ <span class="no">not on server</span>
+<b>decrypt</b>   <span class="no">refused: nothing to decrypt with</span></pre>
+        </div>
+        <p class="verdict" aria-hidden="true">0 items readable<small>The server returned 412 KB it cannot open.</small></p>
+      </div>
+      <figcaption>Example response for a sample vault.</figcaption>
+    </figure>
+    <div class="claim">
+      <h1 id="h1">Our servers hold 412 KB of noise and no way to read it.</h1>
+      <div class="hero-act">
+        <p>Your master password turns into a key on your device. The vault is encrypted there, and only the result is uploaded.</p>
+        <a class="key" href="#passphrase">Generate a master passphrase</a>
+        <a class="evidence" href="#path">Where the key stays</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="path" id="path" aria-labelledby="h-path">
+    <div class="path-inner">
+      <h2 id="h-path">The key is made on your phone or laptop and stays there</h2>
+      <p class="lead">Each step to the right happens on a different machine. Only the last arrow crosses the network, and what crosses is already scrambled.</p>
+      <svg class="flow" viewBox="0 0 900 230" role="img" aria-label="Diagram: on your device, the master password is stretched into a key, the key encrypts the vault, and only ciphertext is sent to Vaultix servers.">
+        <rect x="10" y="20" width="620" height="190" fill="none" stroke="#1b2023" stroke-width="2"/>
+        <text x="24" y="46" font-size="17" font-weight="500">Your device</text>
+        <rect x="660" y="20" width="230" height="190" fill="#14181a"/>
+        <text x="676" y="46" font-size="17" font-weight="500" class="lt">Vaultix servers</text>
+
+        <rect x="30" y="85" width="160" height="80" fill="#dde1e3" stroke="#1b2023" stroke-width="2"/>
+        <text x="110" y="120" font-size="18" text-anchor="middle">Master</text>
+        <text x="110" y="143" font-size="18" text-anchor="middle">password</text>
+
+        <rect x="240" y="85" width="160" height="80" fill="#b88a2e" stroke="#1b2023" stroke-width="2"/>
+        <text x="320" y="120" font-size="18" text-anchor="middle">Key, kept in</text>
+        <text x="320" y="143" font-size="18" text-anchor="middle">memory only</text>
+
+        <rect x="450" y="85" width="160" height="80" fill="#dde1e3" stroke="#1b2023" stroke-width="2"/>
+        <text x="530" y="120" font-size="18" text-anchor="middle">Vault becomes</text>
+        <text x="530" y="143" font-size="18" text-anchor="middle">ciphertext</text>
+
+        <path d="M190 125h50M400 125h50M610 125h50" stroke="#1b2023" stroke-width="2" fill="none"/>
+        <path d="M232 119l8 6-8 6M442 119l8 6-8 6M652 119l8 6-8 6" stroke="#1b2023" stroke-width="2" fill="none"/>
+
+        <text x="775" y="120" font-size="18" text-anchor="middle" class="lt">Stores the</text>
+        <text x="775" y="143" font-size="18" text-anchor="middle" class="br">ciphertext only</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="split" id="server" aria-labelledby="h-server">
+    <h2 id="h-server">What a copy of our database would and would not show</h2>
+    <table>
+      <caption>Design of the vault format</caption>
+      <thead><tr><th scope="col">Item</th><th scope="col">Visible on our servers</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Passwords and notes</th><td class="cant">No, encrypted before upload</td></tr>
+        <tr><th scope="row">Site names and usernames</th><td class="cant">No, inside the same encrypted vault</td></tr>
+        <tr><th scope="row">Your master password</th><td class="cant">No, never sent</td></tr>
+        <tr><th scope="row">Size of the vault</th><td>Yes, roughly</td></tr>
+        <tr><th scope="row">When you last synced</th><td>Yes</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="pass" id="passphrase" aria-labelledby="h-pass">
+    <div class="pass-inner">
+      <h2 id="h-pass">Pick a master passphrase before you pick anything else</h2>
+      <p>This runs in your browser with its random number generator. Nothing you see here is sent anywhere. Because we cannot reset what we cannot read, write the passphrase down once.</p>
+      <output class="phrase" id="phrase" aria-live="polite">Press the key to generate.</output>
+      <p class="bits" id="bits"></p>
+      <button class="key" id="gen" type="button">Cut a new passphrase</button>
+      <button class="again" id="copy" type="button">Copy it</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>Vaultix, pre-launch</span>
+  <span>&copy; <span id="y">2026</span> Vaultix</span>
+</footer>
+
+<script>
+(function(){
+  var W=("amber anvil arch aspen atlas badge basil birch blade bloom bolt brass brick brook cabin cairn camel canal cedar chalk cider cliff cloud clover cobalt comet coral crane creek crest dune eagle ember fable fern finch flint forge frost gable garnet glade grain grove harbor hazel heron hinge hollow iris ivory jade jewel kettle kiln lantern larch ledge lemon linen lotus maple marsh meadow mica mint moss nickel oak olive onyx orbit otter pearl pine plum quartz quill raven reed ridge river robin sable sage slate spruce stone swift tallow thistle tide timber topaz trout tulip umber valley velvet violet walnut willow wren yarrow zephyr birch copper dusk fjord lilac mortar pewter rivet saddle tundra").split(" ");
+  W=W.filter(function(w,i){return W.indexOf(w)===i}).slice(0,128);
+  var n=8,out=document.getElementById("phrase"),bits=document.getElementById("bits");
+  function make(){
+    var b=new Uint8Array(n*2),r=[],i=0;
+    crypto.getRandomValues(b);
+    for(i=0;i<n;i++){r.push(W[b[i]%W.length])}
+    return r.join(" ");
+  }
+  function go(){
+    out.textContent=make();
+    bits.textContent=n+" words from a list of "+W.length+": about "+Math.floor(n*Math.log2(W.length))+" bits of randomness.";
+  }
+  document.getElementById("gen").addEventListener("click",go);
+  document.getElementById("copy").addEventListener("click",function(){
+    var t=out.textContent;
+    if(navigator.clipboard&&/\s/.test(t)){navigator.clipboard.writeText(t).catch(function(){})}
+  });
+  var y=document.getElementById("y");if(y)y.textContent=new Date().getFullYear();
+})();
+</script>
+</body>
+</html>

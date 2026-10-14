@@ -1,6 +1,6 @@
 # Frontend DO NOT list (anti-slop)
 
-Derived from 10 landing pages built from one-line briefs (see ../research/v1-notes.md). A second run with 10 skill-guided pages found the second-order defaults listed at the end (see ../research/v2-analysis.md). The number in brackets is how many of the 10 pages showed the pattern. Within each group, rules are ordered by that frequency.
+Derived from 10 landing pages built from one-line briefs (see ../research/v1-notes.md). Two further runs with skill-guided pages found the later-order defaults listed at the end (see ../research/v2-analysis.md and v3-analysis.md). The number in brackets is how many of the 10 pages showed the pattern. Within each group, rules are ordered by that frequency.
 Each "instead:" is meant to push toward a choice that only makes sense for *this* product, not toward a different default.
 
 ## Layout and structure
@@ -43,10 +43,11 @@ Each "instead:" is meant to push toward a choice that only makes sense for *this
    Instead: write one sentence only this product could say.
 9. **Do not close with "Ready to…?"** [4] **or "No credit card required."** [4] **or "…today."** [3].
    Instead: state the real terms (trial length, what happens after it, cancel policy) in plain words.
-10. **Do not invent claims about the business** (stats, quotes, customer names, prices, terms, address, audits: "2M+ Active users", "Over 20,000 happy homes", "Maya R.") [v1 2–5], **and do not stub them either** [v2: 38 `[… NEEDED]` on 8 pages; three sections made only of placeholders].
-    Instead: if the brief lacks the fact, cut the section and list it in a `<!-- LAUNCH TODO -->` comment. Max 2 visible placeholders per page, none in the hero.
-11. **Do not ship demo data that looks like a real third party** ("Northwind Studio", "Maya R.", a plausible `.app` domain) [v1 5; v2 1].
-    Instead: demo data lives inside the product artifact, uses roles or objects ("Dev", a lot number), and is labelled once in the caption. Never more than one "sample" note per artifact.
+10. **Sort missing facts by who supplies them.**
+    - Never invent **third-party claims** (quotes, ratings, user counts, customer logos, press, audits) [v1 2–5]; cut the section.
+    - Draft **owner facts** (prices, plans, product names, trial terms, hours, shipping) as plausible values in `<data class="todo">`, listed in LAUNCH TODO and named in the hand-off. Do not cut them: v3 cut pricing on 10/10, and a shop without prices cannot sell.
+    - **Contact facts** are launch constants, never invented.
+11. **Do not put honesty notes on the page** ("not connected", "nothing is sent", "pre-launch", "[… NEEDED]") [v2 38 placeholders; v3 7/10 pages]. One short caption on a demo artifact is the maximum. The hand-off message carries the rest.
 12. Watch-list (seen 0/10 here, but still banned): "Supercharge", "Unlock", "Seamless", "Revolutionize", "Elevate", "Effortless", "Game-changer".
 
 ## Color
@@ -70,8 +71,8 @@ Each "instead:" is meant to push toward a choice that only makes sense for *this
 
 ## Typography
 
-1. **Do not ship with no typeface decision** (system-ui only, or Georgia plus system-ui) [10 no web font; 8 system-ui stack].
-   Instead: list three candidate families from different classifications, cross out the first that came to mind, and choose one for this product. Load it with `font-display:swap`. Default to one family. A monospace face appears only inside code, terminal or aligned-figure elements, and only if the page has them.
+1. **Do not ship with no typeface decision** (system-ui only, or Georgia plus system-ui) [v1 10], **and do not pick by "anything but my first idea"** [v3: 6/10 landed on the same second idea, Barlow Semi Condensed].
+   Instead: take the class and shortlist from `scripts/brief_seed.py`. Load with `font-display:swap`. Monospace appears only inside code, terminal or aligned-figure elements.
 2. **Do not use the h1 formula `clamp(2.2rem,5–6vw,3.6–4rem); line-height:1.1; letter-spacing:-.03em`** [10 clamp; 5 negative tracking].
    Instead: set the scale from the typeface and the headline's length. A 3-word headline and a 12-word headline need different sizes.
 3. **Do not use the body formula `16px/1.6` plus a muted `1.1–1.15rem` hero paragraph** [10].
@@ -86,7 +87,7 @@ Each "instead:" is meant to push toward a choice that only makes sense for *this
 1. **Do not use `repeat(auto-fit,minmax(240px,1fr))` card grids** for features, products and steps alike [10].
    Instead: name the section's data shape first (sequence → timeline or log; comparison → table; one number → a single large figure; spatial → map or plan; dialogue → transcript; inventory → shelf with images) and choose the form from it. Ruled rows are one option, not the alternative to cards: no form may be used in more than two sections of one page [v2: ruled rows 10/10].
 2. **Do not use the button padding `12px 24px` / `13px 26px` with radius `10px` or `999px`** [9 padding; 5 r10; 4 pill].
-   Instead: derive the button shape from the product's material (a key cap for a dev tool, a plate edge for a gym).
+   Instead: take the button shape from the seed's edge language.
 3. **Do not build cards as `background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px`** [9].
    Instead: drop the box when spacing alone groups the content, or give the card a product-specific form (a ticket, a bag label, a terminal pane).
 4. **Do not pair a solid button with a ghost button** (`.btn.ghost{background:transparent;border:1px solid var(--line)}`) [9], **and do not put a "See…" text link beside the primary** [v2 4].
@@ -117,15 +118,14 @@ Each "instead:" is meant to push toward a choice that only makes sense for *this
 
 ## Imagery, icons, emoji
 
-1. **Do not ship a page with no image, SVG or favicon** [10].
-   Instead: use a real product screenshot, photo or custom SVG, plus a favicon and an OG image.
+1. **Do not ship a physical-product, delivery or portfolio page without photographs** [v1 10; v2 10; v3 10 had zero `<img>`].
+   Instead: use real photos when supplied; otherwise use art-directed photo slots (`<figure class="photo-slot" data-todo="photo: 250 g bag, kraft, top-lit">`) with correct aspect ratios and alt text. The slot is designed space, not a grey box with "[PHOTO]".
 2. **Do not use emoji as feature icons** (💪 ❤️ 🌙 🏆, 🔐 🕵️ ⚡ 🎲, 🔁 🎙️ 🔥) [5], **or emoji anywhere as decoration** [6].
    Instead: use one consistent SVG icon set with `aria-hidden="true"`, or no icons, since a good title does not need one.
 3. **Do not use a giant emoji in a rounded square as the hero image** (☕, 🪴) [2].
    Instead: use a photo of the actual product, or an illustration made for it.
-4. **Do not use gradient boxes as stand-ins for photos** (`linear-gradient(135deg,#b4532a,#e3b896)`) [1].
-   Instead: use real images with alt text, or a clearly marked `[PHOTO: Clay House exterior]` placeholder.
-5. Do keep **a CSS/SVG product artifact in the hero** [v1 6; v2 10], but show it in a specific state (a refusal, a failure, a total). Give it `role="img"` and an `aria-label`, or real semantic markup. Do not wrap it in the stock chrome strip (label on the left, "sample" on the right) [v2 8], and do not make it interactive just for a "Try it" moment [v2 9 interactive or animated; 3 "Try it"]. Interactivity must be the product's own core action.
+4. **Do not use gradient boxes or abstract objects as stand-ins for the product** (gradient "project photos", a barbell instead of the app screen, a ring diagram instead of the lesson screen) [v1 1; v3 2/2 apps showed no phone].
+5. Do show the product itself in a specific state in the hero: the real UI, terminal session, phone screen, product photo or built work. Give it `role="img"` and an `aria-label`, or real semantic markup. A metaphor (pegboard, container yard, station signage) never replaces the product [v3 8/10 metaphors].
 
 ## Code quality and accessibility
 
@@ -133,8 +133,8 @@ Each "instead:" is meant to push toward a choice that only makes sense for *this
    Instead: use `header > nav`, `main > section[aria-labelledby]` and `footer`, plus a skip link.
 2. **Do not ship text below 4.5:1 contrast**, such as white on `#ff9e4d` (2.05), `#ff6b3d` (2.83), `#4f8cff` (3.22), `#ff4d6d` (3.21), or dark-mode `#e08653` (2.73) / `#e08a5e` (2.64) [7].
    Instead: check every text/background pair in both themes, and use dark text on light accents.
-3. **Do not ship `href="#"`, self-referencing CTAs, or invented destinations** ("Create free account" → `#`; `hello@brand.example`, `.invalid`, a plausible `brand.app`, `tel:+10000000000`, `mailto:?subject=Privacy` as a legal page, a `data:` og:image) [v1 6; v2 7].
-   Instead: link to an on-page section that does the thing (a working form, calculator or picker), or to a URL or email the user supplied. With neither, use a `<button>` that opens the on-page form, and list the missing URL in `<!-- LAUNCH TODO -->`. With no legal pages, show no legal links.
+3. **Do not ship `href="#"`, invented domains, or a conversion that goes nowhere** [v1 6; v2 7; v3 9 toy CTAs, 0 real].
+   Instead: the primary CTA is the category's real action and points to one launch constant (`<form action="SIGNUP_URL">` or `data-href="SIGNUP_URL"`), declared in `<!-- LAUNCH TODO -->`. On-page calculators and pickers are secondary proof, not the conversion. No visible "not connected" text; no fake "Thanks!" state.
 4. **Do not use inline `style=""` patches** (`<h2 style="margin-top:0">`) [7].
    Instead: put the spacing rule in the stylesheet so the system stays consistent.
 5. **Do not make the logo a `<div>`** [7].
@@ -152,43 +152,38 @@ Each "instead:" is meant to push toward a choice that only makes sense for *this
 11. **Do not treat `*{box-sizing:border-box}` alone as a reset** [10].
     Instead: use a deliberate base layer (box-sizing, `img{max-width:100%;display:block}`, `:focus-visible`, a reduced-motion block, form font inheritance).
 
-## Second-order defaults (pages that followed this skill converged here)
-Measured on 10 skill-guided pages (v2). They are now as recognisable as the v1 template. Bracketed numbers count v2 pages.
+## Later-order defaults (pages that followed this skill converged here)
+Bans are written as **shapes**. Moving a value a few units does not clear a shape; the checker compares fingerprints and colour distance, not exact numbers.
 
-1. **Stationery material** (pad, ledger, galley proof, vellum, index card, label, stamp) [7; 10 chose a printed or marked surface].
-   Instead: take the material from where the visitor uses or receives the product. List three, cross out the first.
-2. **Sage paper / green-black / green-grey ink** (`#e4e8e1`, `#16201a`, `#46564b`) [8/8/8].
-   Instead: tint neutrals toward *this* brand's accent hue. If that hue is green, say why the product is green.
-3. **Pencil-red accent that turns salmon in dark mode** (`#a3261c` → `#ff8f7e`) [7].
-   Instead: derive the accent from the material, not from editing marks.
-4. **Ink/paper token vocabulary** (`--ink`, `--ink-soft`, `--rule`, `--paper-deep`, `--pencil`) [9]. This is the v1 `--fg/--muted/--line/--card/--accent` set renamed one for one.
-   Instead: name tokens for product roles. At most one "surface" token, used for one component type.
-5. **Serif + IBM Plex Mono** [7; Plex Mono 8; Newsreader 5, with an identical font request].
-   Instead: one family, chosen by the three-candidate procedure.
-6. **Italic `<em>` in a weight-400 h1, `-.012em`, line-height ~1.03, lede at 34ch** [8/6/6/10/9].
-   Instead: set the h1 from the headline's length and the face. Use emphasis only if the phrase is the claim.
-7. **Tracked uppercase mono micro-labels everywhere; tracked uppercase wordmark** [10/6].
-   Instead: one label style, at most two uses.
-8. **Copy-left / artifact-right split hero at 5fr/7fr** [10 split; 3 exact 5/7].
-   Instead: choose among three described compositions.
-9. **Ruled rows in every section; tables that collapse to blocks** [10; 6 tables].
-   Instead: pick the form from the data shape, with each form in at most two sections.
-10. **Artifact chrome strip with "sample" on the right** [8].
-    Instead: let the artifact's own header carry real content.
-11. **Stacked skeuomorphism** (rotation, stamp, offset shadow, ruled gradient, clip-path) [up to 4 on one page].
-    Instead: one physical cue at most.
-12. **Count-led h2s, "What happens after…", "Where X stops"** [7/4/3].
-    Instead: headings that state the section's finding.
-13. **Mailto for everything; `.example` domains; mailto legal links; data-URI og:image** [7/7/4/7].
-    Instead: see Code 3 and the LAUNCH TODO comment.
-14. **Disclaimer clutter** ("sample", "prototype", "illustrative", "not X advice") [10].
-    Instead: one caption on the artifact.
-15. **Pages 2.7× longer than v1** [v2 average]. Rules to add proof made agents add sections.
-    Instead: cut any section that answers no question the visitor has.
-16. **Copied skill examples** ("Deploy your first app", "Pick a roast", "Book a site visit", $17) [3].
-    Instead: examples here are shapes, not text.
+### v2 "stationery editorial" [v2 counts]
+1. Paper or stationery as the material; sage/grey-green paper ground; green-black dark theme; pencil-red accent turning salmon in dark mode [7/8/8/7].
+2. A serif + IBM Plex/JetBrains Mono pair; Newsreader; an italic `<em>` in a weight-400 h1 [7/5/8].
+3. Tracked-uppercase mono micro-labels everywhere; a tracked-uppercase wordmark [10/6].
+4. A copy-left/artifact-right split hero; ruled rows in every section; an artifact chrome strip with "sample" on the right [10/10/8].
+5. A 4-column "Product · Contact · Legal" footer full of `[… NEEDED]` [8; 38 placeholders].
 
----
+### v3 "industrial caption" [v3 counts]
+6. One condensed or semi-condensed sans for everything (Barlow Semi Condensed, Archivo at 62–80% width) [8].
+7. An orange, amber or safety-yellow CTA with dark text on a grey or brown-black ground [9].
+8. Artifact full-bleed first, h1 below as its caption; the CTA below the mobile fold [7; 7].
+9. An industrial/signage material metaphor standing in for the product (pegboard, container yard, concrete, station sign, safe-deposit steel) [8].
+10. The h1 narrates the demo state instead of saying what the product is [7].
+11. Tokens renamed for the material but with the same seven slots (`--wall / --wall-deep / --enamel-white / --steel-label / --safety-outline / --on-safety / --tool-edge`) [10].
+12. A timeline/sequence section, then a toy widget as the last section and the CTA target [7; 9].
+13. A one-line footer; a nav of 1–3 phrase-labelled anchors; a single theme [10; 10; 10].
+14. No prices, photos, proof or real conversion at all [10].
+15. Checker values nudged past thresholds (34→37/38/41rem lede, `#ebebe8`→`#eeece9`, h1 tracking forced to 0) [4 admitted].
+
+Instead of all of the above: use the seed's assignment, the category conventions, and the shape rules in SKILL.md. Do not choose "the opposite" of a listed value; opposites (weight 400 → 700, paper → steel) were how v3 converged.
+
+## Defaults that are right (do not ban these)
+- A terminal or code block for a developer tool; install steps; a Docs link.
+- A phone screen with real UI for a mobile app; store links.
+- Product photos, names and prices for a shop; plans with prices for a subscription.
+- Photographs of built work for a studio or agency.
+- A product UI screenshot in a specific state for SaaS.
+- A clear "what it is" h1, a primary CTA above the fold, and a nav to Pricing/Docs/Log in.
+- A centred hero, a single theme, or rounded corners, **when the seed assigns them or a visitor reason demands them**.
 
 ## Pre-ship self-check
 

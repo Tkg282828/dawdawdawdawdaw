@@ -1,0 +1,199 @@
+<!doctype html>
+<!-- LAUNCH TODO: signup endpoint (form currently only confirms on page), contact email, pricing, legal pages, og:image absolute https URL, canonical URL -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Taskflow</title>
+<meta name="description" content="Taskflow is a task board for small teams where every task hangs on one person's hook, and unowned work shows up as an empty outline.">
+<meta property="og:title" content="Taskflow: unowned work leaves a visible gap">
+<meta property="og:description" content="A task board for small teams. Every task has one owner, or it shows as an empty outline.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2334424b'/%3E%3Cpath d='M10 24V12a6 6 0 0 1 12 0' fill='none' stroke='%23f2c14e' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wall:#34424b;
+  --wall-deep:#283138;
+  --peg-hole:#222a30;
+  --enamel-white:#ece7da;
+  --steel-label:#b9c3c9;
+  --safety-outline:#f2c14e;
+  --on-safety:#1d2226;
+  --tool-edge:#7d909b;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{font-family:"Barlow Semi Condensed",sans-serif;font-size:106.25%;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--wall);color:var(--enamel-white);line-height:1.45;font-weight:400}
+img,svg{max-width:100%;display:block}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--safety-outline);outline-offset:3px}
+.skip-link{position:absolute;left:12px;top:-60px;background:var(--safety-outline);color:var(--on-safety);padding:.5em .8em;z-index:9;transition:top .15s}
+.skip-link:focus{top:12px}
+
+/* top bar */
+.topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem 2rem;padding:1rem 1.25rem;background:var(--wall-deep)}
+.brand{display:flex;align-items:center;gap:.55rem;font-size:1.35rem;font-weight:500;text-decoration:none}
+.brand svg{width:26px;height:26px}
+.topbar ul{display:flex;flex-wrap:wrap;gap:.25rem 1.5rem;list-style:none;margin:0;padding:0}
+.topbar ul a{text-decoration:none;color:var(--steel-label);padding:.2em 0;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.topbar ul a:hover{color:var(--enamel-white);border-color:var(--safety-outline)}
+
+/* hero: the wall */
+.tool-wall{position:relative;padding:2.5rem 1.25rem 0;background-color:var(--wall);background-image:radial-gradient(circle,var(--peg-hole) 3px,transparent 3.5px);background-size:30px 30px}
+.slots{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:18px;margin:0;padding:0;list-style:none}
+.slot{position:relative;border:2px solid var(--tool-edge);border-radius:6px;padding:1rem .9rem .8rem;background:var(--wall-deep);min-height:150px;display:flex;flex-direction:column;justify-content:space-between}
+.slot::before{content:"";position:absolute;top:-9px;left:50%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--wall);border:3px solid var(--tool-edge)}
+.slot b{font-weight:500;font-size:1.12rem;line-height:1.2;display:block}
+.slot small{display:block;font-size:.95rem;color:var(--steel-label);margin-top:.6rem}
+.slot-wide{grid-column:span 2}
+.slot-gap{background:transparent;border:2px dashed var(--safety-outline)}
+.slot-gap::before{border-color:var(--safety-outline)}
+.slot-gap small{color:var(--safety-outline)}
+.slot-done{background:transparent;border-style:solid;border-color:var(--peg-hole)}
+.slot-done b{text-decoration:line-through;text-decoration-thickness:1px;color:var(--steel-label)}
+.wall-caption{margin:2.2rem -1.25rem 0;padding:2rem 1.25rem 2.4rem;background:var(--wall-deep)}
+.wall-caption h1{margin:0;font-weight:600;font-size:clamp(2rem,5.2vw,3.7rem);line-height:1.04;max-width:20ch}
+.wall-caption p{margin:1rem 0 0;font-size:1.3rem;max-width:42ch}
+.wall-caption .fine{font-size:.98rem;color:var(--steel-label);margin-top:1.4rem}
+.btn-claim{display:inline-block;margin-top:1.6rem;background:var(--safety-outline);color:var(--on-safety);border:2px solid var(--safety-outline);border-radius:3px;padding:.7em 1.1em;font-weight:600;font-size:1.1rem;cursor:pointer;transition:background-color .15s,color .15s}
+.btn-claim:hover{background:transparent;color:var(--safety-outline)}
+.proof-link{display:block;margin-top:1rem;color:var(--enamel-white);text-underline-offset:.2em}
+.proof-link:hover{color:var(--safety-outline)}
+
+/* legend: definition list, offset narrow */
+.reading{padding:4rem 1.25rem 3rem;max-width:44rem;margin-left:max(1.25rem,8vw)}
+.reading h2,.day h2,.request h2{font-weight:600;font-size:1.9rem;line-height:1.1;margin:0 0 1.4rem;max-width:22ch}
+.reading dl{margin:0}
+.reading dt{display:flex;align-items:center;gap:.8rem;font-weight:500;font-size:1.25rem;margin-top:1.6rem}
+.reading dd{margin:.3rem 0 0 calc(44px + .8rem);color:var(--steel-label);max-width:48ch}
+.swatch{flex:none;width:44px;height:28px;border-radius:4px;border:2px solid var(--tool-edge);background:var(--wall-deep)}
+.swatch.gap{border:2px dashed var(--safety-outline);background:transparent}
+.swatch.done{border-color:var(--peg-hole);background:transparent}
+
+/* one task's day: sequence log, wide, right-weighted */
+.day{background:var(--wall-deep);padding:3.5rem 1.25rem 4rem}
+.day-inner{max-width:68rem;margin-left:auto;margin-right:max(1.25rem,5vw)}
+.day ol{list-style:none;margin:0;padding:0;border-left:3px solid var(--tool-edge)}
+.day li{display:grid;grid-template-columns:7.5rem 1fr;gap:.25rem 1.5rem;padding:0 0 1.6rem 1.4rem;position:relative}
+.day li::before{content:"";position:absolute;left:-10px;top:.35rem;width:17px;height:17px;border-radius:50%;background:var(--wall-deep);border:3px solid var(--safety-outline)}
+.day time{font-weight:500;color:var(--safety-outline);font-size:1.1rem}
+.day li p{margin:0;max-width:52ch}
+.day li strong{font-weight:600}
+
+/* request */
+.request{padding:4rem 1.25rem 4.5rem;max-width:38rem;margin-left:max(1.25rem,14vw)}
+.request p{margin:0 0 1.4rem;max-width:44ch}
+.request form{display:flex;flex-wrap:wrap;gap:.8rem}
+.request label{flex:1 1 100%;font-weight:500}
+.request input[type=email]{flex:1 1 14rem;background:var(--wall-deep);border:2px solid var(--tool-edge);border-radius:3px;padding:.65em .8em;transition:border-color .15s}
+.request input[type=email]:hover{border-color:var(--enamel-white)}
+.request .btn-claim{margin-top:0}
+.confirm{margin-top:1rem;min-height:1.5em;color:var(--safety-outline)}
+
+footer{background:var(--wall-deep);padding:1.6rem 1.25rem 2rem;color:var(--steel-label);font-size:.98rem}
+footer p{margin:0;max-width:60ch}
+
+@media (max-width:760px){
+  .slots{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .slot-wide{grid-column:span 2}
+  .reading dd{margin-left:0}
+  .day li{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="#main" aria-label="Taskflow, top of page">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 26V13a7 7 0 0 1 14 0" fill="none" stroke="#f2c14e" stroke-width="3.5"/></svg>
+    Taskflow
+  </a>
+  <nav aria-label="Primary">
+    <ul>
+      <li><a href="#reading">Reading the board</a></li>
+      <li><a href="#day">One task, start to finish</a></li>
+      <li><a href="#request">Request a board</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="tool-wall" aria-labelledby="hero-h">
+    <ul class="slots" role="img" aria-label="A Taskflow board with six hooks. Five tasks are hung with an owner. One, the Thursday invoice run, is an empty dashed outline with no owner.">
+      <li class="slot"><b>Cut v2.3 release notes</b><small>Design, due Tue</small></li>
+      <li class="slot"><b>Reply to vendor audit</b><small>Ops, due Wed</small></li>
+      <li class="slot slot-gap slot-wide"><b>Send invoice batch</b><small>Nobody. Due Thursday.</small></li>
+      <li class="slot"><b>Fix login redirect</b><small>Eng, due Fri</small></li>
+      <li class="slot slot-done"><b>Book offsite room</b><small>Ops, done</small></li>
+    </ul>
+    <div class="wall-caption">
+      <h1 id="hero-h">The invoice run is due Thursday and nobody's hook is holding it.</h1>
+      <p>On a Taskflow board a task hangs on one person. If it has no owner, you see an empty outline where it should be.</p>
+      <button type="button" class="btn-claim" data-open-request>Reserve a board for your team</button>
+      <a class="proof-link" href="#reading">What an empty outline tells you</a>
+      <p class="fine">Board above is a sample, with tasks owned by roles.</p>
+    </div>
+  </section>
+
+  <section class="reading" id="reading" aria-labelledby="reading-h">
+    <h2 id="reading-h">Each outline answers who has it and whether it is still open</h2>
+    <dl>
+      <dt><span class="swatch" aria-hidden="true"></span>Solid outline</dt>
+      <dd>One person owns it. Their role and the due day sit on the task, so nobody has to ask in a thread.</dd>
+      <dt><span class="swatch gap" aria-hidden="true"></span>Dashed yellow outline</dt>
+      <dd>No owner. The task stays on the board, loud, until someone takes the hook.</dd>
+      <dt><span class="swatch done" aria-hidden="true"></span>Faded, struck through</dt>
+      <dd>Finished. It stays visible for the rest of the day so the team can see what cleared.</dd>
+    </dl>
+  </section>
+
+  <section class="day" id="day" aria-labelledby="day-h">
+    <div class="day-inner">
+      <h2 id="day-h">The invoice run, from empty outline to done</h2>
+      <ol>
+        <li><time>Mon 09:10</time><p><strong>Hung with no owner.</strong> Finance adds the task and the Thursday due day. The outline is dashed.</p></li>
+        <li><time>Mon 09:40</time><p><strong>Taken.</strong> Ops claims the hook. The outline turns solid and the role appears on the task.</p></li>
+        <li><time>Wed 16:00</time><p><strong>Handed to Finance.</strong> Handing over moves the task to a named person. Nothing goes back to dashed in between.</p></li>
+        <li><time>Thu 11:25</time><p><strong>Done.</strong> The task fades and strikes through until end of day, then comes off the board.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="request" id="request" aria-labelledby="request-h">
+    <h2 id="request-h">Boards are handed out by request</h2>
+    <p>Leave the address your team's work should be set up under. We will write back once a board is ready.</p>
+    <form id="request-form" novalidate>
+      <label for="request-email">Work email</label>
+      <input id="request-email" name="email" type="email" autocomplete="email" required>
+      <button type="submit" class="btn-claim">Reserve the board</button>
+    </form>
+    <p class="confirm" id="confirm" role="status"></p>
+  </section>
+</main>
+
+<footer>
+  <p>Taskflow is not released yet. Boards are given out one team at a time. <span id="y">2026</span></p>
+</footer>
+
+<script>
+(function(){
+  var y=document.getElementById('y');try{y.textContent=new Date().getFullYear()}catch(e){}
+  var form=document.getElementById('request-form'),msg=document.getElementById('confirm'),input=document.getElementById('request-email');
+  document.querySelector('[data-open-request]').addEventListener('click',function(){
+    document.getElementById('request').scrollIntoView();input.focus();
+  });
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(!input.value||input.validity.typeMismatch){msg.textContent='Enter a work email to reserve the board.';input.focus();return}
+    msg.textContent='Noted. Nothing is sent yet, because this page has no signup endpoint wired.';
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!doctype html>
+<!-- LAUNCH TODO: signup/app URL, contact email, pricing, privacy and terms pages, og:image (absolute https URL), real model-backed edits (the checker below the fold is a browser-only length check) -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Nimbus AI</title>
+<meta name="description" content="Nimbus AI marks the sentences in your draft that need work and says why it left the others alone.">
+<meta property="og:title" content="Nimbus AI">
+<meta property="og:description" content="A writing assistant that marks the few sentences that need work and explains why it left the rest.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231b1820'/%3E%3Cpath d='M8 22V10l16 12V10' fill='none' stroke='%23f2b25c' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+/* Material: a laptop screen in a dim room at night, lit by a single bulb. */
+:root{
+  --dim-room:#1b1820;
+  --screen:#262230;
+  --lamp:#f2b25c;
+  --lamp-ink:#25180a;
+  --page-text:#f0e8d9;
+  --page-text-quiet:#bdb3c0;
+  --cut-mark:#e8959a;
+  --keep-mark:#a9c9a4;
+  --room-edge:#4a4356;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--dim-room);color:var(--page-text);font-family:"Bitter",Georgia,serif;font-size:1.0625rem;line-height:1.55;font-weight:400}
+img,svg{max-width:100%;display:block}
+button,textarea{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--lamp);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+.skip-to-draft{position:absolute;left:1rem;top:-4rem;background:var(--lamp);color:var(--lamp-ink);padding:.6rem 1rem;z-index:10;transition:top .15s}
+.skip-to-draft:focus{top:1rem}
+
+.masthead{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.25rem}
+.brand{display:inline-flex;align-items:center;gap:.6rem;text-decoration:none;font-weight:700;font-size:1.2rem;letter-spacing:0}
+.masthead nav a{text-decoration:underline;text-underline-offset:.25em;text-decoration-color:var(--room-edge);transition:text-decoration-color .15s,color .15s}
+.masthead nav a:hover{text-decoration-color:var(--lamp);color:var(--lamp)}
+
+/* hero: the editor spans the full width; the headline is its caption */
+.editor-pane{background:var(--screen);border-block:1px solid var(--room-edge);padding:1.5rem 1.25rem 2rem}
+.doc-title{margin:0 0 1.25rem;color:var(--page-text-quiet);font-size:.95rem}
+.doc-body{display:grid;grid-template-columns:minmax(0,1fr);gap:1.5rem}
+.draft-text{margin:0;font-size:1.2rem;line-height:1.7;max-width:46rem}
+.draft-text .cut{background:rgba(232,149,154,.16);text-decoration:line-through;text-decoration-color:var(--cut-mark);text-decoration-thickness:2px}
+.draft-text .kept{border-bottom:2px solid var(--keep-mark)}
+.margin-notes{display:grid;gap:1rem;align-content:start}
+.margin-note{border-left:3px solid var(--room-edge);padding:.1rem 0 .1rem .9rem;font-size:.95rem;color:var(--page-text-quiet)}
+.margin-note strong{display:block;color:var(--page-text);font-weight:700}
+.margin-note.is-cut{border-left-color:var(--cut-mark)}
+.margin-note.is-kept{border-left-color:var(--keep-mark)}
+.artifact-caption{margin:1.25rem 0 0;font-size:.9rem;color:var(--page-text-quiet)}
+@media (min-width:56rem){
+  .editor-pane{padding:2rem 3rem 2.5rem}
+  .doc-body{grid-template-columns:minmax(0,1fr) 19rem;gap:3rem}
+}
+
+.claim{padding:2.5rem 1.25rem 3.5rem}
+.claim h1{margin:0;font-size:clamp(1.85rem,4.4vw,3.05rem);line-height:1.15;font-weight:500;max-width:24ch}
+.claim p{margin:1.25rem 0 0;max-width:38rem;font-size:1.15rem}
+.start-button{margin-top:1.75rem;display:inline-block;background:var(--lamp);color:var(--lamp-ink);border:0;border-radius:3px;padding:.8rem 1.3rem;font-weight:700;text-decoration:none;cursor:pointer;transition:background-color .15s,transform .15s}
+.start-button:hover{background:#ffd08e}
+.start-button:active{transform:translateY(1px)}
+@media (min-width:56rem){.claim{padding:3.5rem 3rem 5rem}}
+
+/* exchange: a transcript, narrow, offset right */
+.exchange{padding:3rem 1.25rem}
+.exchange h2{margin:0 0 1.5rem;font-size:1.6rem;line-height:1.25;font-weight:500;max-width:26ch}
+.exchange-log{margin:0;padding:0;list-style:none;display:grid;gap:1rem;max-width:40rem}
+.turn{padding:.9rem 1.1rem;border-radius:3px 14px 14px 14px;background:var(--screen)}
+.turn.from-writer{border-radius:14px 3px 14px 14px;margin-left:2.5rem;background:transparent;border:1px solid var(--room-edge)}
+.turn b{font-weight:700}
+@media (min-width:56rem){.exchange{padding:4rem 3rem 4rem 22vw}}
+
+/* paste: a wide work surface */
+.paste-desk{padding:3rem 1.25rem 4rem;background:var(--screen);border-top:1px solid var(--room-edge)}
+.paste-desk h2{margin:0 0 .75rem;font-size:1.6rem;line-height:1.25;font-weight:500}
+.paste-desk>p{margin:0 0 1.25rem;max-width:44rem;color:var(--page-text-quiet)}
+.draft-input{display:block;width:100%;min-height:12rem;background:var(--dim-room);border:1px solid var(--room-edge);border-radius:3px;padding:1rem;line-height:1.6;resize:vertical;transition:border-color .15s}
+.draft-input:hover{border-color:var(--page-text-quiet)}
+.mark-button{margin-top:1rem;background:transparent;border:2px solid var(--lamp);color:var(--lamp);padding:.65rem 1.1rem;border-radius:3px;font-weight:700;cursor:pointer;transition:background-color .15s,color .15s}
+.mark-button:hover{background:var(--lamp);color:var(--lamp-ink)}
+.mark-result{margin-top:1.5rem;max-width:50rem}
+.mark-result p{margin:0 0 .75rem}
+.mark-result ol{margin:0;padding-left:1.25rem;display:grid;gap:.75rem}
+.mark-result q{quotes:none}
+.mark-result .why{color:var(--page-text-quiet)}
+@media (min-width:56rem){.paste-desk{padding:4rem 3rem 5rem}}
+
+.base-note{padding:1.75rem 1.25rem 2.5rem;color:var(--page-text-quiet);font-size:.95rem}
+.base-note p{margin:0;max-width:40rem}
+@media (min-width:56rem){.base-note{padding-inline:3rem}}
+</style>
+</head>
+<body>
+<a class="skip-to-draft" href="#main">Skip to the content</a>
+<header class="masthead">
+  <a class="brand" href="./" aria-label="Nimbus AI home">
+    <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="4" fill="#f2b25c"/><path d="M8 23V9l16 14V9" fill="none" stroke="#25180a" stroke-width="3"/></svg>
+    Nimbus AI
+  </a>
+  <nav aria-label="Primary"><a href="#exchange">A request it turns down</a></nav>
+</header>
+
+<main id="main">
+  <section class="editor-pane" id="draft" aria-labelledby="doc-title">
+    <h2 class="doc-title" id="doc-title">roof-chapter.txt, 41 sentences, 2 marked</h2>
+    <div class="doc-body">
+      <p class="draft-text">
+        <span class="kept">We shipped the roof repair on Tuesday, and then the rain came through the same corner on Wednesday.</span>
+        Nobody on site said anything, which in hindsight was the first warning.
+        The contractor, <span class="cut">who had previously been very reliable and had never missed a deadline in the eleven years we had worked together,</span> was in at seven the next morning.
+      </p>
+      <div class="margin-notes">
+        <div class="margin-note is-kept"><strong>Left alone</strong>Short, concrete, and the comma carries the turn. A rewrite would only change whose voice it is.</div>
+        <div class="margin-note is-cut"><strong>Suggested cut, 25 words</strong>Two claims about reliability, one of them already implied by eleven years. The sentence still works without them.</div>
+      </div>
+    </div>
+    <p class="artifact-caption">Demo draft. The other 39 sentences got no mark.</p>
+  </section>
+
+  <section class="claim" aria-labelledby="headline">
+    <h1 id="headline">It marked two of your forty-one sentences and told you why it left the rest.</h1>
+    <p>Nimbus AI reads a draft the way an editor with a pencil does: it stops where the sentence is carrying dead weight, and otherwise keeps out of your way.</p>
+    <a class="start-button" href="#paste">Paste a draft and see its marks</a>
+  </section>
+
+  <section class="exchange" id="exchange" aria-labelledby="exchange-h">
+    <h2 id="exchange-h">Asked to make a good sentence punchier, it says no and shows the sentence.</h2>
+    <ol class="exchange-log">
+      <li class="turn from-writer"><b>You:</b> Make the first line punchier.</li>
+      <li class="turn"><b>Nimbus AI:</b> I would not change it. It is 18 words, it names the day, and the rain arrives in the same breath as the repair. Shorter versions I tried lost the Wednesday.</li>
+      <li class="turn from-writer"><b>You:</b> Do it anyway.</li>
+      <li class="turn"><b>Nimbus AI:</b> Here is the shorter version, kept beside the original so you can put either back: <i>We fixed the roof Tuesday. It leaked Wednesday.</i></li>
+    </ol>
+  </section>
+
+  <section class="paste-desk" id="paste" aria-labelledby="paste-h">
+    <h2 id="paste-h">Paste a paragraph and find its longest sentences.</h2>
+    <p>This box is a length check that runs in your browser: it flags sentences over 28 words and doubled words. The full editor is not connected to this page yet.</p>
+    <textarea class="draft-input" id="draft-input" aria-label="Your draft" placeholder="Paste a few paragraphs here."></textarea>
+    <button class="mark-button" id="mark-button" type="button">Mark my draft</button>
+    <div class="mark-result" id="mark-result" role="status" aria-live="polite"></div>
+  </section>
+</main>
+
+<footer class="base-note">
+  <p>Text you paste on this page stays in your browser tab. Nimbus AI &copy; <span id="y">2026</span>.</p>
+</footer>
+
+<script>
+(function(){
+  var y=document.getElementById('y'); if(y){y.textContent=new Date().getFullYear();}
+  var input=document.getElementById('draft-input');
+  var out=document.getElementById('mark-result');
+  document.getElementById('mark-button').addEventListener('click',function(){
+    var text=input.value.trim();
+    out.textContent='';
+    if(!text){out.textContent='Nothing to mark yet.';return;}
+    var sentences=text.split(/(?<=[.!?])\s+/).filter(Boolean);
+    var marks=[];
+    sentences.forEach(function(s,i){
+      var words=s.split(/\s+/).length;
+      var dbl=s.match(/\b(\w+)\s+\1\b/i);
+      if(words>28){marks.push({n:i+1,s:s,why:words+' words. Look for a place to split it.'});}
+      else if(dbl){marks.push({n:i+1,s:s,why:'The word "'+dbl[1]+'" appears twice in a row.'});}
+    });
+    var p=document.createElement('p');
+    p.textContent=marks.length+' of '+sentences.length+' sentences marked.';
+    out.appendChild(p);
+    if(marks.length){
+      var ol=document.createElement('ol');
+      marks.forEach(function(m){
+        var li=document.createElement('li');
+        li.value=m.n;
+        var q=document.createElement('q'); q.textContent=m.s.length>140?m.s.slice(0,140)+'...':m.s;
+        var w=document.createElement('div'); w.className='why'; w.textContent=m.why;
+        li.appendChild(q); li.appendChild(w); ol.appendChild(li);
+      });
+      out.appendChild(ol);
+    }
+  });
+})();
+</script>
+</body>
+</html>

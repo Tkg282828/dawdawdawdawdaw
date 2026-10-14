@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Greenleaf</title>
+<meta name="description" content="Greenleaf delivers a houseplant and sends a weekly care message for it, including the weeks when the right move is to skip the watering.">
+<meta property="og:title" content="Greenleaf, plant delivery with weekly care messages">
+<meta property="og:description" content="A plant at your door, then a weekly message that says what it needs, including when to leave it alone.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23241a14'/%3E%3Cpath d='M16 27C7 22 7 11 16 5c9 6 9 17 0 22z' fill='%23c9dc5c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<!-- LAUNCH TODO: order/signup URL, contact email, pricing and delivery terms, postal address, legal pages, og:image (absolute https URL), real plant photos -->
+<style>
+:root{
+  --peat:#241a14;
+  --potting-mix:#33261d;
+  --perlite:#ece6d6;
+  --perlite-dim:#bfb39c;
+  --new-growth:#c9dc5c;
+  --new-growth-deep:#dbeb82;
+  --water-line:#7fb4c2;
+  --dry-crust:#c98a4b;
+  --root-dark:#150f0b;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--peat);color:var(--perlite);font-family:"Archivo",sans-serif;font-stretch:100%;font-size:1.0625rem;line-height:1.55;font-weight:420}
+img,svg{max-width:100%;display:block}
+button,input,select{font:inherit;color:inherit}
+h1,h2,h3,p,figure,ul,ol,dl,dd{margin:0}
+ul,ol{padding:0;list-style:none}
+:focus-visible{outline:3px solid var(--new-growth);outline-offset:3px}
+a{color:inherit;text-decoration-thickness:1px;text-underline-offset:.2em;transition:color .15s,text-decoration-color .15s}
+a:hover{color:var(--new-growth)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+
+.skip-link{position:absolute;left:12px;top:-60px;background:var(--new-growth);color:var(--root-dark);padding:10px 14px;z-index:5;text-decoration:none;font-weight:600}
+.skip-link:focus{top:12px;color:var(--root-dark)}
+
+.top-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px}
+.mark{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:1.5rem;font-weight:600;font-stretch:80%;letter-spacing:0}
+.mark:hover{color:var(--perlite)}
+.mark svg{width:26px;height:26px}
+.top-bar a.jump{font-size:.98rem}
+
+/* hero: headline above the surface line, the soil reading below it, full width */
+.surface{padding:6px 20px 0;position:relative}
+.surface h1{font-size:clamp(2.1rem,6.6vw,5.6rem);line-height:.98;font-weight:700;font-stretch:72%;max-width:17ch;letter-spacing:0}
+.surface-lead{max-width:30rem;margin-top:20px;font-size:1.15rem;line-height:1.45}
+.pick-link{display:inline-block;margin-top:26px;background:var(--new-growth);color:var(--root-dark);text-decoration:none;font-weight:620;padding:15px 22px 16px;border-radius:2px 2px 16px 16px;transition:background-color .15s,transform .15s}
+.pick-link:hover{background:var(--new-growth-deep);color:var(--root-dark)}
+.vine{position:absolute;right:max(20px,4vw);bottom:-2px;width:min(30vw,260px);height:auto;pointer-events:none}
+.soil-reading{margin-top:44px;border-top:3px solid var(--perlite);background:var(--potting-mix)}
+.layer{display:grid;grid-template-columns:minmax(7.5rem,15rem) 1fr;align-items:stretch;min-height:76px}
+.layer + .layer{border-top:1px dashed #5b4838}
+.layer-depth{padding:14px 20px;font-size:.92rem;color:var(--perlite-dim);line-height:1.3}
+.layer-depth b{display:block;color:var(--perlite);font-weight:600;font-size:1rem}
+.layer-fill{display:flex;align-items:center;padding:0 20px;font-weight:600;font-stretch:80%;font-size:1.15rem;color:var(--root-dark)}
+.layer-fill span{white-space:nowrap}
+.layer-track{position:relative}
+.layer-track::before{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--tone)}
+.layer-track span{position:relative;display:flex;height:100%;align-items:center;padding-left:18px;color:var(--root-dark);font-weight:650;font-stretch:80%;font-size:1.2rem}
+.layer-track.is-dry{--w:14%;--tone:var(--dry-crust)}
+.layer-track.is-damp{--w:58%;--tone:var(--water-line)}
+.layer-track.is-wet{--w:93%;--tone:var(--water-line)}
+.layer-track.is-dry span{color:var(--perlite);padding-left:calc(14% + 14px)}
+.layer-track.is-damp span{padding-left:calc(58% + 14px);color:var(--perlite)}
+.layer-track.is-wet span{padding-left:18px}
+.verdict{display:flex;flex-wrap:wrap;gap:6px 28px;align-items:baseline;justify-content:space-between;background:var(--root-dark);padding:18px 20px}
+.verdict strong{font-size:1.6rem;font-weight:700;font-stretch:75%;color:var(--new-growth)}
+.verdict p{max-width:46ch;color:var(--perlite)}
+.reading-caption{padding:10px 20px 0;font-size:.9rem;color:var(--perlite-dim)}
+
+/* message thread */
+.thread-section{padding:96px 20px 40px;margin-left:min(12vw,180px);max-width:46rem}
+.thread-section h2,.picker h2{font-size:clamp(1.8rem,4.2vw,3rem);line-height:1.02;font-weight:700;font-stretch:75%;max-width:18ch;letter-spacing:0}
+.thread{margin-top:36px;display:flex;flex-direction:column;gap:14px}
+.msg{max-width:38rem;padding:14px 18px 16px;background:var(--potting-mix);border-left:4px solid var(--new-growth)}
+.msg time{display:block;font-size:.88rem;color:var(--perlite-dim);margin-bottom:2px;font-stretch:90%}
+.msg.you{align-self:flex-end;border-left:0;border-right:4px solid var(--water-line);background:var(--root-dark);max-width:20rem}
+.msg.hold{border-left-color:var(--dry-crust)}
+.thread-caption{margin-top:18px;font-size:.9rem;color:var(--perlite-dim)}
+
+/* picker */
+.picker{margin-top:96px;background:var(--potting-mix);padding:72px 20px 80px}
+.picker-body{display:grid;grid-template-columns:minmax(0,22rem) minmax(0,1fr);gap:48px 7vw;margin-top:36px;align-items:start}
+.picker fieldset{border:0;margin:0 0 28px;padding:0}
+.picker legend{font-weight:650;font-size:1.05rem;padding:0;margin-bottom:10px}
+.choice{display:block;position:relative;margin-bottom:6px}
+.choice input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.choice span{display:block;padding:12px 16px 12px 44px;background:var(--peat);transition:background-color .15s,color .15s;position:relative;cursor:pointer}
+.choice span::before{content:"";position:absolute;left:16px;top:50%;width:14px;height:14px;margin-top:-7px;border:2px solid var(--perlite-dim);border-radius:50%;transition:background-color .15s,border-color .15s}
+.choice input:checked + span{background:var(--perlite);color:var(--root-dark)}
+.choice input:checked + span::before{background:var(--root-dark);border-color:var(--root-dark)}
+.choice input:focus-visible + span{outline:3px solid var(--new-growth);outline-offset:2px}
+.choice:hover span{background:#40302a}
+.choice:hover input:checked + span{background:var(--perlite)}
+.match{border-top:3px solid var(--new-growth);padding-top:18px}
+.match-name{font-size:clamp(2.2rem,5.4vw,4.4rem);line-height:.98;font-weight:700;font-stretch:72%;letter-spacing:0}
+.match-latin{font-style:italic;color:var(--perlite-dim);margin-top:4px}
+.match dl{margin-top:22px;display:grid;grid-template-columns:max-content 1fr;gap:10px 22px;max-width:40rem}
+.match dt{color:var(--perlite-dim)}
+.match dd{font-weight:520}
+.match-note{margin-top:22px;max-width:30rem;color:var(--perlite-dim);font-size:.96rem}
+
+.page-end{padding:56px 20px 40px;display:flex;flex-wrap:wrap;gap:12px 40px;justify-content:space-between;align-items:baseline}
+.page-end p{max-width:46ch;color:var(--perlite-dim);font-size:.96rem}
+.page-end .mark{font-size:1.2rem}
+
+@media (max-width:760px){
+  .picker-body{grid-template-columns:1fr}
+  .thread-section{margin-left:0}
+  .vine{display:none}
+  .layer{grid-template-columns:7rem 1fr}
+  .layer-depth{padding:12px 14px}
+  .layer-track span{font-size:1.02rem}
+  .layer-track.is-dry span{padding-left:calc(14% + 8px)}
+  .layer-track.is-damp span{padding-left:calc(58% + 8px)}
+  .layer-track.is-wet span{padding-left:10px}
+  .soil-reading,.verdict,.reading-caption{padding-left:0}
+  .verdict,.reading-caption{padding-left:14px;padding-right:14px}
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header>
+  <nav class="top-bar" aria-label="Main">
+    <a class="mark" href="#top" aria-label="Greenleaf, top of page">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 29C6 23 6 11 16 3c10 8 10 20 0 26z" fill="#c9dc5c"/><path d="M16 9v18" stroke="#241a14" stroke-width="2" fill="none"/></svg>
+      Greenleaf
+    </a>
+    <a class="jump" href="#messages">Weekly messages</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="surface" id="top" aria-labelledby="hero-title">
+    <h1 id="hero-title">Damp at the second knuckle, so this week's message says skip the watering.</h1>
+    <p class="surface-lead">A plant arrives at your door, and each week after that a message tells you what it needs. Some weeks the answer is nothing.</p>
+    <a class="pick-link" href="#picker">Match a plant to my window</a>
+    <svg class="vine" viewBox="0 0 260 150" aria-hidden="true">
+      <path d="M130 150C128 110 150 80 130 36" stroke="#c9dc5c" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M133 120C108 112 96 90 98 70c22 4 38 26 35 50z" fill="#c9dc5c"/>
+      <path d="M137 84c24-4 44-22 46-46-24 2-44 22-46 46z" fill="#c9dc5c"/>
+      <path d="M131 52c-16-6-26-22-24-38 17 4 28 20 24 38z" fill="#dbeb82"/>
+    </svg>
+  </section>
+
+  <section aria-label="Weekly check for a pothos on day 12">
+    <figure class="soil-reading">
+      <div role="img" aria-label="Soil reading for a pothos on day 12. Surface to first knuckle: dry. First to second knuckle: damp. Below the second knuckle: wet. Verdict: skip watering, check again Saturday.">
+        <div class="layer">
+          <div class="layer-depth"><b>Surface</b>to first knuckle</div>
+          <div class="layer-track is-dry"><span>Dry</span></div>
+        </div>
+        <div class="layer">
+          <div class="layer-depth"><b>Middle</b>to second knuckle</div>
+          <div class="layer-track is-damp"><span>Cool, damp</span></div>
+        </div>
+        <div class="layer">
+          <div class="layer-depth"><b>Below</b>toward the drain hole</div>
+          <div class="layer-track is-wet"><span>Wet</span></div>
+        </div>
+        <div class="verdict">
+          <strong>Skip this week</strong>
+          <p>Water sits where the roots are. Check again Saturday and water only if the middle layer has dried.</p>
+        </div>
+      </div>
+      <figcaption class="reading-caption">Sample message: a pothos on a kitchen sill, day 12.</figcaption>
+    </figure>
+  </section>
+
+  <section class="thread-section" id="messages" aria-labelledby="messages-title">
+    <h2 id="messages-title">The weekly message answers one question about one plant</h2>
+    <ol class="thread">
+      <li class="msg"><time>Day 1</time>Lift it out by the pot, not the stem. Set it where it gets light and leave the soil alone for a day.</li>
+      <li class="msg"><time>Day 5</time>Push a finger down to the second knuckle. Dry there? Water until it runs from the base, then empty the saucer.</li>
+      <li class="msg you"><time>You</time>Dry to the first knuckle, damp after.</li>
+      <li class="msg"><time>Day 5, continued</time>Damp at the second is fine. Wait two more days.</li>
+      <li class="msg hold"><time>Day 12</time>Damp at the second knuckle. Skip this week. Check again Saturday.</li>
+      <li class="msg hold"><time>Day 19</time>Lower leaves turning yellow while the soil is wet means too much water, not too little. Keep the can away until the middle layer dries.</li>
+    </ol>
+    <p class="thread-caption">Sample thread for one pothos.</p>
+  </section>
+
+  <section class="picker" id="picker" aria-labelledby="picker-title">
+    <h2 id="picker-title">Tell us your light and your pets, and see which plant fits</h2>
+    <form class="picker-body" id="picker-form" onsubmit="return false">
+      <div>
+        <fieldset>
+          <legend>Light where it will stand</legend>
+          <label class="choice"><input type="radio" name="light" value="sun" checked><span>Direct sun for hours</span></label>
+          <label class="choice"><input type="radio" name="light" value="bright"><span>Bright, no direct sun</span></label>
+          <label class="choice"><input type="radio" name="light" value="dim"><span>A dim corner</span></label>
+        </fieldset>
+        <fieldset>
+          <legend>Animals that chew leaves</legend>
+          <label class="choice"><input type="radio" name="pets" value="yes"><span>A cat or dog lives here</span></label>
+          <label class="choice"><input type="radio" name="pets" value="no" checked><span>No pets</span></label>
+        </fieldset>
+      </div>
+      <div class="match" aria-live="polite">
+        <h3 class="match-name" id="match-name"></h3>
+        <p class="match-latin" id="match-latin"></p>
+        <dl>
+          <dt>Pets</dt><dd id="match-pets"></dd>
+          <dt>Water when</dt><dd id="match-water"></dd>
+          <dt>Check with</dt><dd id="match-check"></dd>
+        </dl>
+        <p class="match-note">Ordering opens once Greenleaf adds its signup link. [ORDER LINK NEEDED]</p>
+      </div>
+    </form>
+  </section>
+</main>
+
+<footer class="page-end">
+  <a class="mark" href="#top" aria-label="Greenleaf, back to top">Greenleaf</a>
+  <p>Plant delivery and plant care subscription. Watering rhythms shown here are starting points; the soil in your pot decides.</p>
+</footer>
+
+<script>
+(function(){
+  var plants = {
+    "sun-yes":{n:"Zebra haworthia",l:"Haworthiopsis attenuata",p:"Non-toxic to cats and dogs",w:"The soil is dry all the way down",c:"A wooden skewer pushed to the bottom"},
+    "sun-no":{n:"Jade plant",l:"Crassula ovata",p:"Mildly toxic if chewed",w:"The soil is dry all the way down",c:"A finger to the second knuckle, then the pot's weight"},
+    "bright-yes":{n:"Spider plant",l:"Chlorophytum comosum",p:"Non-toxic to cats and dogs",w:"The top 2 cm is dry",c:"A finger to the first knuckle"},
+    "bright-no":{n:"Monstera",l:"Monstera deliciosa",p:"Toxic if chewed",w:"The top 5 cm is dry",c:"A finger to the second knuckle"},
+    "dim-yes":{n:"Parlor palm",l:"Chamaedorea elegans",p:"Non-toxic to cats and dogs",w:"The top 2 cm is dry",c:"A finger to the first knuckle"},
+    "dim-no":{n:"ZZ plant",l:"Zamioculcas zamiifolia",p:"Toxic if chewed",w:"The soil is dry through most of the pot",c:"A wooden skewer pushed to the bottom"}
+  };
+  var form = document.getElementById("picker-form");
+  function show(){
+    var light = form.elements.light.value, pets = form.elements.pets.value;
+    var p = plants[light + "-" + pets];
+    document.getElementById("match-name").textContent = p.n;
+    document.getElementById("match-latin").textContent = p.l;
+    document.getElementById("match-pets").textContent = p.p;
+    document.getElementById("match-water").textContent = p.w;
+    document.getElementById("match-check").textContent = p.c;
+  }
+  form.addEventListener("change", show);
+  show();
+})();
+</script>
+</body>
+</html>

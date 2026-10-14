@@ -1,0 +1,194 @@
+<!doctype html>
+<!-- LAUNCH TODO: app store / signup URL, price, supported languages, confirm review intervals (10 min, 1, 3, 7, 16 days), contact email, legal pages, og:image (absolute https URL) -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Lingo Loop</title>
+<meta name="description" content="Lingo Loop sends a word you miss back around in ten minutes instead of next week. Work out how many cards a day your pace creates.">
+<meta property="og:title" content="Lingo Loop">
+<meta property="og:description" content="A word you miss comes back in ten minutes, not next week.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%23f5b800' stroke-width='5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Material: enamel station signage on a ring line. Single light theme because lit platform signs are light. */
+:root{
+  --platform:#e8ebed;
+  --tunnel:#1a2126;
+  --tunnel-soft:#4a565e;
+  --ring-line:#f5b800;
+  --stop-hit:#00694e;
+  --stop-miss:#b3122a;
+  --track:#b9c1c6;
+  --sign-white:#f7f8f8;
+  font-family:"Barlow Semi Condensed",sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:12px}
+body{margin:0;background:var(--platform);color:var(--tunnel);font-size:1.25rem;line-height:1.4;font-weight:400}
+svg{display:block;max-width:100%}
+input,button{font:inherit}
+a{color:inherit;text-underline-offset:.2em;transition:color .15s,text-decoration-color .15s}
+a:hover{color:var(--stop-hit)}
+:focus-visible{outline:3px solid var(--stop-miss);outline-offset:3px}
+.skip{position:absolute;left:12px;top:-60px;background:var(--tunnel);color:var(--sign-white);padding:8px 14px;z-index:5;transition:top .15s}
+.skip:focus{top:12px}
+
+.station-bar{display:flex;flex-wrap:wrap;gap:8px 28px;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--tunnel);color:var(--sign-white)}
+.station-bar a{color:inherit}
+.station-bar a:hover{color:var(--ring-line)}
+.mark{display:flex;align-items:center;gap:10px;font-size:1.5rem;font-weight:500;text-decoration:none}
+.station-bar ul{display:flex;gap:22px;list-style:none;margin:0;padding:0}
+
+.ring-hall{padding:28px 0 0}
+.ring-art{margin:0 auto;max-width:880px;padding:0 16px}
+.ring-art svg{width:100%;height:auto}
+.ring-art text{font-family:"Barlow Semi Condensed",sans-serif}
+.ring-art figcaption{font-size:1rem;color:var(--tunnel-soft);padding:6px 0 0}
+.claim{padding:20px 16px 56px 8vw;max-width:1100px}
+h1{font-size:clamp(2.4rem,7.4vw,5.6rem);line-height:.98;font-weight:700;margin:0 0 20px;max-width:15ch}
+.claim p{max-width:30em;margin:0 0 26px;font-size:1.3rem}
+.go{display:inline-block;background:var(--tunnel);color:var(--sign-white);padding:14px 22px;border-radius:2px;text-decoration:none;font-weight:500;font-size:1.25rem;transition:background-color .15s,color .15s}
+.go:hover{background:var(--ring-line);color:var(--tunnel)}
+
+.timetable{padding:56px 16px 64px 8vw;border-top:6px solid var(--tunnel)}
+h2{font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.05;font-weight:700;margin:0 0 22px;max-width:20ch}
+.timetable table{border-collapse:collapse;width:100%;max-width:780px;background:var(--sign-white)}
+.timetable caption{text-align:left;font-size:1rem;color:var(--tunnel-soft);padding-bottom:8px}
+.timetable th,.timetable td{padding:10px 14px;text-align:left;border-bottom:2px solid var(--platform);font-weight:400}
+.timetable thead th{background:var(--tunnel);color:var(--sign-white);font-weight:500}
+.timetable tbody th{font-weight:700}
+.timetable td:last-child{color:var(--stop-miss)}
+.table-scroll{overflow-x:auto;max-width:780px}
+
+.load{background:var(--ring-line);padding:56px 16px 64px;color:var(--tunnel)}
+.load-inner{max-width:560px;margin:0 auto 0 auto;padding-left:0}
+.load form{display:flex;flex-wrap:wrap;gap:16px 24px;margin:0 0 26px}
+.load label{display:flex;flex-direction:column;gap:4px;font-weight:500}
+.load input{width:9em;padding:10px 12px;border:2px solid var(--tunnel);background:var(--sign-white);color:var(--tunnel);border-radius:2px;transition:background-color .15s}
+.load input:hover{background:#fff}
+.readout{margin:0;font-size:1.25rem}
+.readout strong{display:block;font-size:clamp(3rem,10vw,5.5rem);line-height:1;font-weight:700}
+
+footer{padding:22px 20px;background:var(--tunnel);color:var(--sign-white);font-size:1rem}
+footer p{margin:0;max-width:60ch}
+
+@media (min-width:900px){
+  .load{padding-left:8vw}
+  .load-inner{margin:0}
+}
+@media (prefers-reduced-motion:no-preference){
+  .ticker{animation:ride 6s ease-in-out infinite alternate}
+  @keyframes ride{from{opacity:.55}to{opacity:1}}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="station-bar">
+  <a class="mark" href="/" aria-label="Lingo Loop home">
+    <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="#f5b800" stroke-width="5"/></svg>
+    Lingo Loop
+  </a>
+  <nav aria-label="Primary">
+    <ul>
+      <li><a href="#schedule">Return times</a></li>
+      <li><a href="#load">Daily load</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="ring-hall" aria-labelledby="top-title">
+    <figure class="ring-art">
+      <svg viewBox="0 0 720 600" role="img" aria-label="A ring line with five stops: 10 min, 1 day, 3 days, 7 days, 16 days. The card la ventana was cleared at the first three stops, missed at 7 days, and sent back to the 10 minute stop.">
+        <circle cx="360" cy="300" r="230" fill="none" stroke="#b9c1c6" stroke-width="14"/>
+        <path d="M360,70 A230,230 0 1 1 224.8,486.1" fill="none" stroke="#00694e" stroke-width="14"/>
+        <path class="ticker" d="M224.8,486.1 L360,70" fill="none" stroke="#b3122a" stroke-width="5" stroke-dasharray="14 10"/>
+        <g fill="#f7f8f8" stroke="#1a2126" stroke-width="5">
+          <circle cx="360" cy="70" r="18"/>
+          <circle cx="578.7" cy="228.9" r="18"/>
+          <circle cx="495.2" cy="486.1" r="18"/>
+          <circle cx="224.8" cy="486.1" r="18" stroke="#b3122a"/>
+          <circle cx="141.3" cy="228.9" r="18"/>
+        </g>
+        <g font-size="30" font-weight="500" fill="#1a2126">
+          <text x="390" y="62">10 min</text>
+          <text x="604" y="236">1 day</text>
+          <text x="495" y="540" text-anchor="middle">3 days</text>
+          <text x="225" y="540" text-anchor="middle" fill="#b3122a" font-weight="700">7 days</text>
+          <text x="116" y="236" text-anchor="end">16 days</text>
+        </g>
+        <g fill="#1a2126">
+          <text x="330" y="290" font-size="58" font-weight="700">la ventana</text>
+          <text x="330" y="330" font-size="30" fill="#4a565e">the window</text>
+          <text x="330" y="378" font-size="28" fill="#b3122a" font-weight="500">missed at 7 days, back at 10 min</text>
+        </g>
+      </svg>
+      <figcaption>One Spanish card on the ring: cleared three times, missed at the fourth stop.</figcaption>
+    </figure>
+    <div class="claim">
+      <h1 id="top-title">A word you miss comes back in ten minutes, not next week.</h1>
+      <p>Lingo Loop runs every word around a ring of five return times. Clear a stop and the card moves on. Miss it and it goes back to the start while you still remember what you got wrong.</p>
+      <a class="go" href="#load">Work out my daily card count</a>
+    </div>
+  </section>
+
+  <section class="timetable" id="schedule" aria-labelledby="schedule-title">
+    <h2 id="schedule-title">Each stop is later than the last, and a miss costs you the distance</h2>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Return times table">
+    <table>
+      <caption>Planned return times for one card</caption>
+      <thead><tr><th scope="col">Stop</th><th scope="col">Card returns after</th><th scope="col">If you miss it</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">1</th><td>10 minutes</td><td>Repeats stop 1</td></tr>
+        <tr><th scope="row">2</th><td>1 day</td><td>Repeats stop 2</td></tr>
+        <tr><th scope="row">3</th><td>3 days</td><td>Back to stop 1</td></tr>
+        <tr><th scope="row">4</th><td>7 days</td><td>Back to stop 1</td></tr>
+        <tr><th scope="row">5</th><td>16 days</td><td>Back to stop 1</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="load" id="load" aria-labelledby="load-title">
+    <div class="load-inner">
+      <h2 id="load-title">How many cards will you see each day?</h2>
+      <form id="load-form" autocomplete="off">
+        <label for="newwords">New words per day
+          <input id="newwords" type="number" min="1" max="200" value="10" inputmode="numeric">
+        </label>
+        <label for="secs">Seconds per card
+          <input id="secs" type="number" min="1" max="120" value="6" inputmode="numeric">
+        </label>
+      </form>
+      <p class="readout" id="readout" aria-live="polite"></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Lingo Loop &middot; <span id="y">2026</span>. Daily load assumes every card is cleared at every stop; each miss adds reviews.</p>
+</footer>
+
+<script>
+(function(){
+  var f=document.getElementById('load-form'),out=document.getElementById('readout');
+  function run(){
+    var n=Math.max(1,parseInt(document.getElementById('newwords').value,10)||0);
+    var s=Math.max(1,parseInt(document.getElementById('secs').value,10)||0);
+    var cards=n*6, mins=Math.round(cards*s/60);
+    out.innerHTML='<strong>'+cards+' cards, about '+mins+' min</strong>from day 17 onward: '+n+' new plus '+(n*5)+' returning, because each word stops at five return times.';
+  }
+  f.addEventListener('input',run);f.addEventListener('submit',function(e){e.preventDefault();run();});
+  run();
+  try{document.getElementById('y').textContent=new Date().getFullYear();}catch(e){}
+})();
+</script>
+</body>
+</html>

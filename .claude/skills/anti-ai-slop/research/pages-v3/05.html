@@ -1,0 +1,228 @@
+<!doctype html>
+<!-- LAUNCH TODO: signup URL, contact email, price/trial terms, legal pages, og:image (absolute https URL), confirm the reminder schedule and tax-set-aside behaviour shown on this page with the product team, real postal/company details for the footer -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Ledgerly</title>
+<meta name="description" content="Invoicing and accounting for freelancers. Every invoice shows what you are owed and how much of it is already tax.">
+<meta property="og:title" content="Ledgerly">
+<meta property="og:description" content="Every invoice shows what you are owed and how much of it is already tax.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 26 26%27%3E%3Crect width=%2726%27 height=%2726%27 fill=%27%231e2326%27/%3E%3Cpath d=%27M7 5v14h14%27 fill=%27none%27 stroke=%27%23e0501a%27 stroke-width=%274%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Material: the birch-ply desk of a shared workspace, with a laptop screen on it and an orange cable tie.
+   Single light theme: the page is read in daylight at a desk; the screen inside the artifact stays dark. */
+:root{
+  --floor:#f4f3f0;
+  --floor-text:#23201b;
+  --floor-quiet:#5b554b;
+  --ply:#c9a273;
+  --ply-edge:#8f6b3f;
+  --ply-text:#1d1710;
+  --screen:#1e2326;
+  --screen-line:#3a4246;
+  --screen-text:#f1eee8;
+  --screen-quiet:#b3b9ba;
+  --cable-tie:#e0501a;
+  --cable-tie-hover:#f06a32;--cable-tie-text:#a63608;
+  --on-cable-tie:#1a120c;
+  --overdue:#ff9a6b;
+  --settled:#9fd3a9;
+  --tax:#f2c86b;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--floor);color:var(--floor-text);font-family:"Barlow Semi Condensed",system-ui,sans-serif;font-size:1.1875rem;line-height:1.45;font-variant-numeric:tabular-nums}
+img,svg{max-width:100%;display:block}
+input,button{font:inherit;color:inherit}
+a{color:inherit;text-underline-offset:.2em;transition:color .15s,text-decoration-color .15s}
+a:hover{color:var(--cable-tie-text)}
+:focus-visible{outline:3px solid var(--cable-tie);outline-offset:3px}
+.skip-link{position:absolute;left:12px;top:-60px;background:var(--screen);color:var(--screen-text);padding:10px 14px;z-index:5;transition:top .15s}
+.skip-link:focus{top:12px}
+
+.masthead{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;background:var(--ply);color:var(--ply-text)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.5rem;text-decoration:none;letter-spacing:0}
+.brand svg{width:26px;height:26px}
+.masthead nav{display:flex;gap:22px}
+.masthead nav a{font-weight:500}
+.masthead a:hover{color:var(--ply-text);text-decoration-color:var(--cable-tie)}
+
+.desk{background:var(--ply);color:var(--ply-text);padding:clamp(28px,5vw,64px) 20px 0;border-bottom:10px solid var(--ply-edge)}
+.desk h1{margin:0;max-width:15ch;font-weight:600;font-size:clamp(2.6rem,9.5vw,6.6rem);line-height:.95;letter-spacing:0}
+.desk-lede{max-width:46ch;margin:22px 0 0;font-size:1.35rem;line-height:1.35}
+.laptop{margin:clamp(28px,5vw,52px) auto 0;max-width:980px;background:var(--screen);color:var(--screen-text);border-radius:10px 10px 0 0;padding:clamp(16px,3vw,32px);box-shadow:0 -2px 0 var(--ply-edge)}
+.laptop table{width:100%;border-collapse:collapse}
+.laptop caption{text-align:left;font-weight:600;font-size:1.25rem;padding-bottom:12px}
+.laptop th{font-weight:400;font-size:1rem;color:var(--screen-quiet);text-align:left;padding:6px 10px 8px 0;border-bottom:1px solid var(--screen-line)}
+.laptop td{padding:12px 10px 12px 0;border-bottom:1px solid var(--screen-line);vertical-align:baseline}
+.laptop .num{text-align:right;padding-right:0}
+.state-overdue{color:var(--overdue);font-weight:600}
+.state-settled{color:var(--settled)}
+.state-sent{color:var(--screen-quiet)}
+.laptop tfoot td{border-bottom:0;padding-top:16px;font-weight:600}
+.tax-line td{color:var(--tax)}
+.laptop figcaption{margin-top:14px;font-size:.95rem;color:var(--screen-quiet)}
+.laptop-figure{margin:0}
+.desk-action{max-width:980px;margin:0 auto;padding:22px 0 26px;display:flex;gap:20px;align-items:center}
+
+.cable-tie-btn{display:inline-block;background:var(--cable-tie);color:var(--on-cable-tie);border:0;border-radius:2px;padding:14px 22px;font-weight:700;font-size:1.15rem;text-decoration:none;cursor:pointer;transition:background-color .15s,transform .15s;border-bottom:4px solid #8a2f0a}
+.cable-tie-btn:hover{background:var(--cable-tie-hover);color:var(--on-cable-tie)}
+.cable-tie-btn:active{transform:translateY(2px)}
+
+main{display:block}
+.draft{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,26rem);gap:clamp(24px,6vw,88px);padding:clamp(48px,8vw,104px) 20px;max-width:1240px;margin:0 auto}
+.draft h2,.chase h2{margin:0 0 14px;font-weight:600;font-size:clamp(1.9rem,4.4vw,3rem);line-height:1.02;letter-spacing:0}
+.draft p{margin:0 0 22px;max-width:48ch}
+.draft-fields{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px;max-width:38rem}
+.draft-fields label{display:block;font-weight:500;margin-bottom:6px}
+.draft-fields input{width:100%;padding:11px 12px;background:#fff;border:2px solid var(--floor-quiet);border-radius:2px;transition:border-color .15s}
+.draft-fields input:hover{border-color:var(--cable-tie-text)}
+.draft-result{align-self:start;background:var(--screen);color:var(--screen-text);padding:24px;border-radius:6px}
+.draft-result dl{margin:0}
+.draft-result dt{color:var(--screen-quiet);font-size:1rem;margin-top:14px}
+.draft-result dt:first-child{margin-top:0}
+.draft-result dd{margin:2px 0 0;font-size:1.9rem;font-weight:600}
+.draft-result dd.tax-figure{color:var(--tax)}
+.draft-result dd.keep-figure{color:var(--settled)}
+
+.chase{background:var(--ply);color:var(--ply-text);padding:clamp(48px,7vw,88px) 20px;border-top:10px solid var(--ply-edge)}
+.chase-inner{max-width:760px;margin:0 0 0 clamp(0px,12vw,180px)}
+.chase p{max-width:50ch;margin:0 0 30px}
+.chase ol{list-style:none;margin:0;padding:0 0 0 28px;border-left:4px solid var(--cable-tie)}
+.chase li{position:relative;padding:0 0 26px;max-width:52ch}
+.chase li::before{content:"";position:absolute;left:-37px;top:.55em;width:14px;height:14px;background:var(--ply-text);border:3px solid var(--ply)}
+.chase li:last-child{padding-bottom:0}
+.chase strong{display:block;font-size:1.3rem;font-weight:700}
+
+.foot{padding:28px 20px 36px;display:flex;flex-wrap:wrap;gap:12px 40px;justify-content:space-between;align-items:baseline;max-width:1240px;margin:0 auto}
+.foot p{margin:0}
+.foot nav{display:flex;gap:22px}
+.foot-quiet{color:var(--floor-quiet)}
+
+@media (max-width:760px){
+  body{font-size:1.125rem}
+  .draft{grid-template-columns:1fr}
+  .draft-fields{grid-template-columns:1fr 1fr}
+  .laptop th:nth-child(1),.laptop td:nth-child(1){display:none}
+  .chase-inner{margin-left:0}
+  .desk-action{flex-direction:column;align-items:flex-start;gap:12px}
+}
+@media (max-width:380px){
+  .masthead nav{gap:14px}
+  .draft-fields{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead">
+  <a class="brand" href="#main" aria-label="Ledgerly, top of page">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="2" width="22" height="22" fill="#1e2326"/><path d="M7 7v12h12" fill="none" stroke="#e0501a" stroke-width="4"/></svg>
+    Ledgerly
+  </a>
+  <nav aria-label="Page sections">
+    <a href="#draft">Draft an invoice</a>
+    <a href="#chase">Late payments</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="desk" aria-labelledby="hero-title">
+    <h1 id="hero-title">Every invoice shows what you're owed and what is already tax.</h1>
+    <p class="desk-lede">When an invoice goes overdue, the tax you set aside stays attached to it, so late money never gets mistaken for spendable money.</p>
+    <div class="laptop">
+      <figure class="laptop-figure">
+        <table>
+          <caption>October invoices</caption>
+          <thead>
+            <tr><th scope="col">Invoice</th><th scope="col">Work</th><th scope="col">Status</th><th scope="col" class="num">Amount</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>0041</td><td>Brand identity, milestone 1</td><td class="state-settled">Paid 3 Oct</td><td class="num">2,400.00</td></tr>
+            <tr><td>0042</td><td>Brand identity, milestone 2</td><td class="state-overdue">12 days overdue</td><td class="num">3,600.00</td></tr>
+            <tr><td>0043</td><td>Site copy, 6 pages</td><td class="state-sent">Due in 9 days</td><td class="num">1,150.00</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="3">Still owed to you</td><td class="num">4,750.00</td></tr>
+            <tr class="tax-line"><td colspan="3">Of which already tax (21%)</td><td class="num">997.50</td></tr>
+          </tfoot>
+        </table>
+        <figcaption>Demo figures from an invented October.</figcaption>
+      </figure>
+    </div>
+    <div class="desk-action">
+      <a class="cable-tie-btn" href="#draft">Price a draft invoice</a>
+    </div>
+  </section>
+
+  <section class="draft" id="draft" aria-labelledby="draft-title">
+    <div>
+      <h2 id="draft-title">Type the hours. The tax part separates itself.</h2>
+      <p>Enter what you bill and the two rates that apply to you. Ledgerly shows the invoice total, the share to park for tax, and what stays yours.</p>
+      <form class="draft-fields" onsubmit="return false" aria-describedby="draft-title">
+        <div><label for="hours">Hours billed</label><input id="hours" type="number" inputmode="decimal" min="0" step="0.25" value="32"></div>
+        <div><label for="rate">Hourly rate</label><input id="rate" type="number" inputmode="decimal" min="0" step="1" value="95"></div>
+        <div><label for="sales">Sales tax added, %</label><input id="sales" type="number" inputmode="decimal" min="0" step="0.5" value="21"></div>
+        <div><label for="income">Income tax to set aside, %</label><input id="income" type="number" inputmode="decimal" min="0" step="0.5" value="30"></div>
+      </form>
+    </div>
+    <div class="draft-result" aria-live="polite">
+      <dl>
+        <dt>Invoice total</dt><dd id="out-total">0.00</dd>
+        <dt>Park for tax (sales tax plus set-aside)</dt><dd id="out-tax" class="tax-figure">0.00</dd>
+        <dt>Yours to spend</dt><dd id="out-keep" class="keep-figure">0.00</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="chase" id="chase" aria-labelledby="chase-title">
+    <div class="chase-inner">
+      <h2 id="chase-title">An overdue invoice keeps its own record.</h2>
+      <p>Each invoice carries its history, so you can see how long it has been waiting before you decide to write that email.</p>
+      <ol>
+        <li><strong>Day 0, sent</strong>The invoice leaves with its due date and payment details.</li>
+        <li><strong>Due date</strong>Status flips to due today, and the tax share is flagged as not yet received.</li>
+        <li><strong>Day 1 after</strong>The invoice turns overdue and moves to the top of your month.</li>
+        <li><strong>Day 12 after</strong>Total owed on the invoice, with a reminder note ready to send.</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p><strong>Ledgerly</strong> <span class="foot-quiet">Invoicing and accounting for freelancers. &copy; <span id="y">2026</span></span></p>
+  <nav aria-label="Footer">
+    <a href="#draft">Draft an invoice</a>
+    <a href="#chase">Late payments</a>
+  </nav>
+</footer>
+
+<script>
+(function(){
+  var ids=["hours","rate","sales","income"].reduce(function(o,k){o[k]=document.getElementById(k);return o},{});
+  var fmt=new Intl.NumberFormat(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  function v(el){var n=parseFloat(el.value);return isFinite(n)&&n>0?n:0}
+  function calc(){
+    var net=v(ids.hours)*v(ids.rate);
+    var sales=net*v(ids.sales)/100;
+    var setAside=net*v(ids.income)/100;
+    document.getElementById("out-total").textContent=fmt.format(net+sales);
+    document.getElementById("out-tax").textContent=fmt.format(sales+setAside);
+    document.getElementById("out-keep").textContent=fmt.format(net-setAside);
+  }
+  Object.keys(ids).forEach(function(k){ids[k].addEventListener("input",calc)});
+  calc();
+  document.getElementById("y").textContent=new Date().getFullYear();
+})();
+</script>
+</body>
+</html>

@@ -2,21 +2,18 @@
 
 These came from the feedback of 10 agents that followed this skill (v2 run). Where two rules seem to pull against each other, apply the resolution here. The page numbers say which v2 pages raised each conflict.
 
-**C1. "Every CTA goes to a real destination" vs a fictional or pre-launch product with no URLs.** (01,03,04,05,06,07,08,09)
-Resolution: a destination is real if clicking it completes or advances the visitor's action *on this page or with data the user supplied*. In order of preference:
-(a) an on-page section that does the thing: a working form, calculator, deck picker or order list;
-(b) a URL or email the user gave in the brief;
-(c) if neither exists, a single config constant declared once (`<!-- LAUNCH: SIGNUP_URL, CONTACT_EMAIL -->` plus `data-href="SIGNUP_URL"`), with the CTA rendered as a `<button>` that opens the on-page form.
-Never invent a domain, `.example` included, in visible text or a `mailto:`. Never make the same anchor the target of both the hero and the nav.
+**C1. "The primary CTA is the real conversion" vs a pre-launch product with no URLs.** (v2: 01,03–09; v3: all 10, which then built toy calculators as the CTA)
+Resolution: the primary CTA is still the category's real action (sign up, buy, book, install, download). Point it to **one launch constant**: `<form action="SIGNUP_URL">` or `<a data-href="SIGNUP_URL" href="SIGNUP_URL">`, declared once in `<!-- LAUNCH TODO: SIGNUP_URL = … -->`. Name the constant in the hand-off. On-page tools (calculator, picker, paste box) are fine as *secondary proof*, never as the only conversion. Never invent a domain (`.example`, `.invalid`, a plausible `.app`) and never show "not connected" text on the page.
 
-**C2. "No invented proof" vs "use sample content".** (01,02,04,05,10)
-Resolution: split all content into three classes.
-- **Claims about the business** (stats, quotes, customer names, logos, awards, press, audit results, prices, trial terms, address, hours, team): never invent. If missing, **remove the section**; do not leave a slot.
-- **Demo data inside the product artifact** (tasks, invoice lines, terminal output, a vocabulary card, a plant tag): may be invented. It must be plausible for this domain, use roles or objects rather than fake people, and be labelled **once**, in the artifact's caption.
-- **Domain facts** (pothos watering interval, Argon2id): fine if true; write them for the visitor's level.
+**C2. "No invented proof" vs "the page needs content".** (v2: 01,02,04,05,10; v3: 03,05,07,09,10)
+Resolution: sort every missing fact by **who must supply it**.
+- **Owner facts** (prices, plans, product names, trial terms, hours, shipping terms) may be **drafted** as plausible values, wrapped in `<data class="todo">…</data>`, listed in LAUNCH TODO and named in the hand-off. A shop without prices is worse than a marked draft price.
+- **Third-party claims** (quotes, ratings, user counts, customer logos, press, audits, awards) are never drafted. Cut the section.
+- **Contact facts** (address, phone, email, URLs) are never drafted. Use launch constants.
+- **Demo data inside the product artifact** (tasks, invoice lines, terminal output) may be invented. Use roles or objects rather than fake people, with at most one short caption.
 
-**C3. Placeholders make the page look unfinished.** (06,08,10 and others)
-Resolution: at most **2** visible placeholders per page, and none in the hero or nav. A section that would be more than half placeholder is cut. All other missing facts go in one top-of-file comment: `<!-- LAUNCH TODO: price, trial length, postal address, legal pages -->`. `[TESTIMONIAL NEEDED]` is only for a testimonial section the brief explicitly asks for.
+**C3. Placeholders and honesty notes make the page look unfinished.** (v2: 38 placeholders on 8 pages; v3: 7 pages said "not connected")
+Resolution: no visible `[… NEEDED]`, "prototype", "pre-launch", "nothing is sent" or "not connected" text. The hand-off message and the LAUNCH TODO comment carry that information. Photo gaps become art-directed photo slots (`<figure class="photo-slot" data-todo="…">` at the right aspect ratio), not grey boxes with "[PHOTO]".
 
 **C4. Text link vs ghost button; what a "specific secondary link" is.** (02,05,10)
 Resolution: a ghost button is any secondary action with a border, a background, or padding over 0.25em, or one placed in the same flex row as the primary. A text link is inline in running text or on its own line below, uses the body font at body size, and carries only an underline. Default to no secondary action. Add one only if the visitor's first question is answered lower on the page *and* the hero does not answer it. Its label names that answer as a noun phrase ("The 21-day schedule", "shipyard.toml reference"), not a "See…" verb phrase.
@@ -26,12 +23,12 @@ Resolution: banned means three or more parallel items used *rhetorically* in one
 
 **C6. What a deliberate dark theme is; dark-only vs auto swap.** (01,09)
 Resolution: one finished theme beats two half-made ones.
-- *Single theme* is allowed when the material implies it (a terminal is dark, kraft paper is light). Set `<meta name="color-scheme" content="light">` and say why in the brief.
+- *Single theme* is allowed when the seed assigns it or the colour strategy implies it. Set `<meta name="color-scheme" content="light">` and say why in the brief.
 - *Two themes* count as deliberate only if (1) a visible toggle exists and persists, (2) at least one element is *not* a token swap (the artifact keeps its material, or the accent changes role), and (3) every text pair and button boundary was checked in both.
 - Never ship `[data-theme]` selectors without a toggle. 5/10 did.
 
-**C7. Material reference vs banned palettes; "how specific is specific".** (02,03,07)
-Resolution: the banned palettes are banned as *unmotivated defaults*. A material may land near one if the brief names the physical object and the sampled hex. But the material must come from where the visitor *uses* the product or what they *receive* (gym floor, the coffee bag that arrives, a server log, the building site). It must not come from stationery about the product. See SKILL.md step 1 (material reference).
+**C7. Material metaphors vs the product itself.** (v2: stationery on 7/10; v3: pegboard, container yard, concrete or safe-deposit steel on 8/10)
+Resolution: there is no material requirement any more. For screen software, the material *is* the product UI. A metaphor is allowed only if a stranger in this category would read it without explanation, and it never replaces the product (terminal, phone screen, product photo, built work). Colour comes from the seed's strategy and hue family.
 
 **C8. How far tokens must differ from `--bg/--card`.** (08)
 Resolution: renaming is not the test, structure is. Allowed: at most one "surface" token that is a small lightness shift of the page, and it is used for one component type at most. Token names describe the product role (`--receipt`, `--hull`, `--zone-3`), not ink/paper metaphors (`--ink`, `--ink-soft`, `--rule`, `--paper-deep`).
@@ -59,3 +56,13 @@ Resolution: remove the outlier's concrete traits from SKILL.md (done in SKILL.md
 
 **C16. Does a mid-tone section background count as a card?** (01)
 Resolution: no. A card is a bounded box repeated three or more times as siblings. A full-bleed band is a section. Only one inverted band per page (see dont-list.md).
+
+**C17. Product-behaviour copy vs "invented claims".** (v3: 03,05,07,09)
+Resolution: describing what the product **does** ("rolls back when the health check fails", "encrypts on your device before upload") is product copy, not a claim, so write it plainly. Describing how **well** it does it compared with others, or what **others say** about it ("10× faster", "trusted by 2,000 teams", "audited by…"), is a third-party claim. Do not write those unless they were supplied.
+
+**C18. The seed assigns something that fights the category.** (anticipated, e.g. "number-led" headline for an architect)
+Resolution: use one of your two overrides, with one sentence naming the visitor need. An override may not land on a converged value (SKILL.md rule 15). If more than two axes fight the brief, run `--salt 1` and `--salt 2` and take the direction that fits best, rather than overriding everything.
+
+**C19. "Don't nudge values to clear the checker".** (v3: lede 34→37/38/41rem, `#ebebe8`→`#eeece9`, h1 weight 400→700)
+Resolution: a WARN describes a shape. Change the shape (a different composition, ground or type class), or keep the WARN and write the reason in a comment. Moving a number a few units past a threshold is a fail of the self-check, even if the checker is quiet.
+
